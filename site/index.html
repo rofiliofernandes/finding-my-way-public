@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="apple-mobile-web-app-title" content="Iter ad Dominum">
+  <meta name="application-name" content="Iter ad Dominum">
+  <meta name="theme-color" content="#f6f1e7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#16130f" media="(prefers-color-scheme: dark)">
+  <title>Finding My Way to Jesus Christ</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+  <script>
+    // apply theme before first paint
+    try {
+      const p = JSON.parse(localStorage.getItem("lectio:prefs") || "{}");
+      if (p.theme && p.theme !== "system") document.documentElement.dataset.theme = p.theme;
+      if (p.fontSize) document.documentElement.style.setProperty("--read-size", p.fontSize + "px");
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#/">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 7c-3-2-7-2.5-11-2v20c4-.5 8 0 11 2 3-2 7-2.5 11-2V5c-4-.5-8 0-11 2Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M16 7v20" stroke="currentColor" stroke-width="2"/></svg>
+      <span>Finding My Way to Jesus Christ</span>
+    </a>
+    <nav class="tabs" aria-label="Main">
+      <a href="#/" data-tab="home"><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/></svg><span>Today</span></a>
+      <a href="#/books" data-tab="read"><svg viewBox="0 0 24 24"><path d="M12 6c-2.5-1.6-5.5-2-8-1.6V19c2.5-.4 5.5 0 8 1.6 2.5-1.6 5.5-2 8-1.6V4.4C17.5 4 14.5 4.4 12 6Zm0 0v14.6"/></svg><span>Read</span></a>
+      <a href="#/topics" data-tab="topics"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/></svg><span>Topics</span></a>
+      <a href="#/history" data-tab="history"><svg viewBox="0 0 24 24"><path d="M4 5h16v15H4zM4 9h16M8 3v4M16 3v4"/></svg><span>History</span></a>
+      <a href="#/journal" data-tab="journal"><svg viewBox="0 0 24 24"><path d="M6 3h11a2 2 0 0 1 2 2v16H8a2 2 0 0 1-2-2zM6 19a2 2 0 0 1 2-2h11M10 7h6M10 11h6"/></svg><span>Journal</span></a>
+      <a href="#/settings" data-tab="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></svg><span>You</span></a>
+    </nav>
+    <span class="sync-dot" id="syncDot" title=""></span>
+  </header>
+  <main id="view" tabindex="-1"></main>
+  <div id="sheet" class="sheet" hidden></div>
+  <div id="modal" class="modal" hidden></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

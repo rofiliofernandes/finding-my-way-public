@@ -1,0 +1,13 @@
+{
+  "name": "Finding My Way to Jesus Christ",
+  "short_name": "Iter ad Dominum",
+  "description": "Read the Bible, keep a reading history and a journal.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f1e7",
+  "theme_color": "#8b3a2b",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
