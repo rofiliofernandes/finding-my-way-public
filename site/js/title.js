@@ -35,7 +35,15 @@ export function initTitle() {
     holder.querySelectorAll(".ch").forEach((c) => c.classList.add("out"));
     const outTime = 350 + LATIN.length * 12;
     setTimeout(() => {
-      holder.innerHTML = letters(ENGLISH, "in");
+      // reveal: letters grow in from the middle outwards (0.3s + 0.1s per step from the centre)
+      const chars = [...ENGLISH];
+      const middle = chars.length / 2;
+      holder.innerHTML = chars
+        .map((ch, i) => `<span class="ch" style="animation-delay:${(0.3 + Math.abs(i - middle) * 0.1).toFixed(2)}s">${ch}</span>`)
+        .join("");
+      holder.classList.remove("reveal");
+      void holder.offsetWidth;
+      holder.classList.add("reveal");
       brand.setAttribute("aria-label", ENGLISH);
       brand.title = "";
     }, outTime);

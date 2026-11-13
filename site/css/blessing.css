@@ -121,5 +121,18 @@
 .brand .ch { display: inline-block; white-space: pre; }
 .brand .ch.out { animation: tt-out .35s ease-in forwards; }
 .brand .ch.in { opacity: 0; filter: blur(6px); transform: translateY(6px); animation: tt-in .5s ease-out forwards; }
+
+/* English reveal: letters grow in from the middle outwards while two lines spring to the edges */
+.brand .title-text.reveal .ch { opacity: 0; transform: scale(0); animation: tr-in .8s forwards; }
+.brand .title-text.reveal::before, .brand .title-text.reveal::after {
+  content: ""; position: absolute; top: -2px; bottom: -2px; width: 2px; border-radius: 2px;
+  background: var(--gold); opacity: 0; transform: scale(0);
+}
+.brand .title-text.reveal::before { left: 50%; animation: tr-left 1.5s cubic-bezier(.7, -.6, .3, 1.5) forwards, tr-gone .6s 2.6s forwards; }
+.brand .title-text.reveal::after { right: 50%; animation: tr-right 1.5s cubic-bezier(.7, -.6, .3, 1.5) forwards, tr-gone .6s 2.6s forwards; }
+@keyframes tr-in { to { opacity: 1; transform: scale(1); } }
+@keyframes tr-left { to { left: -3%; opacity: 1; transform: scale(.9); } }
+@keyframes tr-right { to { right: -3%; opacity: 1; transform: scale(.9); } }
+@keyframes tr-gone { from { opacity: 1; transform: scale(.9); } to { opacity: 0; transform: scale(.9); } }
 @keyframes tt-out { to { opacity: 0; filter: blur(6px); transform: translateY(-6px); } }
 @keyframes tt-in { to { opacity: 1; filter: blur(0); transform: none; } }
