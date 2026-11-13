@@ -121,7 +121,7 @@ export async function renderJournal(main, _params, query) {
       (b.onclick = () => {
         filter = b.dataset.f;
         $$("[data-f]", main).forEach((x) => x.classList.toggle("on", x === b));
-        history.replaceState(null, "", `#/journal?f=${filter}`);
+        history.replaceState(history.state, "", `#/journal?f=${filter}`);
         draw();
       })
   );

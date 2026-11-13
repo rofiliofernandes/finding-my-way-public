@@ -103,7 +103,7 @@ export async function renderTopics(main, _params, query) {
     if (st.book) p.set("b", st.book);
     if (st.chapter) p.set("c", st.chapter);
     const s = p.toString();
-    history.replaceState(null, "", "#/topics" + (s ? "?" + s : ""));
+    history.replaceState(history.state, "", "#/topics" + (s ? "?" + s : ""));
   };
   const bookOptions = () =>
     canon.books

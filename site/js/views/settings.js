@@ -3,6 +3,7 @@ import * as sync from "../sync.js";
 import { esc, icon, $, toast, timeAgo, confirmBox } from "../ui.js";
 import * as semantic from "../semantic.js";
 import { AI_ENABLED } from "../config.js";
+import * as blessing from "../blessing.js";
 
 const GOOGLE = `<svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.5l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.6 5.4 2.6 13.2l7.8 6.1C12.3 13.5 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.5 5.8c4.4-4 6.8-10 6.8-17.2z"/><path fill="#FBBC05" d="M10.4 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.8-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.3 0-11.7-4-13.6-9.6l-7.8 6.1C6.6 42.6 14.6 48 24 48z"/></svg>`;
 
@@ -63,6 +64,11 @@ export function renderSettings(main) {
           <div class="chips">${["system", "light", "dark"]
             .map((t) => `<button class="chip ${theme === t ? "on" : ""}" data-theme="${t}">${t[0].toUpperCase() + t.slice(1)}</button>`)
             .join("")}</div></div>
+        <div class="setting"><div class="what"><b>Title</b><span class="muted small">${
+          store.pref("titleEnglish") ? "Shown in English. Hold-to-translate already used on this device." : "Shown in Latin. Hold the title for 2 seconds to translate it."
+        }</span></div>${store.pref("titleEnglish") ? `<button class="btn" data-latin>Show in Latin again</button>` : ""}</div>
+        <div class="setting"><div class="what"><b>The blessing</b><span class="muted small">After 5+ minutes of reading, pressing back from a passage shows a short blessing (once per visit).</span></div>
+          <button class="btn" data-bless>Preview</button></div>
         <p class="scripture" style="margin:10px 0 0;font-size:var(--read-size)">The <span class="sc">Lord</span> is my shepherd; I shall lack nothing.</p>
       </section>
 
@@ -98,6 +104,15 @@ export function renderSettings(main) {
       }
     });
     $("[data-sync]", main)?.addEventListener("click", () => sync.syncNow());
+    $("[data-bless]", main).onclick = () => blessing.show({ force: true });
+    const latin = $("[data-latin]", main);
+    if (latin)
+      latin.onclick = () => {
+        store.pref("titleEnglish", false);
+        const t = document.querySelector(".brand .title-text");
+        if (t) t.textContent = "Iter ad Dominum";
+        draw();
+      };
     const range = $("#size", main);
     range.addEventListener("input", () => {
       document.documentElement.style.setProperty("--read-size", range.value + "px");

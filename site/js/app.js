@@ -8,6 +8,8 @@ import { renderHistory } from "./views/history.js";
 import { renderJournal } from "./views/journal.js";
 import { renderSettings } from "./views/settings.js";
 import { renderTopics } from "./views/topics.js";
+import * as blessing from "./blessing.js";
+import { initTitle } from "./title.js";
 
 const routes = [
   [/^\/?$/, renderHome, "home"],
@@ -25,9 +27,26 @@ const main = $("#view");
 let current = null; // { cleanup, refresh }
 let renderId = 0;
 
+// Know whether a navigation was "back", by numbering our history entries.
+let navIdx = history.state?.idx ?? 0;
+if (history.state?.idx == null) history.replaceState({ ...(history.state || {}), idx: 0 }, "");
+let lastPath = "";
+const READING = /^\/(read|verse|random)\b/;
+
 async function route() {
   const raw = location.hash.replace(/^#/, "") || "/";
   const [path, qs] = raw.split("?");
+  let isBack = false;
+  if (history.state?.idx == null) {
+    navIdx += 1;
+    history.replaceState({ ...(history.state || {}), idx: navIdx }, "");
+  } else {
+    isBack = history.state.idx < navIdx;
+    navIdx = history.state.idx;
+  }
+  // pressing back from a passage after 5+ minutes of reading → a short blessing
+  if (isBack && READING.test(lastPath) && path !== lastPath) blessing.show();
+  lastPath = path;
   const query = new URLSearchParams(qs || "");
   let match = null;
   for (const [re, fn, tab] of routes) {
@@ -83,6 +102,8 @@ sync.onStatus((st, session) => {
 
 async function start() {
   store.load();
+  initTitle();
+  blessing.startTimer();
   main.innerHTML = `<div class="spinner"></div>`;
   await bible.loadCanon();
   window.addEventListener("hashchange", route);

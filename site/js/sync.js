@@ -60,7 +60,7 @@ export async function init() {
     const { data } = await client.auth.getSession();
     session = data.session;
     // Remove ?code=... left over from the Google redirect.
-    if (location.search.includes("code=")) history.replaceState(null, "", location.pathname + location.hash);
+    if (location.search.includes("code=")) history.replaceState(history.state, "", location.pathname + location.hash);
     emit();
     if (session) scheduleSync(50);
   } catch (e) {

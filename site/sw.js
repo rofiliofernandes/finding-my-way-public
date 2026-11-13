@@ -1,11 +1,11 @@
 // Offline support: app files are fetched fresh when online (falling back to cache),
 // Bible text is cached on first read and served from cache afterwards.
-const VERSION = "fmw-v4";
+const VERSION = "fmw-v5";
 // Big, rarely-changing files (Bible text, search model) live in their own cache so app
 // updates don't re-download them. Bump DATA when those files change.
 const DATA = "fmw-data-1";
 const SHELL = [
-  "./", "index.html", "css/app.css", "js/app.js", "js/bible.js", "js/store.js", "js/sync.js", "js/ui.js",
+  "./", "index.html", "css/app.css", "css/blessing.css", "js/blessing.js", "js/title.js", "js/app.js", "js/bible.js", "js/store.js", "js/sync.js", "js/ui.js",
   "js/activity.js", "js/config.js", "js/views/home.js", "js/views/read.js", "js/views/history.js",
   "js/views/journal.js", "js/views/topics.js", "js/topics.js", "js/search.js", "js/semantic.js", "js/embed.js", "js/expand.js", "js/ai.js", "js/views/settings.js", "js/views/noteEditor.js", "data/canon.json", "icon.svg",
 ];
