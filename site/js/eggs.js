@@ -97,7 +97,28 @@ function banner(text, ref, cls = "") {
 }
 
 const FISH = `<svg viewBox="0 0 64 32"><path d="M2 16c10-12 30-14 44-4l14-9-4 13 4 13-14-9C32 30 12 28 2 16Z" fill="currentColor"/><circle cx="14" cy="13" r="2" fill="#fff"/></svg>`;
-const WHALE = `<svg viewBox="0 0 220 110"><path d="M8 62c0-30 40-48 92-48 48 0 80 20 92 40l20-26c4 14 2 28-8 38 10 8 12 22 8 34l-22-22c-14 18-50 28-90 28C42 106 8 92 8 62Z" fill="currentColor"/><circle cx="48" cy="54" r="4" fill="#fff"/><path d="M60 22c-4-10 2-18 10-18M70 22c0-12 10-16 16-12" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;
+const WHALE_OLD = `<svg viewBox="0 0 220 110"><path d="M8 62c0-30 40-48 92-48 48 0 80 20 92 40l20-26c4 14 2 28-8 38 10 8 12 22 8 34l-22-22c-14 18-50 28-90 28C42 106 8 92 8 62Z" fill="currentColor"/><circle cx="48" cy="54" r="4" fill="#fff"/><path d="M60 22c-4-10 2-18 10-18M70 22c0-12 10-16 16-12" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;
+// a friendly whale facing right; blowhole at (158, 24)
+const WHALE = `<svg viewBox="0 0 230 120" class="egg-whale-svg">
+  <path d="M8 34 34 58 10 86c22-4 38-12 50-18 16 30 66 42 108 34 36-7 56-26 54-48-2-24-30-42-70-44-46-2-80 16-98 40C42 46 26 38 8 34Z" fill="#3d6a99"/>
+  <path d="M62 70c20 22 62 30 102 24 26-4 44-14 52-28-18 12-52 18-86 16-28-2-50-6-68-12Z" fill="#a9c6e3"/>
+  <circle cx="190" cy="54" r="4.5" fill="#fff"/><circle cx="191" cy="54" r="2.4" fill="#1d2b3a"/>
+  <path d="M182 70c6 4 14 4 20 0" stroke="#1d2b3a" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+  <path d="M110 74c6 14 2 26-10 34 18-2 28-12 28-26" fill="#335c86"/>
+  <ellipse cx="158" cy="24" rx="5" ry="2.2" fill="#24496f"/>
+</svg>`;
+const WAVES = `<svg viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0 40c100-30 200-30 300 0s200 30 300 0 200-30 300 0 200 30 300 0v80H0z"/></svg>`;
+// seven bands, drawn from bottom-left, over the top, to bottom-right
+const RAINBOW = (() => {
+  const colors = ["#e53935", "#fb8c00", "#fdd835", "#43a047", "#1e88e5", "#3949ab", "#8e24aa"];
+  const bands = colors
+    .map((c, i) => {
+      const r = 300 - i * 14;
+      return `<path d="M ${320 - r} 330 A ${r} ${r} 0 0 1 ${320 + r} 330" pathLength="1" stroke="${c}" style="animation-delay:${(i * 0.09).toFixed(2)}s"/>`;
+    })
+    .join("");
+  return `<svg viewBox="0 0 640 340" class="egg-rainbow-svg">${bands}</svg>`;
+})();
 const FLAME = `<svg viewBox="0 0 24 36"><path d="M12 1c3 7 10 11 10 20a10 10 0 0 1-20 0c0-6 4-8 5-13 2 3 2 6 5 7-1-5-2-9 0-14Z" fill="#f59e0b"/><path d="M12 16c2 3 5 5 5 9a5 5 0 0 1-10 0c0-3 2-4 2-7 1 2 2 3 3 3 0-2-1-3 0-5Z" fill="#fde68a"/></svg>`;
 const DOVE = `<svg viewBox="0 0 120 80"><path d="M8 44c18-2 30 4 40 14 6-14 2-34-12-48 22 6 36 24 38 42 10-10 26-14 42-10-10 6-16 14-18 22-6 18-34 26-60 16C28 74 16 62 8 44Z" fill="#fff" stroke="#c9a227" stroke-width="2"/><circle cx="96" cy="44" r="2.5" fill="#333"/></svg>`;
 
@@ -108,14 +129,28 @@ export function playEffect(t, ctx = {}) {
       layer("egg-light", "", 2600);
       break;
     case "rainbow":
-      layer("egg-rainbow", '<div class="egg-arc"></div>', 4200);
+      layer("egg-rainbow", RAINBOW + '<div class="egg-rainbow-glint"></div>', 4600);
       break;
     case "sea":
       partSea();
       break;
-    case "whale":
-      layer("egg-whale", `<div class="egg-whale-body">${WHALE}</div>`, 6000);
+    case "whale": {
+      const drops = Array.from({ length: 14 }, (_, i) => {
+        const a = -90 + (i - 6.5) * 9; // fan of droplets
+        const d = 60 + (i % 4) * 16;
+        const x = Math.cos((a * Math.PI) / 180) * d;
+        const y = Math.sin((a * Math.PI) / 180) * d;
+        return `<i style="--x:${x.toFixed(0)}px;--y:${y.toFixed(0)}px;animation-delay:${(2.35 + (i % 5) * 0.06).toFixed(2)}s"></i>`;
+      }).join("");
+      layer(
+        "egg-whale",
+        `<div class="egg-sea back">${WAVES}</div>
+         <div class="egg-whale-swim"><div class="egg-whale-bob">${WHALE}<div class="egg-spout"><div class="egg-plume"></div>${drops}</div></div></div>
+         <div class="egg-sea front">${WAVES}</div>`,
+        7200
+      );
       break;
+    }
     case "ripple": {
       const x = ctx.x ?? innerWidth / 2;
       const y = ctx.y ?? innerHeight / 2;
