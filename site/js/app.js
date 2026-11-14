@@ -10,6 +10,7 @@ import { renderSettings } from "./views/settings.js";
 import { renderTopics } from "./views/topics.js";
 import * as blessing from "./blessing.js";
 import { initTitle } from "./title.js";
+import * as eggs from "./eggs.js";
 
 const routes = [
   [/^\/?$/, renderHome, "home"],
@@ -72,6 +73,7 @@ async function route() {
       return;
     }
     current = res || null;
+    if (match.tab === "home") eggs.onHome();
   } catch (e) {
     console.error(e);
     main.innerHTML = `<div class="empty-state"><h2>Something went wrong</h2><p>${String(e.message || e)}</p><a href="#/">Go home</a></div>`;
@@ -104,6 +106,7 @@ async function start() {
   store.load();
   initTitle();
   blessing.startTimer();
+  eggs.init();
   main.innerHTML = `<div class="spinner"></div>`;
   await bible.loadCanon();
   window.addEventListener("hashchange", route);

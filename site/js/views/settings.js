@@ -4,8 +4,83 @@ import { esc, icon, $, toast, timeAgo, confirmBox } from "../ui.js";
 import * as semantic from "../semantic.js";
 import { AI_ENABLED } from "../config.js";
 import * as blessing from "../blessing.js";
+import * as eggs from "../eggs.js";
+import * as act from "../activity.js";
+import * as bible from "../bible.js";
 
 const GOOGLE = `<svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.5l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.6 5.4 2.6 13.2l7.8 6.1C12.3 13.5 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.5 5.8c4.4-4 6.8-10 6.8-17.2z"/><path fill="#FBBC05" d="M10.4 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.8-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.3 0-11.7-4-13.6-9.6l-7.8 6.1C6.6 42.6 14.6 48 24 48z"/></svg>`;
+
+/* ---------- Hidden treasures ---------- */
+const GROUPS = [
+  ["scripture", "In the Scriptures", "Hints unlock once you've finished reading the chapter."],
+  ["gesture", "Hidden gestures", "Hints unlock after you've found 3 treasures."],
+  ["season", "Seasons and hours", ""],
+  ["milestone", "Milestones", ""],
+];
+
+function treasureRow(t, { locked, lockText, extra = "" }) {
+  const found = eggs.isFound(t.id);
+  const when = found ? new Date(eggs.foundAt(t.id)).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : "";
+  const open = t.where ? `<a class="btn ghost small" href="#/read/${t.where[0]}/${t.where[1]}?v=${t.where[2]}">${icon("book")} Open</a>` : "";
+  return `<div class="treasure ${found ? "found" : ""}" data-t="${t.id}">
+    <div class="gem">${found ? "✦" : "?"}</div>
+    <div class="info">
+      <b>${found ? esc(t.title) : "Hidden treasure"}</b>
+      <div class="sub">${found ? `Found ${esc(when)}` : locked ? esc(lockText) : extra || "Not found yet"}</div>
+      <div class="reveal-slot"></div>
+    </div>
+    <div class="acts">${
+      found
+        ? `<button class="btn small" data-share="${t.id}">${icon("share")} Share</button>${open}`
+        : locked
+          ? t.where ? `<a class="btn ghost small" href="#/read/${t.where[0]}/${t.where[1]}">${icon("book")} Read it</a>` : ""
+          : `<button class="btn ghost small" data-hint="${t.id}">Hint</button><button class="btn ghost small" data-show="${t.id}">Show me</button>`
+    }</div>
+  </div>`;
+}
+
+function treasuresHTML() {
+  const total = eggs.TREASURES.length;
+  const found = eggs.foundCount();
+  const read = act.chaptersRead();
+  const streak = act.streak();
+  let html = `<section class="card section" id="treasures">
+    <div class="treasure-head"><div class="egg-found-icon">✦</div><div><div class="treasure-count">${found} of ${total}</div><div class="muted small">hidden treasures found</div></div></div>
+    <p class="muted small" style="margin:10px 0 0;font-style:italic;font-family:var(--serif);font-size:15px">“The Kingdom of Heaven is like treasure hidden in the field…” (Matthew 13:44)</p>`;
+  for (const [g, name, note] of GROUPS) {
+    const list = eggs.TREASURES.filter((t) => t.group === g);
+    const got = list.filter((t) => eggs.isFound(t.id)).length;
+    html += `<div class="treasure-group"><div class="section-head" style="margin-bottom:4px"><h3>${name}</h3><span class="muted small">${got} of ${list.length}</span></div>${note ? `<p class="muted small" style="margin:0 0 4px">${note}</p>` : ""}`;
+    if (g === "scripture") {
+      for (const ch of eggs.treasureChapters()) {
+        const done = read.has(ch.book + "." + ch.chapter);
+        const label = bible.formatRef(ch.book, ch.chapter);
+        html += `<div class="muted small" style="margin-top:10px;font-weight:600">${esc(label)} · ${ch.items.length} treasure${ch.items.length > 1 ? "s" : ""}</div>`;
+        html += ch.items.map((t) => treasureRow(t, { locked: !done, lockText: `Finish ${label} to unlock a hint` })).join("");
+      }
+    } else if (g === "gesture") {
+      html += list.map((t) => treasureRow(t, { locked: found < 3, lockText: "Find 3 treasures to unlock a hint" })).join("");
+    } else if (g === "milestone") {
+      html += list
+        .map((t) => treasureRow(t, { locked: false, extra: t.need ? `Your streak: ${Math.min(streak, t.need)} of ${t.need} days` : t.id === "psalm119" ? (read.has("PSA.119") ? "Done" : "Psalm 119 not finished yet") : `${read.size} of 1,328 chapters` }))
+        .join("");
+    } else {
+      html += list.map((t) => treasureRow(t, { locked: false })).join("");
+    }
+    html += `</div>`;
+  }
+  return html + `</section>`;
+}
+
+function wireTreasures(main) {
+  const reveal = (btn, text) => {
+    const slot = btn.closest(".treasure").querySelector(".reveal-slot");
+    slot.innerHTML = `<div class="hint">${esc(text)}</div>`;
+  };
+  main.querySelectorAll("[data-hint]").forEach((b) => (b.onclick = () => reveal(b, eggs.TREASURES.find((t) => t.id === b.dataset.hint).hint)));
+  main.querySelectorAll("[data-show]").forEach((b) => (b.onclick = () => reveal(b, eggs.TREASURES.find((t) => t.id === b.dataset.show).how)));
+  main.querySelectorAll("[data-share]").forEach((b) => (b.onclick = () => eggs.share(b.dataset.share)));
+}
 
 function aiUsageText() {
   const u = store.pref("aiUsage");
@@ -23,7 +98,7 @@ export function renderSettings(main) {
     const size = store.pref("fontSize") || 19;
     const counts = {
       log: store.all("reading_log").length,
-      notes: store.all("notes").length,
+      notes: store.all("notes").filter((n) => n.kind !== "treasure").length,
       marks: store.all("bookmarks").length,
     };
 
@@ -55,6 +130,8 @@ export function renderSettings(main) {
         <div class="section-head"><h2>Account</h2></div>
         ${account}
       </section>
+
+      ${treasuresHTML()}
 
       <section class="card section">
         <div class="section-head"><h2>Reading</h2></div>
@@ -105,6 +182,7 @@ export function renderSettings(main) {
     });
     $("[data-sync]", main)?.addEventListener("click", () => sync.syncNow());
     $("[data-bless]", main).onclick = () => blessing.show({ force: true });
+    wireTreasures(main);
     const latin = $("[data-latin]", main);
     if (latin)
       latin.onclick = () => {

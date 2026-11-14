@@ -6,6 +6,7 @@ import { openNoteEditor } from "./noteEditor.js";
 import { expandButton, wireExpand } from "../expand.js";
 import { aiEnabled, runInto } from "../ai.js";
 import { openModal } from "../ui.js";
+import * as eggs from "../eggs.js";
 
 /* =========================================================
    Book & chapter picker   #/books   #/books/GEN
@@ -185,6 +186,7 @@ export async function renderChapter(main, [bookId, c], query) {
     clearTimeout(autoTimer);
     const r = act.logRead({ book: bookId, chapter, mode: "chapter" });
     if (r && !silent) toast(`${bible.formatRef(bookId, chapter)} marked as read`);
+    if (r) setTimeout(() => eggs.checkMilestones(), silent ? 600 : 1800);
   };
 
   const wire = () => {
@@ -193,6 +195,7 @@ export async function renderChapter(main, [bookId, c], query) {
       const el = e.target.closest(".v");
       if (!el) return;
       const n = parseInt(el.dataset.v, 10);
+      eggs.onVerse(bookId, chapter, n, { x: e.clientX, y: e.clientY });
       if (selected.has(n)) selected.delete(n);
       else selected.add(n);
       el.classList.toggle("sel", selected.has(n));
@@ -333,6 +336,7 @@ export async function renderChapter(main, [bookId, c], query) {
   };
 
   draw();
+  eggs.onChapterOpen();
   const target = parseInt(query.get("v"), 10);
   if (target) {
     const el = $(`.v[data-v="${target}"]`, main);
@@ -409,6 +413,7 @@ export async function renderVerse(main, [bookId, c, v]) {
   const ref = { book: bookId, chapter, verse };
   act.logRead({ book: bookId, chapter, verse_start: verse, verse_end: verse, mode: "verse" });
   store.pref("lastVerse", ref);
+  setTimeout(() => eggs.onVerse(bookId, chapter, verse), 500);
   const idx = ch.v.indexOf(item);
   const pct = Math.round(((idx + 1) / ch.v.length) * 100);
 

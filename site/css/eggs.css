@@ -1,0 +1,135 @@
+/* Hidden treasures: small effects. All of them are pointer-events: none so reading is never blocked. */
+.egg-layer { position: fixed; inset: 0; z-index: 90; pointer-events: none; overflow: hidden; }
+
+/* Genesis 1:3: a sunrise of light */
+.egg-light { background: radial-gradient(circle at 50% 40%, #fffdf2 0%, #fff3c4 35%, rgba(255, 236, 170, 0) 75%); animation: egg-flash 2.6s ease-in-out forwards; }
+@keyframes egg-flash { 0% { opacity: 0; } 30% { opacity: 1; } 60% { opacity: .9; } 100% { opacity: 0; } }
+
+/* Genesis 9:13: a rainbow rising from the bottom */
+.egg-rainbow .egg-arc {
+  position: absolute; left: 50%; bottom: -60vmin; width: 130vmin; height: 130vmin; margin-left: -65vmin; border-radius: 50%;
+  background: radial-gradient(circle, transparent 52%, rgba(148, 0, 211, .45) 53%, rgba(75, 0, 130, .45) 56%, rgba(0, 0, 255, .45) 59%, rgba(0, 170, 0, .45) 62%, rgba(255, 220, 0, .5) 65%, rgba(255, 127, 0, .5) 68%, rgba(255, 0, 0, .45) 71%, transparent 72%);
+  transform: translateY(40vmin) scale(.9); opacity: 0;
+  animation: egg-arc 4.2s ease-out forwards;
+}
+@keyframes egg-arc { 30% { opacity: 1; transform: none; } 75% { opacity: 1; transform: none; } 100% { opacity: 0; transform: none; } }
+
+/* Exodus 14:21: the text parts */
+.egg-sea-half { position: fixed; z-index: 91; margin: 0; pointer-events: none; animation: egg-part 3.2s cubic-bezier(.5, 0, .3, 1) forwards; }
+@keyframes egg-part { 0% { transform: none; } 35%, 65% { transform: translateX(var(--dx)); } 100% { transform: none; } }
+.egg-sea-gap { left: 0; right: auto; width: 80px; background: linear-gradient(90deg, transparent, rgba(160, 120, 60, .18), transparent); animation: egg-gap 3.2s ease-in-out forwards; opacity: 0; }
+@keyframes egg-gap { 35%, 65% { opacity: 1; } }
+
+/* Jonah 1:17: a whale swims by */
+.egg-whale .egg-whale-body { position: absolute; bottom: 6vh; left: -240px; width: 220px; color: rgba(40, 70, 110, .55); animation: egg-swim 6s ease-in-out forwards; }
+@keyframes egg-swim { 0% { transform: translateX(0) translateY(0); } 50% { transform: translateX(calc(50vw + 120px)) translateY(-14px); } 100% { transform: translateX(calc(100vw + 260px)) translateY(0); } }
+
+/* Psalm 23:2: still waters */
+.egg-ripples span { position: absolute; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; border: 2px solid rgba(70, 130, 180, .5); opacity: 0; animation: egg-ripple 2.4s ease-out forwards; }
+@keyframes egg-ripple { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(28); } }
+
+/* John 11:35: a single tear */
+.egg-drop { position: absolute; left: 50%; top: -30px; width: 22px; height: 22px; margin-left: -11px; background: rgba(110, 160, 220, .85); border-radius: 0 50% 50% 50%; transform: rotate(45deg); animation: egg-fall 2.2s cubic-bezier(.5, 0, 1, 1) forwards; box-shadow: inset -4px -4px 6px rgba(255, 255, 255, .5); }
+@keyframes egg-fall { 0% { top: -30px; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { top: 55vh; opacity: 0; } }
+.egg-caption { position: absolute; left: 0; right: 0; bottom: 18vh; text-align: center; font: italic 400 18px var(--serif); color: var(--muted); opacity: 0; animation: egg-cap 4s .8s ease-out forwards; }
+@keyframes egg-cap { 20%, 80% { opacity: 1; } 100% { opacity: 0; } }
+
+/* John 21:11: fish swimming across */
+.egg-fishes span { position: absolute; left: -80px; width: 54px; color: rgba(50, 110, 140, .6); animation: egg-fish 4.5s linear forwards; }
+@keyframes egg-fish { to { transform: translateX(calc(100vw + 160px)); } }
+
+/* Acts 2:3 and Pentecost: tongues of fire */
+.egg-flames span { position: absolute; width: 18px; height: 27px; transform-origin: 50% 100%; opacity: 0; animation: egg-flame 3.6s ease-in-out forwards; }
+@keyframes egg-flame { 10% { opacity: 1; transform: scale(1); } 20% { transform: scale(1.12, .9); } 30% { transform: scale(.92, 1.08); } 40% { transform: scale(1.08, .94); } 50% { transform: scale(.95, 1.06); } 60% { transform: scale(1.1, .92); } 85% { opacity: 1; } 100% { opacity: 0; transform: scale(.6); } }
+
+/* Banner verse (gestures, seasons) */
+.egg-banner { display: flex; align-items: center; justify-content: center; padding: 24px; }
+.egg-banner.top { align-items: flex-start; padding-top: 90px; }
+.egg-banner-in { max-width: 560px; text-align: center; background: color-mix(in srgb, var(--card) 92%, transparent); border: 1px solid var(--line); border-radius: 18px; padding: 22px 26px; box-shadow: 0 10px 40px rgba(0, 0, 0, .12); animation: egg-banner 4.2s ease-in-out forwards; }
+.egg-banner-text { font: italic 400 21px/1.5 var(--serif); color: var(--ink); }
+.egg-banner-ref { margin-top: 8px; font: 600 12px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.egg-banner.glow .egg-banner-in { box-shadow: 0 0 0 1px rgba(214, 170, 60, .35), 0 0 60px rgba(255, 210, 90, .55); }
+.egg-banner.dark .egg-banner-in { background: rgba(20, 16, 12, .9); border-color: #3a3128; }
+.egg-banner.dark .egg-banner-text { color: #efe6d6; }
+.egg-banner.rays { background: radial-gradient(circle at 50% 40%, rgba(255, 240, 200, .5), transparent 60%); }
+@keyframes egg-banner { 0% { opacity: 0; transform: translateY(10px) scale(.98); } 12%, 85% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+
+/* the book icon flutters (7 taps) */
+.brand svg.egg-flutter { animation: egg-flutter 1.4s ease-in-out; transform-origin: 50% 50%; }
+@keyframes egg-flutter { 0% { transform: none; } 15% { transform: rotateY(60deg) scale(1.15); } 30% { transform: rotateY(-50deg) scale(1.2); } 45% { transform: rotateY(40deg) scale(1.15); } 60% { transform: rotateY(-25deg); } 100% { transform: none; filter: drop-shadow(0 0 8px rgba(255, 200, 80, .9)); } }
+
+/* Be still */
+.egg-still { display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(246, 241, 231, .78); backdrop-filter: blur(6px); animation: egg-banner 4.2s ease-in-out forwards; }
+:root[data-theme="dark"] .egg-still { background: rgba(22, 19, 15, .8); }
+.egg-still-in { font: italic 400 clamp(26px, 6vw, 40px)/1.3 var(--serif); color: var(--ink); text-align: center; padding: 0 24px; }
+
+/* Amen */
+.egg-amen { display: flex; align-items: center; justify-content: center; }
+.egg-amen-in { font: italic 600 64px var(--serif); color: var(--gold); text-shadow: 0 0 30px rgba(255, 210, 100, .8); opacity: 0; animation: egg-amen 2.6s ease-out forwards; }
+@keyframes egg-amen { 0% { opacity: 0; transform: scale(.7); } 30% { opacity: 1; transform: scale(1); } 75% { opacity: 1; } 100% { opacity: 0; transform: scale(1.1); } }
+
+/* Christmas: snow and a star */
+.egg-snow i { position: absolute; top: -12px; width: 8px; height: 8px; border-radius: 50%; background: #fff; box-shadow: 0 0 4px rgba(150, 170, 200, .8); animation: egg-snow linear forwards; }
+@keyframes egg-snow { to { top: 105vh; margin-left: 30px; } }
+.egg-star { position: absolute; top: 8px; left: 50%; font-size: 34px; color: #f5c542; text-shadow: 0 0 18px #ffd86b; animation: egg-amen 9s ease-out forwards; }
+
+/* Easter: the stone rolls away */
+.egg-tomb { display: flex; align-items: flex-end; justify-content: center; padding-bottom: calc(var(--tabbar) + 30px); }
+.egg-tomb-scene { position: relative; width: 260px; height: 170px; animation: egg-banner 6s ease-in-out forwards; }
+.egg-tomb-hill { position: absolute; inset: 20px 0 0 0; background: #b9a68a; border-radius: 130px 130px 12px 12px; }
+.egg-tomb-door { position: absolute; left: 92px; top: 66px; width: 76px; height: 104px; background: #2b2219; border-radius: 38px 38px 0 0; }
+.egg-tomb-glow { position: absolute; left: 60px; top: 30px; width: 140px; height: 140px; border-radius: 50%; background: radial-gradient(closest-side, #fff7d1, rgba(255, 230, 140, 0)); opacity: 0; animation: egg-show 1s 1.6s forwards; z-index: 3; }
+.egg-tomb-stone { position: absolute; left: 84px; top: 62px; width: 92px; height: 92px; border-radius: 50%; background: #8d8170; border: 3px solid #6e6456; z-index: 4; animation: egg-roll 1.8s .5s cubic-bezier(.4, 0, .2, 1) forwards; }
+@keyframes egg-roll { to { transform: translateX(118px) rotate(240deg); } }
+@keyframes egg-show { to { opacity: 1; } }
+
+/* Ash Wednesday / Good Friday: the mood of the day */
+:root.egg-ashwed { --accent: #6b6560; --accent-soft: #e6e2dc; --gold: #8a8178; }
+:root.egg-goodfriday .topbar { background: #2a2420; border-bottom-color: #2a2420; }
+:root.egg-goodfriday .topbar .brand, :root.egg-goodfriday .topbar .tabs a { color: #d8cfc4; }
+:root.egg-goodfriday .topbar .tabs a.active { background: rgba(255, 255, 255, .08); color: #fff; }
+
+/* Milestone badges */
+.egg-badge { display: flex; align-items: center; justify-content: center; padding: 24px; }
+.egg-badge-in { text-align: center; background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 26px 30px; max-width: 420px; box-shadow: 0 12px 50px rgba(0, 0, 0, .15); animation: egg-banner 4.6s ease-in-out forwards; }
+.egg-badge-in b { display: block; font: 600 22px var(--serif); margin: 8px 0 6px; }
+.egg-badge-verse { font: italic 400 17px/1.5 var(--serif); color: var(--muted); }
+.egg-medal { width: 64px; height: 64px; margin: 0 auto; border-radius: 50%; display: grid; place-items: center; font-size: 30px; color: #fff; background: radial-gradient(circle at 35% 30%, #ffe08a, #c9962b); box-shadow: 0 0 30px rgba(255, 200, 80, .6); animation: egg-spin 1.2s ease-out; }
+@keyframes egg-spin { from { transform: rotateY(360deg) scale(.4); } }
+.egg-dove { width: 110px; margin: 0 auto; animation: egg-dove 2.4s ease-out; }
+@keyframes egg-dove { from { transform: translate(-80px, 40px) rotate(-12deg); opacity: 0; } }
+
+/* "Hidden treasure found" card */
+.egg-found {
+  position: fixed; left: 50%; transform: translateX(-50%); z-index: 95; display: flex; align-items: center; gap: 10px;
+  top: calc(env(safe-area-inset-top) + 66px); width: min(460px, calc(100% - 24px));
+  background: var(--card); border: 1px solid color-mix(in srgb, var(--gold) 50%, var(--line)); border-radius: 18px; padding: 10px 12px;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 14%, transparent), 0 12px 40px rgba(0, 0, 0, .18);
+  animation: egg-found-in .45s cubic-bezier(.2, .9, .3, 1.2);
+}
+.egg-found.out { transition: opacity .3s, transform .3s; opacity: 0; transform: translate(-50%, -10px); }
+@keyframes egg-found-in { from { opacity: 0; transform: translate(-50%, -20px) scale(.96); } }
+.egg-found-icon { width: 38px; height: 38px; flex: none; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 18px; background: radial-gradient(circle at 35% 30%, #ffe08a, #c9962b); }
+.egg-found-text { flex: 1; min-width: 0; }
+.egg-found-text b { display: block; font-size: 14px; }
+.egg-found-text span { display: block; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* You page: treasures */
+.treasure-head { display: flex; align-items: center; gap: 12px; }
+.treasure-count { font: 600 28px var(--serif); }
+.treasure-group { margin-top: 18px; }
+.treasure { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
+.treasure:first-of-type { border-top: 0; }
+.treasure .gem { width: 26px; height: 26px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 13px; background: var(--heat-0); color: var(--muted); margin-top: 2px; }
+.treasure.found .gem { background: radial-gradient(circle at 35% 30%, #ffe08a, #c9962b); color: #fff; }
+.treasure .info { flex: 1; min-width: 0; }
+.treasure .info b { display: block; font-weight: 600; font-size: 14.5px; }
+.treasure .info .sub { font-size: 13px; color: var(--muted); }
+.treasure .info .hint { margin-top: 6px; font: italic 400 15px/1.5 var(--serif); color: var(--ink); background: var(--accent-soft); border-radius: 10px; padding: 6px 10px; }
+.treasure .acts { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+
+@media (prefers-reduced-motion: reduce) {
+  .egg-layer *, .egg-layer, .egg-sea-half, .brand svg.egg-flutter { animation-duration: .01s !important; animation-delay: 0s !important; }
+  .egg-banner, .egg-badge, .egg-still { animation: none !important; }
+  .egg-banner-in, .egg-badge-in { animation: none !important; }
+}

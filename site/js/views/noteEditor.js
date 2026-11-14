@@ -2,6 +2,7 @@ import { openModal, esc, toast, confirmBox } from "../ui.js";
 import { loadChapter, formatRef, verseHTML } from "../bible.js";
 import * as act from "../activity.js";
 import * as store from "../store.js";
+import * as eggs from "../eggs.js";
 
 // Open the note editor for a verse range (new note) or an existing note.
 export async function openNoteEditor({ book, chapter, verse_start, verse_end, note }) {
@@ -36,6 +37,7 @@ export async function openNoteEditor({ book, chapter, verse_start, verse_end, no
           const rec = act.saveNote({ id: note?.id, book, chapter, verse_start, verse_end, body });
           close();
           toast("Note saved");
+          eggs.onNoteSaved(body);
           resolve(rec);
         };
         dlg.querySelector("[data-save]").onclick = save;

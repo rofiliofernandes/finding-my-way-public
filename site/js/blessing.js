@@ -49,15 +49,18 @@ const FIGURE = `
     <div class="foot2"></div>
   </div>`;
 
-const WORDS = [["Jesus", "left"], ["loves", "top"], ["you,", "bottom"], ["my", "right"], ["child.", "bottom"]];
+const DIRS = ["left", "top", "bottom", "right", "bottom", "top", "left", "right"];
+const DEFAULT_WORDS = ["Jesus", "loves", "you,", "my", "child."];
 // timeline, in seconds
 const W0 = 3.6; // first word starts flying in
 const WGAP = 0.3; // between words
 const WDUR = 0.9; // each word's flight
-const Z0 = 6.4; // the dive into the "o" begins
+const HOLD = 0.7; // pause once every word has landed
 const ZDUR = 2.0; // and lasts
 
-export function show({ force = false } = {}) {
+export function show({ force = false, words: wordList = DEFAULT_WORDS } = {}) {
+  const WORDS = wordList.map((w, i) => [w, DIRS[i % DIRS.length]]);
+  const Z0 = W0 + (WORDS.length - 1) * WGAP + WDUR + HOLD; // the dive into the first "o" begins
   if (!force && !eligible()) return false;
   if (document.querySelector(".blessing")) return false;
   if (!force) ss(KEY_SHOWN, "1");
@@ -65,14 +68,21 @@ export function show({ force = false } = {}) {
   const el = document.createElement("div");
   el.className = "blessing";
   el.setAttribute("role", "dialog");
-  el.setAttribute("aria-label", "Jesus loves you, my child.");
+  el.setAttribute("aria-label", wordList.join(" "));
+  let oDone = false;
+  const wordHTML = (w) => {
+    const k = w.indexOf("o");
+    if (oDone || k < 0) return w;
+    oDone = true;
+    return `${w.slice(0, k)}<span class="o">o</span>${w.slice(k + 1)}`;
+  };
   const filters = WORDS.map((_, i) => `<filter id="bl-mb${i}" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="0,0"/></filter>`).join("");
   el.innerHTML = `<svg class="fx" aria-hidden="true"><defs>${filters}</defs></svg>
     <div class="zoom">
       <div class="dark"></div><div class="gold"></div><div class="light"></div>
       <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div><div class="cloud c4"></div><div class="cloud c5"></div>
       <div class="lift"><div class="stage">${FIGURE}</div></div>
-      <div class="msg">${WORDS.map(([w], i) => `<span class="w" style="filter:url(#bl-mb${i})">${w === "loves" ? 'l<span class="o">o</span>ves' : w}</span>`).join(" ")}</div>
+      <div class="msg">${WORDS.map(([w], i) => `<span class="w" style="filter:url(#bl-mb${i})">${wordHTML(w)}</span>`).join(" ")}</div>
     </div>`;
   document.body.appendChild(el);
 
@@ -139,7 +149,8 @@ export function show({ force = false } = {}) {
     if (t >= Z0) {
       if (!hole) {
         // find the hole in the "o" once the words have landed
-        const o = msg.querySelector(".o").getBoundingClientRect();
+        const oEl = msg.querySelector(".o") || msg;
+        const o = oEl.getBoundingClientRect();
         hole = { x: o.left + o.width / 2, y: o.top + o.height * 0.62, rx: o.width * 0.2, ry: o.height * 0.17 };
         zoom.style.transformOrigin = `${hole.x}px ${hole.y}px`;
         const mask = `radial-gradient(${hole.rx}px ${hole.ry}px at ${hole.x}px ${hole.y}px, transparent 97%, #000 100%)`;
