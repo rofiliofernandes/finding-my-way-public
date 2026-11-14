@@ -1,0 +1,251 @@
+/* Treasure scenes. Shared pieces first. */
+.fx { --serif: "Literata", Georgia, serif; }
+.fx-cap {
+  position: absolute; left: 0; right: 0; bottom: calc(var(--tabbar) + 8vh); z-index: 5; text-align: center; padding: 0 28px;
+  font: italic 400 clamp(17px, 4.6vw, 24px)/1.4 var(--serif); color: var(--ink); opacity: 0;
+  text-shadow: 0 0 6px var(--paper), 0 0 14px var(--paper), 0 0 22px var(--paper);
+  animation: fx-cap 3.2s ease-out forwards;
+}
+@media (min-width: 721px) { .fx-cap { bottom: 9vh; } }
+.fx-cap.light { color: #fff6dc; text-shadow: 0 1px 10px rgba(0, 0, 0, .5); }
+.fx-cap.dark { color: #3a2a0a; }
+.fx-cap.big { font-size: clamp(26px, 7vw, 44px); bottom: auto; top: 42%; }
+@keyframes fx-cap { 0% { opacity: 0; transform: translateY(8px); } 18%, 80% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+@keyframes fx-in-out { 0% { opacity: 0; } 12%, 82% { opacity: 1; } 100% { opacity: 0; } }
+.fx-night { position: absolute; inset: 0; background: linear-gradient(#0b1630, #1d2a52 60%, #3a3560); opacity: 0; animation: fx-in-out var(--dur, 6s) ease-in-out forwards; }
+.fx-night.soft { background: linear-gradient(#141b33, #2a2f52); }
+.fx-dusk { position: absolute; inset: 0; background: linear-gradient(#3b2a4a, #b0603a 70%, #e0a050); opacity: 0; animation: fx-in-out 6.4s ease-in-out forwards; }
+.fx-dusk.soft { background: linear-gradient(#2b3a5a, #6a7fa8 70%, #c9b28a); }
+.fx-dark { position: absolute; inset: 0; background: #07060a; opacity: 0; animation: fx-in-out 4s ease-in-out forwards; }
+.fx-dark.soft { background: radial-gradient(circle at 50% 45%, #2a1a1a, #050405 70%); animation-duration: 5.4s; }
+.fx-softglow { position: absolute; inset: 0; background: radial-gradient(circle at 50% 55%, rgba(255, 240, 200, .75), rgba(255, 240, 200, 0) 60%); opacity: 0; animation: fx-in-out 5.6s ease-in-out forwards; }
+.fx-warm { position: absolute; inset: 0; background: radial-gradient(circle at 50% 80%, rgba(255, 170, 60, .45), rgba(255, 170, 60, 0) 60%); opacity: 0; animation: fx-in-out 5.8s ease-in-out forwards; }
+.fx-star { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #fff; box-shadow: 0 0 6px #fff; opacity: 0; transform: scale(var(--s)); animation: fx-twinkle 3.2s ease-in-out forwards; }
+@keyframes fx-twinkle { 0% { opacity: 0; } 20% { opacity: 1; } 40% { opacity: .5; } 60% { opacity: 1; } 85% { opacity: .9; } 100% { opacity: 0; } }
+.fx-quake { animation: fx-quake .12s linear infinite; }
+@keyframes fx-quake { 0% { transform: translate(0, 0); } 25% { transform: translate(-4px, 2px); } 50% { transform: translate(3px, -2px); } 75% { transform: translate(-2px, -3px); } 100% { transform: translate(2px, 3px); } }
+
+/* Genesis 1:3 */
+.fx-light .fx-dark { animation-duration: 4.2s; }
+.fx-burst { position: absolute; left: 50%; top: 45%; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; background: radial-gradient(circle, #fffef6 0%, #fff6cf 40%, rgba(255, 240, 180, 0) 70%); opacity: 0; animation: fx-burst 3.6s .6s cubic-bezier(.2, .7, .2, 1) forwards; }
+@keyframes fx-burst { 0% { opacity: 0; transform: scale(.2); } 10% { opacity: 1; transform: scale(1); } 45% { opacity: 1; transform: scale(160); } 80% { opacity: 1; transform: scale(160); } 100% { opacity: 0; transform: scale(160); } }
+
+/* Genesis 1:16 */
+.fx-stars .fx-night { --dur: 6.4s; }
+.fx-sun { position: absolute; left: 14%; top: 30%; width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle, #ffe9a0, #f5a742); box-shadow: 0 0 40px #f5b04a; animation: fx-set 2.6s ease-in forwards; }
+@keyframes fx-set { to { transform: translateY(70vh); opacity: .3; } }
+.fx-moon { position: absolute; right: 16%; top: 100%; width: 60px; height: 60px; border-radius: 50%; box-shadow: -14px 8px 0 0 #f7f0d6; animation: fx-rise 2.4s 1s ease-out forwards, fx-fadeend 6.4s forwards; }
+@keyframes fx-rise { to { top: 14%; } }
+@keyframes fx-fadeend { 0%, 85% { opacity: 1; } 100% { opacity: 0; } }
+.fx-shoot { position: absolute; left: 10%; top: 10%; width: 120px; height: 2px; background: linear-gradient(90deg, rgba(255, 255, 255, 0), #fff); opacity: 0; transform: rotate(18deg); animation: fx-shoot 1s 3.6s ease-in forwards; }
+@keyframes fx-shoot { 0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: 0; transform: rotate(18deg) translateX(70vw); } }
+
+/* Genesis 28:12 */
+.fx-ladder .fx-night { --dur: 6.6s; }
+.fx-ladder-in { position: absolute; left: 50%; bottom: 0; width: 120px; height: 100%; margin-left: -60px; filter: drop-shadow(0 0 10px rgba(255, 210, 90, .9)); clip-path: inset(100% 0 0 0); animation: fx-climb 1.8s .5s cubic-bezier(.3, 0, .2, 1) forwards, fx-fadeend 6.6s forwards; }
+.fx-ladder-in svg { width: 100%; height: 100%; }
+@keyframes fx-climb { to { clip-path: inset(0 0 0 0); } }
+.fx-angel { position: absolute; left: 50%; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: #fff7d6; box-shadow: 0 0 14px 6px rgba(255, 230, 150, .9); opacity: 0; }
+.fx-angel.up { bottom: 5%; animation: fx-up 3s ease-in-out forwards; }
+.fx-angel.down { top: 5%; animation: fx-down 3s ease-in-out forwards; }
+@keyframes fx-up { 0% { opacity: 0; } 15%, 85% { opacity: 1; } 100% { opacity: 0; transform: translateY(-80vh); } }
+@keyframes fx-down { 0% { opacity: 0; } 15%, 85% { opacity: 1; } 100% { opacity: 0; transform: translateY(80vh); } }
+
+/* Exodus 3:2 */
+.fx-bush-in { position: absolute; left: 50%; bottom: calc(var(--tabbar) + 2vh); width: 220px; margin-left: -110px; transform: translateY(120%); animation: fx-bush 5.8s ease-in-out forwards; }
+.fx-bush-in svg { width: 100%; display: block; }
+@keyframes fx-bush { 0% { transform: translateY(120%); } 14%, 84% { transform: none; } 100% { transform: translateY(120%); } }
+.fx-flame { position: absolute; top: 0; width: 26px; height: 40px; transform-origin: 50% 100%; opacity: 0; animation: fx-flicker 4s ease-in-out forwards; }
+.fx-flame svg { width: 100%; height: 100%; }
+@keyframes fx-flicker { 0% { opacity: 0; transform: scale(.3); } 10% { opacity: 1; transform: scale(1.1, .9); } 20% { transform: scale(.9, 1.15); } 30% { transform: scale(1.12, .92); } 40% { transform: scale(.94, 1.1); } 50% { transform: scale(1.1, .9); } 60% { transform: scale(.92, 1.12); } 70% { transform: scale(1.08, .94); } 85% { opacity: 1; } 100% { opacity: 0; transform: scale(.8); } }
+
+/* Exodus 14:21 water walls and sand path */
+.fx-seapath { position: fixed; top: 0; bottom: 0; z-index: 90; width: 140px; pointer-events: none; opacity: 0; animation: fx-pathin 3.4s ease-in-out forwards; }
+.fx-seapath .sand { position: absolute; left: 34px; right: 34px; top: 0; bottom: 0; background: repeating-linear-gradient(0deg, #ead7a8 0 6px, #e2cb93 6px 12px); }
+.fx-seapath .wall { position: absolute; top: 0; bottom: 0; width: 34px; background: linear-gradient(90deg, rgba(40, 110, 170, .9), rgba(90, 160, 210, .7)); overflow: hidden; }
+.fx-seapath .wall.l { left: 0; } .fx-seapath .wall.r { right: 0; transform: scaleX(-1); }
+.fx-seapath .wall::after { content: ""; position: absolute; inset: -40px 0; background: repeating-linear-gradient(170deg, rgba(255, 255, 255, .25) 0 3px, transparent 3px 18px); animation: fx-water 1s linear infinite; }
+@keyframes fx-water { to { transform: translateY(40px); } }
+@keyframes fx-pathin { 0% { opacity: 0; transform: scaleX(.1); } 30%, 70% { opacity: 1; transform: none; } 100% { opacity: 0; transform: scaleX(.1); } }
+
+/* Exodus 16:14 */
+.fx-morning { position: absolute; inset: 0; background: linear-gradient(#fdf1d6, rgba(253, 241, 214, 0) 60%); opacity: 0; animation: fx-in-out 6.2s forwards; }
+.fx-manna i { position: absolute; top: -10px; width: 7px; height: 7px; border-radius: 50%; background: #fffdf5; box-shadow: 0 0 4px rgba(200, 180, 140, .9); animation-name: fx-mannafall; animation-timing-function: ease-in; animation-fill-mode: forwards; }
+@keyframes fx-mannafall { 0% { top: -10px; opacity: 0; } 10% { opacity: 1; } 100% { top: calc(100vh - var(--tabbar) - 22px); opacity: 1; } }
+.fx-ground { position: absolute; left: 0; right: 0; bottom: var(--tabbar); height: 18px; background: linear-gradient(transparent, rgba(255, 252, 240, .95)); opacity: 0; animation: fx-in-out 6.2s 1s forwards; }
+@media (min-width: 721px) { .fx-ground { bottom: 0; } @keyframes fx-mannafall { 0% { top: -10px; opacity: 0; } 10% { opacity: 1; } 100% { top: calc(100vh - 22px); opacity: 1; } } }
+
+/* walkers (donkey, sheep) */
+.fx-walker { position: absolute; bottom: calc(var(--tabbar) + 2vh); left: 0; width: 170px; animation: fx-walk 7s ease-in-out forwards; }
+@media (min-width: 721px) { .fx-walker { bottom: 4vh; } }
+.fx-walker svg { width: 100%; display: block; }
+@keyframes fx-walk { 0% { transform: translateX(-190px); } 35%, 62% { transform: translateX(calc(50vw - 85px)); } 100% { transform: translateX(calc(100vw + 40px)); } }
+.fx-walker .legs path, .fx-sheepwalk .legs path { transform-box: fill-box; transform-origin: 50% 0; animation: fx-step .45s ease-in-out infinite alternate; }
+.fx-walker .legs .l2, .fx-walker .legs .l4, .fx-sheepwalk .legs .l2, .fx-sheepwalk .legs .l4 { animation-direction: alternate-reverse; }
+@keyframes fx-step { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
+.fx-bubble { position: absolute; left: 80%; bottom: 100%; width: max-content; max-width: 60vw; padding: 10px 14px; border-radius: 16px 16px 16px 4px; background: var(--card); border: 1px solid var(--line); box-shadow: 0 6px 20px rgba(0, 0, 0, .12); font: italic 400 17px var(--serif); color: var(--ink); opacity: 0; transform: scale(.6); transform-origin: 0 100%; animation: fx-pop 2.2s 2.6s ease-out forwards; }
+@keyframes fx-pop { 0% { opacity: 0; transform: scale(.6); } 15% { opacity: 1; transform: scale(1.05); } 25% { transform: scale(1); } 85% { opacity: 1; } 100% { opacity: 0; } }
+
+/* 1 Kings 19:12 */
+.fx-gusts i { position: absolute; left: -60vw; height: 2px; border-radius: 2px; background: linear-gradient(90deg, rgba(120, 110, 100, 0), rgba(120, 110, 100, .55), rgba(120, 110, 100, 0)); animation: fx-gust 1.1s ease-in forwards; }
+@keyframes fx-gust { to { transform: translateX(170vw); } }
+.fx-fireflash { position: absolute; inset: 0; background: radial-gradient(circle at 50% 70%, rgba(255, 140, 40, .55), rgba(255, 140, 40, 0) 65%); opacity: 0; animation: fx-flash .9s 2.3s ease-out forwards; }
+@keyframes fx-flash { 30% { opacity: 1; } 100% { opacity: 0; } }
+.fx-hush { position: absolute; inset: 0; background: rgba(250, 247, 240, .92); opacity: 0; animation: fx-in-out 3.4s 3.1s ease-in-out forwards; }
+.fx-whisper { position: absolute; left: 0; right: 0; top: 44%; text-align: center; font: italic 300 clamp(18px, 4.5vw, 26px) var(--serif); letter-spacing: .3em; color: #6d6252; opacity: 0; animation: fx-cap 3s 3.4s ease-out forwards; }
+
+/* Daniel 6:22 */
+.fx-lions .fx-dusk { animation-duration: 6.4s; }
+.fx-beam { position: absolute; left: 50%; top: 0; width: 160px; margin-left: -80px; height: 70%; background: linear-gradient(rgba(255, 245, 200, .9), rgba(255, 245, 200, 0)); clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%); opacity: 0; animation: fx-in-out 3.6s 2s ease-in-out forwards; }
+.fx-lion { position: absolute; left: 50%; bottom: calc(var(--tabbar) + 1vh); width: 170px; margin-left: -85px; transform: translateY(110%); animation: fx-lionup 6.4s ease-in-out forwards; }
+@media (min-width: 721px) { .fx-lion { bottom: 2vh; } }
+.fx-lion svg { width: 100%; display: block; }
+@keyframes fx-lionup { 0% { transform: translateY(110%); } 14% { transform: none; } 30% { transform: scale(1.06); } 40%, 84% { transform: rotate(-6deg) translateY(10px); } 100% { transform: translateY(110%); } }
+.fx-lion .jaw { transform-box: fill-box; transform-origin: 50% 0; animation: fx-jaw 6.4s ease-in-out forwards; }
+@keyframes fx-jaw { 0%, 12% { transform: scaleY(.2); } 18%, 30% { transform: scaleY(1.6); } 40%, 100% { transform: scaleY(0); } }
+.fx-lion .eyes-closed { opacity: 0; animation: fx-eyesclose 6.4s forwards; }
+.fx-lion .eyes-open { animation: fx-eyesopen 6.4s forwards; }
+@keyframes fx-eyesclose { 0%, 44% { opacity: 0; } 50%, 100% { opacity: 1; } }
+@keyframes fx-eyesopen { 0%, 44% { opacity: 1; } 50%, 100% { opacity: 0; } }
+.fx-zzz { position: absolute; right: -10px; top: 0; font: italic 600 18px var(--serif); color: #fff3d6; opacity: 0; animation: fx-zzz 2.4s 3.4s ease-out forwards; }
+@keyframes fx-zzz { 0% { opacity: 0; transform: translate(0, 10px); } 30%, 80% { opacity: 1; } 100% { opacity: 0; transform: translate(14px, -20px); } }
+
+/* Tobit 5:4 */
+.fx-wings { position: absolute; left: 50%; top: 40%; width: 0; height: 0; }
+.fx-wings .w { position: absolute; top: -90px; width: 130px; height: 175px; opacity: 0; }
+.fx-wings .w svg { width: 100%; height: 100%; }
+.fx-wings .w.l { right: 6px; transform-origin: 100% 60%; animation: fx-wingl 5.4s ease-in-out forwards; }
+.fx-wings .w.r { left: 6px; transform-origin: 0 60%; transform: scaleX(-1); animation: fx-wingr 5.4s ease-in-out forwards; }
+@keyframes fx-wingl { 0% { opacity: 0; transform: rotate(60deg) scale(.4); } 30%, 75% { opacity: 1; transform: none; } 100% { opacity: 0; transform: rotate(40deg) scale(.5); } }
+@keyframes fx-wingr { 0% { opacity: 0; transform: scaleX(-1) rotate(60deg) scale(.4); } 30%, 75% { opacity: 1; transform: scaleX(-1); } 100% { opacity: 0; transform: scaleX(-1) rotate(40deg) scale(.5); } }
+.fx-core { position: absolute; left: -22px; top: -60px; width: 44px; height: 110px; border-radius: 22px; background: radial-gradient(ellipse, #fffef4, #fff0c0 60%, rgba(255, 240, 192, 0)); opacity: 0; animation: fx-in-out 5.4s .3s forwards; box-shadow: 0 0 40px 10px rgba(255, 236, 170, .7); }
+
+/* Matthew 2:9 */
+.fx-bethlehem .fx-night { --dur: 6.8s; }
+.fx-stable { position: absolute; left: 50%; bottom: calc(var(--tabbar) + 2vh); width: 150px; margin-left: -75px; opacity: 0; animation: fx-in-out 6.6s .4s forwards; }
+@media (min-width: 721px) { .fx-stable { bottom: 4vh; } }
+.fx-stable svg { width: 100%; display: block; }
+.fx-traveller { position: absolute; left: 6%; top: 10%; font-size: 34px; color: #fff3c4; text-shadow: 0 0 14px #ffd86b, 0 0 30px #ffd86b; animation: fx-travel 3s .5s cubic-bezier(.4, 0, .2, 1) forwards, fx-fadeend 6.6s forwards; }
+@keyframes fx-travel { 0% { left: 6%; top: 10%; } 50% { top: 6%; } 100% { left: calc(50% - 14px); top: 28%; } }
+.fx-starbeam { position: absolute; left: 50%; top: 32%; width: 140px; margin-left: -70px; bottom: calc(var(--tabbar) + 6vh); background: linear-gradient(rgba(255, 240, 180, .55), rgba(255, 240, 180, .1)); clip-path: polygon(46% 0, 54% 0, 100% 100%, 0 100%); opacity: 0; animation: fx-in-out 3.2s 3.3s forwards; }
+
+/* Matthew 14:29 */
+.fx-waterwalk .egg-sea { animation-duration: 7.4s; }
+.fx-boat { position: absolute; left: 4%; bottom: 10vh; width: 120px; opacity: 0; animation: fx-in-out 7s .3s forwards, fx-rock 2s ease-in-out infinite; }
+.fx-boat svg { width: 100%; display: block; }
+@keyframes fx-rock { 50% { transform: rotate(4deg) translateY(3px); } }
+.fx-peter { position: absolute; left: 18%; bottom: 13vh; width: 26px; color: #4a3a2e; opacity: 0; animation: fx-peter 6.6s .6s ease-in-out forwards; }
+.fx-peter svg { width: 100%; display: block; }
+@keyframes fx-peter { 0% { opacity: 0; transform: none; } 10% { opacity: 1; transform: translateY(-14px); } 18% { transform: translate(6vw, -10px); } 75% { opacity: 1; transform: translate(48vw, -10px); } 100% { opacity: 0; transform: translate(52vw, -10px); } }
+.fx-jesus-light { position: absolute; right: 12%; bottom: 13vh; width: 30px; height: 80px; border-radius: 15px; background: radial-gradient(ellipse, #fffef4, #fff0c0 60%, rgba(255, 240, 192, 0)); box-shadow: 0 0 40px 14px rgba(255, 236, 170, .8); opacity: 0; animation: fx-in-out 6.8s .4s forwards; }
+
+/* Mark 4:39 */
+.fx-stormsky { position: absolute; inset: 0; background: linear-gradient(#1e2530, #3a4656); opacity: 0; animation: fx-stormsky 6.8s ease-in-out forwards; }
+@keyframes fx-stormsky { 0% { opacity: 0; } 8%, 40% { opacity: .92; background: linear-gradient(#1e2530, #3a4656); } 60% { opacity: .7; background: linear-gradient(#9ec6e6, #dbeaf5); } 85% { opacity: .6; background: linear-gradient(#9ec6e6, #dbeaf5); } 100% { opacity: 0; } }
+.fx-rain i { position: absolute; top: -20px; width: 2px; height: 22px; background: rgba(200, 220, 240, .8); transform: rotate(14deg); animation: fx-rainfall .5s linear 5 forwards; }
+@keyframes fx-rainfall { to { top: 105vh; margin-left: -60px; } }
+.fx-bolt { position: absolute; inset: 0; background: #fff; opacity: 0; animation: fx-bolt 2.6s .5s forwards; }
+@keyframes fx-bolt { 0%, 30% { opacity: 0; } 32% { opacity: .8; } 34% { opacity: 0; } 37% { opacity: .6; } 40%, 100% { opacity: 0; } }
+.fx-storm .egg-sea { height: 22vh; animation-duration: 7s; }
+.fx-storm .egg-sea svg { animation-duration: 1.1s; transform-origin: 50% 100%; }
+.fx-storm .egg-sea.front { animation: egg-sea-in 7s ease-in-out forwards, fx-calmwave 7s ease-in-out forwards; }
+@keyframes fx-calmwave { 0%, 40% { scale: 1 1.6; } 60%, 100% { scale: 1 .45; } }
+.fx-calmword { position: absolute; left: 0; right: 0; top: 36%; text-align: center; font: italic 600 clamp(28px, 8vw, 50px) var(--serif); color: #fff; text-shadow: 0 2px 20px rgba(0, 0, 0, .4); opacity: 0; animation: fx-cap 3.6s 2.5s ease-out forwards; }
+
+/* Psalm 23:2 */
+.fx-pool { position: absolute; left: 0; right: 0; bottom: 0; height: 40vh; background: linear-gradient(rgba(140, 190, 220, 0), rgba(140, 190, 220, .35)); opacity: 0; animation: fx-in-out 6.2s forwards; }
+.fx-ring { position: absolute; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; border: 2px solid rgba(70, 130, 180, .5); opacity: 0; animation: egg-ripple 2.4s ease-out forwards; }
+.fx-sheepwalk { position: absolute; bottom: calc(var(--tabbar) + 2vh); right: 0; width: 120px; animation: fx-sheepwalk 6.2s ease-in-out forwards; }
+@media (min-width: 721px) { .fx-sheepwalk { bottom: 4vh; } }
+.fx-sheepwalk svg { width: 100%; display: block; transform: scaleX(-1); }
+@keyframes fx-sheepwalk { 0% { transform: translateX(140px); } 100% { transform: translateX(calc(-100vw - 140px)); } }
+
+/* Luke 15:5 */
+.fx-sheephop { position: absolute; left: 50%; bottom: calc(var(--tabbar) + 3vh); width: 140px; margin-left: -70px; animation: fx-sheephop 6s ease-in-out forwards; }
+@media (min-width: 721px) { .fx-sheephop { bottom: 5vh; } }
+.fx-sheephop svg { width: 100%; display: block; }
+@keyframes fx-sheephop { 0% { transform: translateX(70vw); } 25% { transform: translateX(20vw) rotate(-4deg); } 35% { transform: translateX(5vw); } 42% { transform: none; } 48% { transform: translateY(-30px); } 54% { transform: none; } 60% { transform: translateY(-30px); } 66%, 86% { transform: none; } 100% { transform: translateX(-80vw); } }
+.fx-heart { position: absolute; left: 50%; top: -30px; font-size: 32px; color: #e0566a; opacity: 0; animation: fx-heart 2.2s 2.6s ease-out forwards; }
+@keyframes fx-heart { 0% { opacity: 0; transform: scale(.4); } 25% { opacity: 1; transform: scale(1.2); } 40% { transform: scale(1); } 80% { opacity: 1; transform: translateY(-20px); } 100% { opacity: 0; transform: translateY(-40px); } }
+
+/* Luke 2:7 */
+.fx-manger .fx-night { --dur: 5.6s; }
+.fx-manger-in { position: absolute; left: 50%; bottom: calc(var(--tabbar) + 3vh); width: 200px; margin-left: -100px; opacity: 0; animation: fx-in-out 5.4s .4s forwards; }
+@media (min-width: 721px) { .fx-manger-in { bottom: 6vh; } }
+.fx-manger-in svg { width: 100%; display: block; }
+.fx-mangerglow { position: absolute; left: 50%; bottom: calc(var(--tabbar) + 6vh); width: 300px; height: 220px; margin-left: -150px; background: radial-gradient(closest-side, rgba(255, 228, 150, .8), rgba(255, 228, 150, 0)); opacity: 0; animation: fx-in-out 5s .8s forwards; }
+.fx-mangerstar { position: absolute; left: 50%; top: 16%; margin-left: -16px; font-size: 32px; color: #fff3c4; text-shadow: 0 0 16px #ffd86b; opacity: 0; animation: fx-in-out 5.2s .6s forwards; }
+
+/* Luke 2:13 */
+.fx-host .fx-night { --dur: 6.4s; }
+.fx-host i { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: #fffbe6; box-shadow: 0 0 14px 6px rgba(255, 236, 170, .8); opacity: 0; animation: fx-hostlight 3.6s ease-in-out forwards; }
+@keyframes fx-hostlight { 0% { opacity: 0; transform: translateY(10px) scale(.4); } 25%, 80% { opacity: 1; transform: translateY(-6px) scale(1); } 100% { opacity: 0; transform: translateY(-20px); } }
+.fx-gloria { position: absolute; left: 0; right: 0; top: 66%; text-align: center; font: italic 600 clamp(24px, 6.5vw, 40px) var(--serif); color: #fff3c4; text-shadow: 0 0 20px rgba(255, 215, 100, .8); opacity: 0; animation: fx-cap 3.6s 2.2s ease-out forwards; }
+
+/* John 2:9 */
+.fx-jar { position: absolute; left: 50%; bottom: calc(var(--tabbar) + 3vh); width: 130px; margin-left: -65px; opacity: 0; animation: fx-in-out 5.8s forwards; }
+@media (min-width: 721px) { .fx-jar { bottom: 6vh; } }
+.fx-jar svg { width: 100%; display: block; }
+.fx-jar .liquid { fill: #6aa8d8; transform: translateY(110px); animation: fx-fill 1.6s .5s ease-out forwards, fx-wine 1.2s 2.4s ease-in-out forwards; }
+@keyframes fx-fill { to { transform: none; } }
+@keyframes fx-wine { to { fill: #7a1530; } }
+.fx-jar i { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px #ffd; opacity: 0; animation: fx-sparkle 1.2s ease-out forwards; }
+.fx-jar i:nth-of-type(1) { left: 20%; top: 40%; animation-delay: 2.5s; } .fx-jar i:nth-of-type(2) { left: 70%; top: 30%; animation-delay: 2.8s; } .fx-jar i:nth-of-type(3) { left: 45%; top: 15%; animation-delay: 3.1s; }
+@keyframes fx-sparkle { 0% { opacity: 0; transform: scale(.2); } 40% { opacity: 1; transform: scale(1.4); } 100% { opacity: 0; transform: scale(.4) translateY(-20px); } }
+
+/* John 6:11 */
+.fx-basket { position: absolute; left: 50%; top: 52%; width: 0; height: 0; }
+.fx-one, .fx-many { position: absolute; width: 54px; margin: -16px 0 0 -27px; opacity: 0; color: #5a8fb0; }
+.fx-one svg, .fx-many svg { width: 100%; display: block; }
+.fx-one { left: calc((var(--i) - 3) * 30px); top: calc(((var(--i) % 2) * 26px) - 10px); animation: fx-appear 4.6s ease-out forwards; }
+@keyframes fx-appear { 0% { opacity: 0; transform: scale(.3) translateY(20px); } 12% { opacity: 1; transform: scale(1.1); } 18%, 80% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.fx-many { animation: fx-multiply 3s ease-out forwards; }
+@keyframes fx-multiply { 0% { opacity: 0; transform: translate(0, 0) scale(.3); } 20% { opacity: 1; } 70% { opacity: 1; transform: translate(var(--x), var(--y)) scale(.9); } 100% { opacity: 0; transform: translate(var(--x), calc(var(--y) + 20px)) scale(.8); } }
+
+/* John 11:35 */
+.fx-tear { position: absolute; left: 50%; top: -30px; width: 22px; height: 22px; margin-left: -11px; background: rgba(110, 160, 220, .9); border-radius: 0 50% 50% 50%; transform: rotate(45deg); box-shadow: inset -4px -4px 6px rgba(255, 255, 255, .5); animation: fx-tearfall 1.6s cubic-bezier(.5, 0, 1, 1) forwards; }
+@keyframes fx-tearfall { 0% { top: -30px; opacity: 0; } 15% { opacity: 1; } 98% { opacity: 1; } 100% { top: 55vh; opacity: 0; } }
+.fx-splash { position: absolute; left: 50%; top: calc(55vh + 12px); width: 0; height: 0; }
+.fx-splash i { position: absolute; width: 6px; height: 6px; margin: -3px; border-radius: 50%; background: rgba(110, 160, 220, .9); opacity: 0; animation: fx-splashdrop .8s 1.6s ease-out forwards; }
+@keyframes fx-splashdrop { 0% { opacity: 1; transform: rotate(var(--a)) translateX(0); } 100% { opacity: 0; transform: rotate(var(--a)) translateX(46px) translateY(10px); } }
+.fx-splash b { position: absolute; left: -30px; top: -8px; width: 60px; height: 16px; border-radius: 50%; border: 2px solid rgba(110, 160, 220, .7); opacity: 0; animation: fx-splashring 1.4s 1.6s ease-out forwards; }
+@keyframes fx-splashring { 0% { opacity: 1; transform: scale(.2); } 100% { opacity: 0; transform: scale(3); } }
+
+/* John 20:7 */
+.fx-dawn { position: absolute; inset: 0; background: linear-gradient(#f9e7c8, rgba(249, 231, 200, 0) 70%); opacity: 0; animation: fx-in-out 5.4s forwards; }
+.fx-cloth { position: absolute; left: 50%; top: 42%; width: 200px; height: 90px; margin: -45px 0 0 -100px; perspective: 400px; opacity: 0; animation: fx-in-out 5.2s .2s forwards; }
+.fx-cloth-in { width: 100%; height: 100%; border-radius: 6px; background: repeating-linear-gradient(90deg, #fbf7ee 0 8px, #f1eadb 8px 10px); box-shadow: 0 6px 20px rgba(120, 100, 60, .18); transform-origin: 0 50%; animation: fx-roll 1.8s 1s cubic-bezier(.4, 0, .2, 1) forwards; }
+@keyframes fx-roll { 0% { transform: none; } 100% { transform: scaleX(.22) translateX(170%); border-radius: 40px; box-shadow: 0 0 40px 10px rgba(255, 240, 200, .9); } }
+
+/* John 20:29 */
+.fx-heartglow { position: absolute; left: 50%; top: 36%; margin-left: -40px; width: 80px; text-align: center; font-size: 64px; color: #f2b7a8; text-shadow: 0 0 30px rgba(255, 180, 160, .9); opacity: 0; animation: fx-heartbeat 4.8s .5s ease-in-out forwards; }
+@keyframes fx-heartbeat { 0% { opacity: 0; transform: scale(.6); } 20% { opacity: 1; transform: scale(1); } 30% { transform: scale(1.15); } 40% { transform: scale(1); } 50% { transform: scale(1.15); } 60%, 85% { opacity: 1; transform: scale(1); } 100% { opacity: 0; } }
+
+/* John 21:11 */
+.fx-net .egg-sea { animation-duration: 6.6s; }
+.fx-catch { position: absolute; left: 50%; bottom: 4vh; width: min(70vw, 320px); margin-left: calc(min(70vw, 320px) / -2); transform: translateX(-100vw); animation: fx-netin 6.4s ease-in-out forwards; }
+.fx-netsvg { width: 100%; display: block; }
+@keyframes fx-netin { 0% { transform: translateX(-100vw); } 20%, 52% { transform: none; } 80% { transform: translateY(-45vh); opacity: 1; } 100% { transform: translateY(-55vh); opacity: 0; } }
+.fx-netfish { position: absolute; inset: 0; }
+.fx-netfish span { position: absolute; left: var(--tx); top: var(--ty); width: 34px; color: #3e7aa0; opacity: 0; animation: fx-intonet 1.2s ease-out forwards; }
+.fx-netfish span svg { width: 100%; display: block; }
+@keyframes fx-intonet { 0% { opacity: 0; transform: translateX(100vw); } 100% { opacity: 1; transform: none; } }
+
+/* Matthew 28:2 */
+.fx-angelbeam { position: absolute; left: 50%; top: 0; width: 120px; margin-left: -60px; height: 80%; background: linear-gradient(rgba(255, 252, 230, .95), rgba(255, 245, 200, .2)); clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%); opacity: 0; transform: translateY(-40%); animation: fx-descend 2s 1s ease-out forwards, fx-fadeend 6.2s forwards; }
+@keyframes fx-descend { 0% { opacity: 0; transform: translateY(-40%); } 100% { opacity: 1; transform: none; } }
+.fx-tomb { position: absolute; left: 50%; bottom: calc(var(--tabbar) + 3vh); width: 260px; height: 170px; margin-left: -130px; animation: fx-in-out 6.2s forwards; }
+@media (min-width: 721px) { .fx-tomb { bottom: 5vh; } }
+.fx-tomb .egg-tomb-stone { animation-delay: 2.2s; }
+.fx-tomb .egg-tomb-glow { animation-delay: 3.4s; }
+
+/* Acts 2:3 */
+.fx-fire .fx-gusts i { background: linear-gradient(90deg, rgba(220, 120, 60, 0), rgba(220, 120, 60, .45), rgba(220, 120, 60, 0)); }
+.fx-tongue { position: absolute; width: 18px; height: 27px; transform-origin: 50% 100%; opacity: 0; animation: fx-land 3.6s ease-out forwards; }
+.fx-tongue svg { width: 100%; height: 100%; }
+@keyframes fx-land { 0% { opacity: 0; transform: translateY(-40px) scale(.4); } 12% { opacity: 1; transform: none; } 25% { transform: scale(1.12, .9); } 38% { transform: scale(.92, 1.08); } 50% { transform: scale(1.08, .94); } 62% { transform: scale(.95, 1.06); } 85% { opacity: 1; } 100% { opacity: 0; transform: scale(.6); } }
+
+/* Revelation 21:5 */
+.fx-white { position: absolute; inset: 0; background: #fffdf7; opacity: 0; animation: fx-in-out 5.6s ease-in-out forwards; }
+.fx-new i { position: absolute; width: 40px; height: 40px; margin: -20px; border-radius: 50%; opacity: 0; filter: blur(12px); animation: fx-bloom 3.4s ease-out forwards; }
+@keyframes fx-bloom { 0% { opacity: 0; transform: scale(.2); } 30% { opacity: .75; transform: scale(5); } 80% { opacity: .55; transform: scale(7); } 100% { opacity: 0; transform: scale(8); } }

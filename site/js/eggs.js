@@ -5,6 +5,7 @@ import * as store from "./store.js";
 import * as act from "./activity.js";
 import * as bible from "./bible.js";
 import { esc, icon } from "./ui.js";
+import * as fx from "./eggfx.js";
 
 export const TREASURES = [
   // ---- in the Scriptures (tap the verse) ----
@@ -12,10 +13,30 @@ export const TREASURES = [
   { id: "rainbow", group: "scripture", where: ["GEN", 9, 13], title: "The sign in the clouds", hint: "A promise after the flood has colours.", how: "Tap Genesis 9:13 while reading.", fx: "rainbow" },
   { id: "sea", group: "scripture", where: ["EXO", 14, 21], title: "The sea parts", hint: "Moses stretches out his hand.", how: "Tap Exodus 14:21 while reading.", fx: "sea" },
   { id: "fish", group: "scripture", where: ["JON", 1, 17], title: "A great fish", hint: "Someone is swallowed, and not by the sea.", how: "Tap Jonah 1:17 while reading.", fx: "whale" },
-  { id: "still", group: "scripture", where: ["PSA", 23, 2], title: "Still waters", hint: "The shepherd leads somewhere calm.", how: "Tap Psalm 23:2 while reading.", fx: "ripple" },
-  { id: "wept", group: "scripture", where: ["JHN", 11, 35], title: "Jesus wept", hint: "The shortest verse in the Bible.", how: "Tap John 11:35 while reading.", fx: "tear" },
-  { id: "net", group: "scripture", where: ["JHN", 21, 11], title: "One hundred fifty-three", hint: "A net that should have torn, but didn't.", how: "Tap John 21:11 while reading.", fx: "fishes" },
-  { id: "fire", group: "scripture", where: ["ACT", 2, 3], title: "Tongues of fire", hint: "Pentecost, as it happened.", how: "Tap Acts 2:3 while reading.", fx: "flames" },
+  { id: "still", group: "scripture", where: ["PSA", 23, 2], title: "Still waters", hint: "The shepherd leads somewhere calm.", how: "Tap Psalm 23:2 while reading.", fx: "still" },
+  { id: "wept", group: "scripture", where: ["JHN", 11, 35], title: "Jesus wept", hint: "The shortest verse in the Bible.", how: "Tap John 11:35 while reading.", fx: "wept" },
+  { id: "net", group: "scripture", where: ["JHN", 21, 11], title: "One hundred fifty-three", hint: "A net that should have torn, but didn't.", how: "Tap John 21:11 while reading.", fx: "net" },
+  { id: "fire", group: "scripture", where: ["ACT", 2, 3], title: "Tongues of fire", hint: "Pentecost, as it happened.", how: "Tap Acts 2:3 while reading.", fx: "fire" },
+  { id: "stars", group: "scripture", where: ["GEN", 1, 16], title: "He also made the stars", hint: "On the fourth day, the lights of the sky.", how: "Tap Genesis 1:16 while reading.", fx: "stars" },
+  { id: "ladder", group: "scripture", where: ["GEN", 28, 12], title: "A stairway to heaven", hint: "Jacob falls asleep on a stone pillow.", how: "Tap Genesis 28:12 while reading.", fx: "ladder" },
+  { id: "bush", group: "scripture", where: ["EXO", 3, 2], title: "The bush that did not burn up", hint: "Moses notices something strange on the mountain.", how: "Tap Exodus 3:2 while reading.", fx: "bush" },
+  { id: "manna", group: "scripture", where: ["EXO", 16, 14], title: "Bread from heaven", hint: "Something small and round covers the ground one morning.", how: "Tap Exodus 16:14 while reading.", fx: "manna" },
+  { id: "donkey", group: "scripture", where: ["NUM", 22, 28], title: "The donkey speaks", hint: "Balaam's journey is interrupted by an unexpected voice.", how: "Tap Numbers 22:28 while reading.", fx: "donkey" },
+  { id: "voice", group: "scripture", where: ["1KI", 19, 12], title: "A still small voice", hint: "Not in the wind, nor the earthquake, nor the fire.", how: "Tap 1 Kings 19:12 while reading.", fx: "voice" },
+  { id: "lions", group: "scripture", where: ["DAN", 6, 22], title: "The lions' mouths are shut", hint: "A night spent in a den.", how: "Tap Daniel 6:22 while reading.", fx: "lions" },
+  { id: "raphael", group: "scripture", where: ["TOB", 5, 4], title: "Raphael", hint: "Tobias looks for a travelling companion.", how: "Tap Tobit 5:4 while reading.", fx: "raphael" },
+  { id: "bethlehem", group: "scripture", where: ["MAT", 2, 9], title: "The star stood still", hint: "The wise men follow a light.", how: "Tap Matthew 2:9 while reading.", fx: "bethlehem" },
+  { id: "waterwalk", group: "scripture", where: ["MAT", 14, 29], title: "Walking on the water", hint: "Peter hears one word: “Come.”", how: "Tap Matthew 14:29 while reading.", fx: "waterwalk" },
+  { id: "storm", group: "scripture", where: ["MRK", 4, 39], title: "Peace! Be still!", hint: "A storm on the lake, and someone asleep in the boat.", how: "Tap Mark 4:39 while reading.", fx: "storm" },
+  { id: "sheep", group: "scripture", where: ["LUK", 15, 5], title: "The lost sheep is found", hint: "One out of a hundred wandered off.", how: "Tap Luke 15:5 while reading.", fx: "sheep" },
+  { id: "manger", group: "scripture", where: ["LUK", 2, 7], title: "Laid in a manger", hint: "There was no room at the inn.", how: "Tap Luke 2:7 while reading.", fx: "manger" },
+  { id: "host", group: "scripture", where: ["LUK", 2, 13], title: "The heavenly host", hint: "Shepherds in the fields at night.", how: "Tap Luke 2:13 while reading.", fx: "host" },
+  { id: "wine", group: "scripture", where: ["JHN", 2, 9], title: "Water into wine", hint: "A wedding runs out of something.", how: "Tap John 2:9 while reading.", fx: "wine" },
+  { id: "loaves", group: "scripture", where: ["JHN", 6, 11], title: "Five loaves and two fish", hint: "A boy's lunch feeds a crowd.", how: "Tap John 6:11 while reading.", fx: "loaves" },
+  { id: "cloth", group: "scripture", where: ["JHN", 20, 7], title: "The folded cloth", hint: "Look closely inside the empty tomb.", how: "Tap John 20:7 while reading.", fx: "cloth" },
+  { id: "notseen", group: "scripture", where: ["JHN", 20, 29], title: "Blessed are those who have not seen", hint: "Thomas finally believes.", how: "Tap John 20:29 while reading.", fx: "notseen" },
+  { id: "stone", group: "scripture", where: ["MAT", 28, 2], title: "The stone rolled away", hint: "An earthquake at dawn on the first day of the week.", how: "Tap Matthew 28:2 while reading.", fx: "stone" },
+  { id: "newall", group: "scripture", where: ["REV", 21, 5], title: "All things new", hint: "The very end of the story.", how: "Tap Revelation 21:5 while reading.", fx: "newall" },
   // ---- hidden gestures ----
   { id: "lamp", group: "gesture", title: "A lamp to my feet", hint: "Seven is the number of completeness. Try it on the little book at the top.", how: "Tap the book icon in the header 7 times quickly.", verse: ["PSA", 119, 105], fx: "lamp" },
   { id: "bestill", group: "gesture", title: "Be still", hint: "When everything is shaking…", how: "Shake your phone.", verse: ["PSA", 46, 10], fx: "bestill" },
@@ -124,6 +145,7 @@ const DOVE = `<svg viewBox="0 0 120 80"><path d="M8 44c18-2 30 4 40 14 6-14 2-34
 
 export function playEffect(t, ctx = {}) {
   const r = reduce();
+  if (fx.has(t.fx)) return fx.run(t.fx, ctx, { partSea });
   switch (t.fx) {
     case "light":
       layer("egg-light", "", 2600);
@@ -228,7 +250,7 @@ export function playEffect(t, ctx = {}) {
 }
 
 // Exodus 14:21: the text on screen parts down the middle, then closes again.
-function partSea() {
+function partSea(withPath = false) {
   const art = document.querySelector("#scripture");
   if (!art || reduce()) return;
   const rc = art.getBoundingClientRect();
@@ -240,10 +262,19 @@ function partSea() {
     document.body.appendChild(c);
     return c;
   };
-  const a = make("inset(0 50% 0 0)", "-38px");
-  const b = make("inset(0 0 0 50%)", "38px");
-  const gap = layer("egg-sea-gap", "", 3200);
-  gap.style.left = rc.left + rc.width / 2 - 40 + "px";
+  const a = make("inset(0 50% 0 0)", withPath ? "-70px" : "-38px");
+  const b = make("inset(0 0 0 50%)", withPath ? "70px" : "38px");
+  if (withPath) {
+    const path = document.createElement("div");
+    path.className = "fx-seapath";
+    path.innerHTML = '<div class="sand"></div><div class="wall l"></div><div class="wall r"></div>';
+    path.style.left = rc.left + rc.width / 2 - 70 + "px";
+    document.body.appendChild(path);
+    setTimeout(() => path.remove(), 3400);
+  } else {
+    const gap = layer("egg-sea-gap", "", 3200);
+    gap.style.left = rc.left + rc.width / 2 - 40 + "px";
+  }
   art.style.visibility = "hidden";
   setTimeout(() => {
     a.remove();
@@ -366,7 +397,8 @@ export function treasureChapters() {
     if (!m.has(key)) m.set(key, { book: t.where[0], chapter: t.where[1], items: [] });
     m.get(key).items.push(t);
   }
-  return [...m.values()];
+  const canon = bible.getCanon();
+  return [...m.values()].sort((a, b) => canon.byId[a.book].index - canon.byId[b.book].index || a.chapter - b.chapter);
 }
 
 export function onChapterOpen() {
