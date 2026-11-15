@@ -260,6 +260,40 @@ export function play(mine = [], { feeling = "", onEnd } = {}) {
   measurer.className = "fw truth";
   measurer.style.visibility = "hidden";
   wordsEl.appendChild(measurer);
+  // dust: sample a word's pixels from an offscreen canvas, in the word's own font
+  const sampler = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+  const samplePoints = (el, text, cx, cy, scale) => {
+    const cs = getComputedStyle(el);
+    const size = parseFloat(cs.fontSize) * scale;
+    const font = `${cs.fontStyle} ${cs.fontWeight} ${size}px ${cs.fontFamily}`;
+    sampler.font = font;
+    const w = Math.ceil(sampler.measureText(text).width) + 8, h = Math.ceil(size * 1.4);
+    sampler.canvas.width = w;
+    sampler.canvas.height = h;
+    sampler.font = font;
+    sampler.textBaseline = "middle";
+    sampler.fillStyle = "#fff";
+    sampler.fillText(text, 4, h / 2);
+    const data = sampler.getImageData(0, 0, w, h).data, pts = [];
+    const step = 2;
+    for (let y = 0; y < h; y += step) for (let x = 0; x < w; x += step) if (data[(y * w + x) * 4 + 3] > 110) pts.push([cx - w / 2 + x, cy - h / 2 + y]);
+    return pts;
+  };
+  const makeDust = (w) => {
+    const from = samplePoints(w.el, w.d, w.hx, w.hy, 1.15);
+    const to = samplePoints(w.tr, w.a, w.hx, w.hy, 1);
+    if (!from.length || !to.length) return [];
+    // shuffle the targets so the dust crosses over itself as it re-forms
+    for (let i = to.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [to[i], to[j]] = [to[j], to[i]]; }
+    const n = Math.max(from.length, to.length), spread = w.mine ? 70 : 40;
+    const dust = [];
+    for (let i = 0; i < n; i++) {
+      const [sx, sy] = from[i % from.length], [tx, ty] = to[i % to.length];
+      const a = Math.random() * Math.PI * 2, r = (0.3 + Math.random()) * spread;
+      dust.push({ sx, sy, tx, ty, mx: sx + Math.cos(a) * r, my: sy + Math.sin(a) * r * 0.7 - spread * 0.25, j: Math.random() * 6.28, d: Math.random() * 0.25 });
+    }
+    return dust;
+  };
   const fit = (el) => {
     const max = VW - 28, wd = el.offsetWidth;
     if (wd > max) el.style.fontSize = parseFloat(getComputedStyle(el).fontSize) * (max / wd) + "px";
@@ -269,7 +303,8 @@ export function play(mine = [], { feeling = "", onEnd } = {}) {
   // the usual words (fewer when you've brought your own, so it stays about the same length), then yours
   const base = PAIRS.filter(([d]) => !mine.some((w) => w.d.toLowerCase() === d)).slice(0, Math.max(8, 14 - mine.length * 1.5) | 0);
   const T_DOOR = 1.2, T_OPEN = 2.4, T_FIG = 3.2, T_W0 = 4.2, GAP = 0.62, TRAVEL = 2.2;
-  const MY_GAP = 1.15, MY_TRAVEL = 2.6;
+  const MY_GAP = 1.5, MY_TRAVEL = 2.6;
+  const MORPH = 0.9, MY_MORPH = 2.0; // seconds for a word to break into dust and re-form as its answer
   const list = base.map(([d, a], i) => ({ d, a, mine: false, start: T_W0 + i * GAP, travel: TRAVEL, ang: ((i * 137.5) * Math.PI) / 180 + 0.4 }));
   const myStart = T_W0 + base.length * GAP + (mine.length ? 1.0 : 0);
   mine.forEach((w, i) => {
@@ -278,7 +313,7 @@ export function play(mine = [], { feeling = "", onEnd } = {}) {
     list.push({ d: w.d, a: w.a, mine: true, start: myStart + i * MY_GAP, travel: MY_TRAVEL, side, row, drift: i % 2 ? -1 : 1 });
   });
   const lastHit = list.reduce((m, w) => Math.max(m, w.start + w.travel), 0);
-  const T_END = lastHit + (mine.length ? 2.2 : 1.4);
+  const T_END = lastHit + (mine.length ? MY_MORPH + 1.2 : MORPH + 1.0);
   list.forEach((w, i) => {
     w.i = i;
     w.el = document.createElement("div");
@@ -349,7 +384,7 @@ export function play(mine = [], { feeling = "", onEnd } = {}) {
         w.hy = y;
         beams.push({ x, y, t, big: w.mine });
         rings.push({ x, y, t, big: w.mine });
-        const n = w.mine ? 44 : 26;
+        const n = w.mine ? 18 : 10;
         for (let k = 0; k < n; k++) {
           const a = Math.random() * Math.PI * 2, v = 40 + Math.random() * (w.mine ? 170 : 120);
           w.sparks.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0.6 + Math.random() * 0.6, t });
@@ -359,6 +394,9 @@ export function play(mine = [], { feeling = "", onEnd } = {}) {
         w.tr.textContent = w.a;
         wordsEl.appendChild(w.tr);
         fit(w.tr);
+        w.tr.style.opacity = 0;
+        w.morph = w.mine ? MY_MORPH : MORPH;
+        w.dust = makeDust(w);
       }
       if (!w.hit) {
         const shake = Math.sin(t * 23 + (w.ang ?? w.i) * 5) * (w.mine ? 2 : 1.2);
@@ -367,15 +405,42 @@ export function play(mine = [], { feeling = "", onEnd } = {}) {
         w.el.style.filter = `blur(${(1 - p) * 1.5}px)`;
       } else {
         const k = t - w.hit;
-        w.el.style.opacity = Math.max(0, 1 - k * 6);
-        w.el.style.transform = `translate(${w.hx}px,${w.hy}px) translate(-50%,-50%) scale(${1 + k * 2})`;
-        const q = ease(k / 0.5);
+        // the dark word gives way to its dust at once
+        w.el.style.opacity = w.dust.length ? 0 : Math.max(0, 1 - k * 6);
+        // the answer appears as the dust settles into it
+        const q = w.dust.length ? ease((k - w.morph * 0.82) / (w.morph * 0.25)) : ease(k / 0.5);
+        const kr = Math.max(0, k - w.morph);
         const fade = t > T_END - 1.8 ? Math.max(0, 1 - (t - (T_END - 1.8)) / 0.8) : 1;
         // the usual answers glow, then soften so the screen stays readable; yours stay bright
         let soft = w.mine ? 1 : 0.55 + 0.45 * Math.max(0, 1 - Math.max(0, k - 1.6) / 1.2);
         if (!w.mine && mine.length) soft *= 1 - 0.6 * ease((t - myStart) / 1.2);
         w.tr.style.opacity = q * fade * soft;
-        w.tr.style.transform = `translate(${w.hx}px,${w.hy - k * 6}px) translate(-50%,-50%) scale(${0.6 + 0.4 * q})`;
+        w.tr.style.transform = `translate(${w.hx}px,${w.hy - kr * 6}px) translate(-50%,-50%)`;
+        // dust: crumble outward (grey), drift, then gather into the answer (gold)
+        if (w.dust.length && k < w.morph * 1.15) {
+          const out = 1 - ease((k - w.morph * 0.95) / (w.morph * 0.2));
+          const sz = w.mine ? 1.8 : 1.5;
+          for (const d of w.dust) {
+            const u = ease((k / w.morph - d.d * 0.4) / (1 - d.d * 0.4));
+            let px, py;
+            if (u < 0.32) {
+              const e = eio(u / 0.32);
+              px = d.sx + (d.mx - d.sx) * e;
+              py = d.sy + (d.my - d.sy) * e;
+            } else {
+              const e = eio((u - 0.32) / 0.68);
+              px = d.mx + (d.tx - d.mx) * e;
+              py = d.my + (d.ty - d.my) * e;
+            }
+            const jit = (1 - u) * 1.6;
+            px += Math.sin(t * 11 + d.j) * jit;
+            py += Math.cos(t * 13 + d.j) * jit;
+            const c = ease((u - 0.25) / 0.6);
+            const rC = (169 + (255 - 169) * c) | 0, gC = (163 + (226 - 163) * c) | 0, bC = (184 + (150 - 184) * c) | 0;
+            ctx.fillStyle = `rgba(${rC},${gC},${bC},${(0.55 + 0.45 * c) * out * fade})`;
+            ctx.fillRect(px - sz / 2, py - sz / 2, sz, sz);
+          }
+        }
       }
       for (const s of w.sparks) {
         const k = t - s.t;
