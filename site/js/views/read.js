@@ -437,7 +437,8 @@ export async function renderVerse(main, [bookId, c, v]) {
   };
   const go = async (dir) => {
     const n = await bible.stepVerse(bookId, chapter, verse, dir);
-    if (n) location.hash = `#/verse/${n.book}/${n.chapter}/${n.verse}`;
+    // replace, not push: Back should leave verse-by-verse reading, not step back one verse at a time
+    if (n) location.replace(`#/verse/${n.book}/${n.chapter}/${n.verse}`);
     else toast(dir > 0 ? "You've reached the end of the Bible" : "This is the first verse");
   };
   const onKey = (e) => {

@@ -16,6 +16,7 @@ export const TREASURES = [
   { id: "still", group: "scripture", where: ["PSA", 23, 2], title: "Still waters", hint: "The shepherd leads somewhere calm.", how: "Tap Psalm 23:2 while reading.", fx: "still" },
   { id: "wept", group: "scripture", where: ["JHN", 11, 35], title: "Jesus wept", hint: "The shortest verse in the Bible.", how: "Tap John 11:35 while reading.", fx: "wept" },
   { id: "net", group: "scripture", where: ["JHN", 21, 11], title: "One hundred fifty-three", hint: "A net that should have torn, but didn't.", how: "Tap John 21:11 while reading.", fx: "net" },
+  { id: "love", group: "scripture", where: ["1JN", 4, 8], title: "God is love", hint: "Three words that say who He is.", how: "Tap 1 John 4:8 while reading.", fx: "love" },
   { id: "fire", group: "scripture", where: ["ACT", 2, 3], title: "Tongues of fire", hint: "Pentecost, as it happened.", how: "Tap Acts 2:3 while reading.", fx: "fire" },
   { id: "stars", group: "scripture", where: ["GEN", 1, 16], title: "He also made the stars", hint: "On the fourth day, the lights of the sky.", how: "Tap Genesis 1:16 while reading.", fx: "stars" },
   { id: "ladder", group: "scripture", where: ["GEN", 28, 12], title: "A stairway to heaven", hint: "Jacob falls asleep on a stone pillow.", how: "Tap Genesis 28:12 while reading.", fx: "ladder" },

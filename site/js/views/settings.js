@@ -16,6 +16,7 @@ const PALETTE = [["#8e5cc7", "#6b3fa0"], ["#d65555", "#b23a3a"], ["#3f9a68", "#2
 const SEASON_COLORS = { christmas: ["#e7c45a", "#c9962b"], easter: ["#f0cf6a", "#d6a93a"], pentecost: ["#e05a4a", "#bf3b2c"], ashes: ["#8a7fa6", "#6b5f8a"], goodfriday: ["#7a2e2e", "#561d1d"], mercy: ["#d9534f", "#3f7fbf"], watch: ["#3b4a7a", "#25305a"] };
 const SVG = (d) => `<svg viewBox="0 0 24 24">${d}</svg>`;
 const EMBLEMS = {
+  love: SVG('<path d="M12 21C5 16 2 12 2 8a5 5 0 0 1 10-2 5 5 0 0 1 10 2c0 4-3 8-10 13Z"/>'),
   light: SVG('<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>'),
   rainbow: SVG('<path d="M3 17a9 9 0 0 1 18 0M6 17a6 6 0 0 1 12 0M9 17a3 3 0 0 1 6 0"/>'),
   sea: SVG('<path d="M2 9c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0M12 4v16"/>'),

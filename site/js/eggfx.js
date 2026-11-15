@@ -53,6 +53,7 @@ const BUSH = `<svg viewBox="0 0 160 110"><g fill="#3f7d3a"><circle cx="40" cy="7
 const LADDER = `<svg viewBox="0 0 120 600" preserveAspectRatio="none"><g stroke="#f2c94c" stroke-width="6" stroke-linecap="round" fill="none"><path d="M20 600 40 0M100 600 80 0"/>${Array.from({ length: 14 }, (_, i) => { const y = 580 - i * 42; const k = y / 600; return `<path d="M${20 + 20 * (1 - k)} ${y}H${100 - 20 * (1 - k)}"/>`; }).join("")}</g></svg>`;
 const TOMB = `<div class="fx-tomb"><div class="egg-tomb-glow"></div><div class="egg-tomb-hill"></div><div class="egg-tomb-door"></div><div class="egg-tomb-stone"></div></div>`;
 const WING = `<svg viewBox="0 0 120 160"><g fill="rgba(255,250,230,.92)" stroke="rgba(214,170,60,.6)" stroke-width="1.5">${Array.from({ length: 7 }, (_, i) => `<ellipse cx="${100 - i * 10}" cy="${40 + i * 14}" rx="${46 - i * 3}" ry="11" transform="rotate(${-40 + i * 12} ${100 - i * 10} ${40 + i * 14})"/>`).join("")}</g></svg>`;
+const HEART = `<svg viewBox="0 0 32 30" aria-hidden="true"><path d="M16 29 C6 21 1 15 1 9 C1 4.5 4.5 1 9 1 C12 1 14.5 2.6 16 5 C17.5 2.6 20 1 23 1 C27.5 1 31 4.5 31 9 C31 15 26 21 16 29Z"/></svg>`;
 const CLOTH = `<div class="fx-cloth"><div class="fx-cloth-in"></div></div>`;
 
 function stars(n, seed, cls = "fx-star") {
@@ -175,6 +176,16 @@ export const FX = {
   // John 11:35: a single tear falls… and lands with a splash
   wept: () =>
     scene("fx-wept", `<div class="fx-tear"></div><div class="fx-splash">${Array.from({ length: 8 }, (_, i) => `<i style="--a:${i * 45}deg"></i>`).join("")}<b></b></div>${cap("The shortest verse in the Bible.", 2.4)}`, 5200),
+
+  // 1 John 4:8: a heart beats twice, then swells past the edges of the screen and dissolves into warmth
+  love: () => {
+    const r = rnd(8);
+    const small = Array.from({ length: 14 }, (_, i) => {
+      const a = (i / 14) * 360 + r() * 20, d = 28 + r() * 22;
+      return `<i style="--tx:${(Math.cos((a * Math.PI) / 180) * d).toFixed(1)}vmin;--ty:${(Math.sin((a * Math.PI) / 180) * d).toFixed(1)}vmin;--s:${(0.5 + r() * 0.7).toFixed(2)};animation-delay:${(2.0 + r() * 0.35).toFixed(2)}s">${HEART}</i>`;
+    }).join("");
+    return scene("fx-love", `<div class="fx-lovewash"></div><div class="fx-lovering r1"></div><div class="fx-lovering r2"></div><div class="fx-bigheart">${HEART}</div><div class="fx-smallhearts">${small}</div>${cap("God is love.", 2.5, "big")}`, 6000);
+  },
 
   // John 20:7: the face cloth, folded and set by itself
   cloth: () => scene("fx-clothscene", `<div class="fx-dawn"></div>${CLOTH}${cap("…rolled up in a place by itself.", 2.6)}`, 5600),
