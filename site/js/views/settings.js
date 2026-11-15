@@ -67,7 +67,7 @@ function itemHTML(t, { locked, lockText, progress }) {
   if (found) {
     const when = new Date(eggs.foundAt(t.id)).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
     const open = t.where ? `<a class="btn ghost small" href="#/read/${t.where[0]}/${t.where[1]}?v=${t.where[2]}">${icon("book")} Open</a>` : "";
-    return `<div class="door__item"><b>${esc(t.title)}</b><div class="sub">Found ${esc(when)}</div><div class="acts"><button class="btn small" data-share="${t.id}">${icon("share")} Share</button>${open}</div></div>`;
+    return `<div class="door__item"><b>${esc(t.title)}</b><div class="sub">Found ${esc(when)}</div><div class="acts"><button class="btn small" data-share="${t.id}">${icon("share")} Share</button><button class="btn ghost small" data-play="${t.id}">Play again</button>${open}</div></div>`;
   }
   if (locked) {
     const read = t.where ? `<a class="btn ghost small" href="#/read/${t.where[0]}/${t.where[1]}">${icon("book")} Read it</a>` : "";
@@ -173,6 +173,7 @@ function wireTreasures(main) {
   main.querySelectorAll("[data-hint]").forEach((b) => (b.onclick = () => reveal(b, byId(b.dataset.hint).hint)));
   main.querySelectorAll("[data-show]").forEach((b) => (b.onclick = () => reveal(b, byId(b.dataset.show).how)));
   main.querySelectorAll("[data-share]").forEach((b) => (b.onclick = () => eggs.share(b.dataset.share)));
+  main.querySelectorAll("[data-play]").forEach((b) => (b.onclick = () => eggs.playEffect(byId(b.dataset.play))));
 }
 
 function aiUsageText() {

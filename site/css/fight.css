@@ -1,0 +1,103 @@
+/* "The Lord will fight for you" — doors, light, Jesus, and the battle of words. See js/fight.js. */
+
+.fight { position: fixed; inset: 0; z-index: 120; overflow: hidden; background: #000; cursor: default; transition: opacity .45s; }
+.fight.out { opacity: 0; }
+.fight canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.fight .f-bg { z-index: 0; }
+.fight .f-fx { z-index: 3; }
+.fight .f-glow { position: absolute; z-index: 1; width: 10px; height: 10px; border-radius: 50%; opacity: 0;
+  background: radial-gradient(closest-side, #fff8e0, #ffd970 40%, rgba(255, 200, 80, 0) 100%); }
+.fight .f-fig { position: absolute; z-index: 2; opacity: 0; transform-origin: 0 0; }
+.fight .f-fig .stage { position: absolute; left: -110px; top: -215px; width: 220px; height: 430px; }
+.fight .f-fig .theman { position: absolute; left: 0; top: 0; width: 220px; height: 430px; animation: none !important; transform: none !important; opacity: 1 !important; }
+.fight .f-fig .arm.left { transform: rotate(32deg) !important; animation: none !important; }
+.fight .f-fig .arm.right { transform: rotate(-32deg) !important; animation: none !important; }
+.fight .f-fig .halo { opacity: 1 !important; transform: scale(1.15) !important; animation: none !important; }
+.fight .fheart { position: absolute; left: 58px; top: 38px; width: 30px; height: 28px; transform-origin: 50% 55%; z-index: 3; }
+.fight .fheart svg { width: 100%; height: 100%; overflow: visible; display: block; }
+.fight .fheart path { fill: #d4273a; stroke: #ffd27a; stroke-width: 1.6; filter: drop-shadow(0 0 4px #ffcf6a) drop-shadow(0 0 10px #ffb43a); }
+
+.fight .f-words { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+.fight .fw { position: absolute; left: 0; top: 0; white-space: nowrap; font: italic 600 27px/1 var(--serif, Georgia, serif); will-change: transform; }
+.fight .fw.neg { color: #a9a3b8; text-shadow: 0 0 6px rgba(0, 0, 0, .9); letter-spacing: .02em; }
+.fight .fw.truth { color: #ffe8a3; text-shadow: 0 0 10px rgba(255, 210, 100, .9), 0 0 22px rgba(255, 190, 60, .6); }
+.fight .fw.mine { font-size: 33px; }
+.fight .fw.neg.mine { color: #c9c2d8; }
+.fight .fw.truth.mine { color: #fff3c8; text-shadow: 0 0 12px rgba(255, 220, 120, 1), 0 0 30px rgba(255, 190, 60, .8); }
+@media (max-width: 380px) { .fight .fw { font-size: 23px; } .fight .fw.mine { font-size: 28px; } }
+
+.fight .f-flash { position: absolute; inset: 0; z-index: 5; background: #fff7dc; opacity: 0; pointer-events: none; }
+.fight .f-final { position: absolute; left: 0; right: 0; top: 12%; z-index: 6; text-align: center; padding: 0 20px; opacity: 0;
+  font: italic 600 clamp(26px, 7vw, 44px)/1.25 var(--serif, Georgia, serif); color: #5a3a06; }
+.fight .f-final small { display: block; margin-top: 10px; font: 600 13px var(--sans, system-ui, sans-serif); letter-spacing: .12em; text-transform: uppercase; color: #8a5a14; }
+
+/* the doors */
+.fight .f-doors { position: absolute; z-index: 7; left: 50%; top: 50%; width: min(78vw, 340px); height: min(70vh, 520px); transform: translate(-50%, -50%); perspective: 1100px; }
+.fight .f-frame { position: absolute; inset: -14px -14px 0 -14px; border-radius: 170px 170px 6px 6px; background: linear-gradient(#5a3b22, #3a2414); box-shadow: 0 0 0 4px #2a190d, 0 20px 60px rgba(0, 0, 0, .6); }
+.fight .f-seam { position: absolute; left: 50%; top: 6%; bottom: 0; width: 4px; margin-left: -2px; opacity: 0; filter: blur(1px);
+  background: linear-gradient(transparent, #fff3c4 10%, #fff3c4 90%, transparent); box-shadow: 0 0 18px 6px rgba(255, 220, 130, .7); }
+.fight .f-leaf { position: absolute; top: 0; bottom: 0; width: 50%; overflow: hidden; box-shadow: inset 0 0 30px rgba(0, 0, 0, .5);
+  background: linear-gradient(90deg, #4a2c17, #6b4226 40%, #4a2c17); }
+.fight .f-leaf.l { left: 0; border-radius: 160px 0 0 0; transform-origin: 0 50%; }
+.fight .f-leaf.r { right: 0; border-radius: 0 160px 0 0; transform-origin: 100% 50%; }
+.fight .f-panel { position: absolute; left: 14%; right: 14%; border-radius: 8px; background: linear-gradient(135deg, #7a4c2b, #4f2f18);
+  box-shadow: inset 2px 2px 0 rgba(255, 220, 170, .12), inset -3px -3px 6px rgba(0, 0, 0, .45); }
+.fight .f-panel.p1 { top: 16%; height: 30%; }
+.fight .f-panel.p2 { top: 52%; height: 40%; }
+.fight .f-leaf.l .p1 { border-radius: 120px 20px 8px 8px; }
+.fight .f-leaf.r .p1 { border-radius: 20px 120px 8px 8px; }
+.fight .f-ring { position: absolute; top: 50%; width: 26px; height: 26px; margin-top: -13px; border-radius: 50%; border: 4px solid #d4a73c; box-shadow: 0 0 6px rgba(255, 200, 80, .6); }
+.fight .f-leaf.l .f-ring { right: 10px; }
+.fight .f-leaf.r .f-ring { left: 10px; }
+.fight .f-stud { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f2d27a, #8a6420); }
+.fight .f-cross { position: absolute; left: 50%; top: 9%; width: 30px; height: 46px; margin-left: -15px; z-index: 3; }
+.fight .f-cross::before, .fight .f-cross::after { content: ""; position: absolute; background: #d4a73c; border-radius: 2px; box-shadow: 0 0 8px rgba(255, 200, 80, .6); }
+.fight .f-cross::before { left: 12px; top: 0; width: 6px; height: 46px; }
+.fight .f-cross::after { left: 0; top: 12px; width: 30px; height: 6px; }
+
+.fight .f-skip { position: absolute; z-index: 9; top: max(14px, env(safe-area-inset-top)); right: 14px; padding: 6px 14px; border-radius: 99px; cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, .25); background: rgba(0, 0, 0, .35); color: rgba(255, 255, 255, .75); font: 600 13px var(--sans, system-ui, sans-serif); }
+
+/* reduced motion: a quiet list instead */
+.fight.still { background: #120f1c; }
+.fight.still .f-doors, .fight.still canvas { display: none; }
+.fight .f-list { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; font: italic 22px/1.9 var(--serif, Georgia, serif); color: #ffe8a3; }
+.fight .f-list s { color: #8f89a0; }
+
+/* the sheet before */
+.fight-sheet .fight-chips { display: flex; flex-wrap: wrap; gap: 8px; min-height: 36px; align-items: center; margin-bottom: 10px; }
+.fight-sheet .fight-chips .chip { display: inline-flex; align-items: center; gap: 6px; }
+.fight-sheet .fight-chips .chip button { border: 0; background: none; color: inherit; font-size: 17px; line-height: 1; cursor: pointer; padding: 0 2px; opacity: .7; }
+.fight-sheet .fight-add { display: flex; gap: 8px; }
+.fight-sheet .fight-add input { flex: 1; min-width: 0; }
+
+/* the card after */
+.fight-end { position: fixed; inset: 0; z-index: 121; display: flex; align-items: center; justify-content: center; padding: 20px;
+  background: radial-gradient(closest-side, #fff8e2, #f3e8cc); opacity: 0; transition: opacity .45s; }
+.fight-end.in { opacity: 1; }
+.fight-card { width: min(520px, 100%); max-height: 100%; overflow: auto; background: var(--paper, #fffdf7); border-radius: 22px; padding: 26px 22px 20px;
+  box-shadow: 0 20px 60px rgba(120, 80, 10, .18); }
+.fight-card .quote { margin: 10px 0 6px; font: italic 20px/1.6 var(--serif, Georgia, serif); }
+.fight-given { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
+.fight-given li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font: italic 17px var(--serif, Georgia, serif); }
+.fight-given s { color: var(--muted, #888); }
+.fight-given span { color: #9a6a12; font-weight: 600; }
+.fight-given span::before { content: "→ "; color: var(--muted, #888); font-weight: 400; }
+.fight-help { margin-top: 16px; padding: 12px 14px; border-radius: 14px; background: #fdf0ec; font-size: 14px; line-height: 1.5; }
+.fight-help a { font-weight: 700; }
+.fight-card .actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+
+/* the invitation in Topics */
+.fight-invite { display: flex; align-items: center; gap: 14px; padding: 16px 18px; margin-bottom: 18px; border: 0; width: 100%; text-align: left; cursor: pointer; color: #fff4d6;
+  border-radius: 18px; background: radial-gradient(120% 140% at 0% 50%, #ffd36a 0%, #b9831e 22%, #2a1f12 60%, #15111c 100%); box-shadow: 0 10px 30px rgba(60, 40, 0, .18); }
+.fight-invite .fi-heart { flex: none; width: 34px; height: 34px; filter: drop-shadow(0 0 6px #ffcf6a); animation: fi-beat 1.6s ease-in-out infinite; }
+.fight-invite .fi-heart path { fill: #d4273a; stroke: #ffd27a; stroke-width: 1.6; }
+.fight-invite b { display: block; font: italic 600 19px var(--serif, Georgia, serif); }
+.fight-invite span { font-size: 13px; opacity: .8; }
+@keyframes fi-beat { 0%, 100% { transform: scale(1); } 12% { transform: scale(1.14); } 24% { transform: scale(1); } 36% { transform: scale(1.08); } }
+@media (prefers-reduced-motion: reduce) { .fight-invite .fi-heart { animation: none; } }
+
+/* prayers in the journal and weekly review */
+.prayer-words { font: italic 17px/1.5 var(--serif, Georgia, serif); }
+.prayer-follow textarea { width: 100%; min-height: 64px; margin-top: 8px; }
+.prayer-follow .answered { margin-top: 8px; padding: 10px 12px; border-radius: 12px; background: #f6efdc; font-size: 15px; white-space: pre-wrap; }

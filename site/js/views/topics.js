@@ -8,6 +8,8 @@ import { esc, icon, $, $$, toast } from "../ui.js";
 import { openNoteEditor } from "./noteEditor.js";
 import { expandButton, wireExpand } from "../expand.js";
 import { aiEnabled, runInto } from "../ai.js";
+import * as fight from "../fight.js";
+import * as eggs from "../eggs.js";
 
 const PAGE = 40;
 
@@ -329,6 +331,10 @@ export async function renderTopics(main, _params, query) {
           .map((s) => `<button class="chip ${sub?.id === s.id ? "on" : ""}" data-sub="${s.id}">${esc(s.name)}</button>`)
           .join("")}</div>`;
       }
+      if (fight.HEAVY[t.id]) {
+        const feel = sub ? sub.name.toLowerCase().replace(/ (&|and) .*$/, "") : fight.HEAVY[t.id];
+        html += `<button class="fight-invite" data-fight="${esc(feel)}"><svg class="fi-heart" viewBox="0 0 32 30" aria-hidden="true"><path d="M16 29 C6 21 1 15 1 9 C1 4.5 4.5 1 9 1 C12 1 14.5 2.6 16 5 C17.5 2.6 20 1 23 1 C27.5 1 31 4.5 31 9 C31 15 26 21 16 29Z"/></svg><div><b>Let Him fight for you</b><span>Name what's weighing on you, and watch Him answer it</span></div></button>`;
+      }
       const keys = await keyVerses(sub ? sub.key : t.key);
       if (my !== token) return;
       html += `<div class="section-head"><h2>${esc(sub ? sub.name : t.name)}: key verses</h2><span class="muted small">hand-picked · ${esc(scopeText())}</span></div>`;
@@ -345,6 +351,8 @@ export async function renderTopics(main, _params, query) {
     }
     if (my !== token) return;
     results.innerHTML = html;
+    const inv = results.querySelector("[data-fight]");
+    if (inv) inv.onclick = () => fight.open({ feeling: inv.dataset.fight, onEnd: () => eggs.discover("fight") });
     wireResults(results);
     wireSemanticGate();
     wireMentions();

@@ -1,7 +1,8 @@
 import * as bible from "../bible.js";
 import * as act from "../activity.js";
 import * as store from "../store.js";
-import { esc, icon, $ } from "../ui.js";
+import { esc, icon, $, confirmBox } from "../ui.js";
+import * as fight from "../fight.js";
 
 const WEEKS_IN_HEATMAP = 26;
 
@@ -90,6 +91,16 @@ export function renderHistory(main, _params, query) {
   const doneCh = [...ot, ...nt].reduce((a, x) => a + x.done, 0);
 
   const refl = act.reflection(week);
+  // prayers: the ones made this week, plus earlier ones (up to 8 weeks back) that are still waiting for "How did it go?"
+  const prayers = act
+    .notes()
+    .filter((n) => n.kind === "prayer")
+    .filter((n) => {
+      const d = store.localDate(n.created_at);
+      if (d >= week && d < weekEnd) return true;
+      return week === thisWeek && d < week && d >= store.addDays(week, -56) && !fight.prayerData(n).followup;
+    })
+    .sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
   const isThisWeek = week === thisWeek;
 
   main.className = "wide";
@@ -112,6 +123,16 @@ export function renderHistory(main, _params, query) {
       <div class="section-head"><h2>Day by day</h2></div>
       ${dayRows}
     </section>
+
+    ${
+      prayers.length
+        ? `<section class="section card" id="prayers">
+            <div class="section-head"><h2>Given to Him</h2><span class="muted small">${prayers.length} prayer${prayers.length === 1 ? "" : "s"}</span></div>
+            <p class="muted small" style="margin:0 0 6px">What you gave Him to fight for you. How did it go?</p>
+            ${prayers.map((n) => fight.prayerHTML(n, { compact: true })).join("")}
+          </section>`
+        : ""
+    }
 
     <section class="section card">
       <div class="section-head"><h2>Weekly reflection</h2><span class="muted small" id="reflState">${refl ? "Saved" : ""}</span></div>
@@ -144,6 +165,8 @@ export function renderHistory(main, _params, query) {
       </details>
     </section>`;
 
+  const pr = $("#prayers", main);
+  if (pr) fight.wirePrayers(pr, () => renderHistory(main, _params, query), confirmBox);
   const ta = $("#refl", main);
   const state = $("#reflState", main);
   let t;

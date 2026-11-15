@@ -3,6 +3,7 @@ import * as act from "../activity.js";
 import * as store from "../store.js";
 import { esc, icon, $, $$, highlight, confirmBox, toast } from "../ui.js";
 import { openNoteEditor } from "./noteEditor.js";
+import * as fight from "../fight.js";
 
 export async function renderJournal(main, _params, query) {
   let filter = query.get("f") || "all";
@@ -28,6 +29,8 @@ export async function renderJournal(main, _params, query) {
       for (const n of act.notes().filter((n) => n.kind === "note")) out.push({ type: "note", at: n.created_at, n });
     if (filter === "all" || filter === "reflections")
       for (const n of act.notes().filter((n) => n.kind === "reflection")) out.push({ type: "reflection", at: n.week_start + "T23:59", n });
+    if (filter === "all" || filter === "prayers")
+      for (const n of act.notes().filter((n) => n.kind === "prayer")) out.push({ type: "prayer", at: n.created_at, n });
     if (filter === "all" || filter === "saved")
       for (const m of store.all("bookmarks")) out.push({ type: "saved", at: m.created_at, m });
     const ql = q.toLowerCase();
@@ -35,12 +38,14 @@ export async function renderJournal(main, _params, query) {
       .filter((it) => {
         if (!ql) return true;
         if (it.type === "saved") return (texts.get(it.m.id) || "").toLowerCase().includes(ql) || bible.formatRef(it.m.book, it.m.chapter, it.m.verse).toLowerCase().includes(ql);
+        if (it.type === "prayer") return fight.prayerData(it.n).words.flat().join(" ").toLowerCase().includes(ql) || fight.prayerData(it.n).followup.toLowerCase().includes(ql);
         return (it.n.body || "").toLowerCase().includes(ql) || act.noteRef(it.n).toLowerCase().includes(ql);
       })
       .sort((a, b) => (a.at < b.at ? 1 : -1));
   };
 
   const entryHTML = (it) => {
+    if (it.type === "prayer") return fight.prayerHTML(it.n);
     if (it.type === "saved") {
       const m = it.m;
       return `<div class="entry">
@@ -76,6 +81,7 @@ export async function renderJournal(main, _params, query) {
         ["all", "Everything"],
         ["notes", "Notes"],
         ["reflections", "Weekly reflections"],
+        ["prayers", "Prayers"],
         ["saved", "Saved & highlighted"],
       ]
         .map(([id, label]) => `<button class="chip ${filter === id ? "on" : ""}" data-f="${id}">${label}</button>`)
@@ -93,6 +99,7 @@ export async function renderJournal(main, _params, query) {
       return;
     }
     list.innerHTML = its.map(entryHTML).join("");
+    fight.wirePrayers(list, draw, confirmBox);
     $$("[data-edit]", list).forEach(
       (b) =>
         (b.onclick = async () => {

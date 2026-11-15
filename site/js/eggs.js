@@ -41,6 +41,7 @@ export const TREASURES = [
   { id: "lamp", group: "gesture", title: "A lamp to my feet", hint: "Seven is the number of completeness. Try it on the little book at the top.", how: "Tap the book icon in the header 7 times quickly.", verse: ["PSA", 119, 105], fx: "lamp" },
   { id: "bestill", group: "gesture", title: "Be still", hint: "When everything is shaking…", how: "Shake your phone.", verse: ["PSA", 46, 10], fx: "bestill" },
   { id: "seek", group: "gesture", title: "Seek and you will find", hint: "On the Today page, look beyond the top.", how: "On the Today page, pull down past the top (or scroll up hard on a computer).", verse: ["MAT", 7, 7], fx: "seek" },
+  { id: "fight", group: "gesture", title: "The Lord will fight for you", hint: "When a feeling is heavy, you don't have to carry it alone.", how: "In Topics, choose a heavy feeling (like Fear or Worry) and tap “Let Him fight for you”.", verse: ["EXO", 14, 14], fx: "fight" },
   { id: "amen", group: "gesture", title: "Amen", hint: "How do prayers end?", how: "End a note with the word “Amen” and save it.", verse: ["PSA", 106, 48], fx: "amen" },
   // ---- seasons and hours ----
   { id: "christmas", group: "season", title: "Glory to God in the highest", hint: "Comes on Christmas Eve and Christmas Day.", how: "Open the app on 24 or 25 December.", verse: ["LUK", 2, 14], fx: "snow" },
@@ -92,6 +93,14 @@ export function find(id, ctx = {}) {
   } catch {}
   playEffect(t, ctx);
   if (first) setTimeout(() => foundCard(t), t.fx === "bible" ? 9000 : 1400);
+}
+
+// For treasures whose scene plays itself (like "fight"): just record it and show the found card.
+export function discover(id) {
+  const t = byId[id];
+  if (!t || isFound(id)) return;
+  store.put("notes", { id: treasureNoteId(id), kind: "treasure", body: id, deleted: false });
+  foundCard(t);
 }
 
 /* ---------- effects ---------- */
@@ -147,6 +156,9 @@ export function playEffect(t, ctx = {}) {
   const r = reduce();
   if (fx.has(t.fx)) return fx.run(t.fx, ctx, { partSea });
   switch (t.fx) {
+    case "fight":
+      import("./fight.js").then((m) => m.open({}));
+      break;
     case "light":
       layer("egg-light", "", 2600);
       break;
