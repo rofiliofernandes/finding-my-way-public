@@ -4,6 +4,7 @@ import { esc, icon, $, toast, timeAgo, confirmBox } from "../ui.js";
 import * as semantic from "../semantic.js";
 import { AI_ENABLED } from "../config.js";
 import * as blessing from "../blessing.js";
+import * as daily from "../daily.js";
 import * as eggs from "../eggs.js";
 import * as act from "../activity.js";
 import * as bible from "../bible.js";
@@ -236,6 +237,8 @@ export function renderSettings(main) {
           <div class="chips">${["system", "light", "dark"]
             .map((t) => `<button class="chip ${theme === t ? "on" : ""}" data-theme="${t}">${t[0].toUpperCase() + t.slice(1)}</button>`)
             .join("")}</div></div>
+        <div class="setting"><div class="what"><b>Verse for today</b><span class="muted small" id="dailyDesc">${esc(daily.describe())}</span></div>
+          <button class="btn" data-daily>Change</button></div>
         <div class="setting"><div class="what"><b>Title</b><span class="muted small">${
           store.pref("titleEnglish") ? "Shown in English. Hold-to-translate already used on this device." : "Shown in Latin. Hold the title for 2 seconds to translate it."
         }</span></div>${store.pref("titleEnglish") ? `<button class="btn" data-latin>Show in Latin again</button>` : ""}</div>
@@ -277,6 +280,7 @@ export function renderSettings(main) {
     });
     $("[data-sync]", main)?.addEventListener("click", () => sync.syncNow());
     $("[data-bless]", main).onclick = () => blessing.show({ force: true });
+    $("[data-daily]", main).onclick = () => daily.choose(() => ($("#dailyDesc", main).textContent = daily.describe()));
     wireTreasures(main);
     const latin = $("[data-latin]", main);
     if (latin)

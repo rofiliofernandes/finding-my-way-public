@@ -3,6 +3,7 @@ import * as act from "../activity.js";
 import * as store from "../store.js";
 import { esc, icon } from "../ui.js";
 import { TOPICS } from "../topics.js";
+import * as daily from "../daily.js";
 
 function greeting() {
   const h = new Date().getHours();
@@ -12,31 +13,45 @@ function greeting() {
   return "Good evening";
 }
 
-// Same "verse for today" on every device: a hash of the date picks a verse.
-async function verseOfDay() {
-  const canon = bible.getCanon();
-  const d = store.localDate();
-  let h = 2166136261;
-  for (const ch of "lectio" + d) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0;
-  // favour the Psalms, Wisdom books and New Testament for a daily verse
-  const pool = canon.books.filter((b) => b.t === "NT" || b.g === "Wisdom" || b.id === "ISA");
-  const total = pool.reduce((a, b) => a + b.total, 0);
-  let r = h % total;
-  for (const b of pool) {
-    if (r >= b.total) {
-      r -= b.total;
-      continue;
-    }
-    for (let ci = 0; ci < b.vc.length; ci++) {
-      if (r >= b.vc[ci]) {
-        r -= b.vc[ci];
-        continue;
-      }
-      const ch = await bible.loadChapter(b.id, ci + 1);
-      const v = ch.v[r];
-      return { book: b.id, chapter: ci + 1, verse: v.n, text: v.t };
-    }
-  }
+function vodHTML(vod) {
+  const head = `<div class="vod-head"><div class="eyebrow">Verse for today</div><button class="btn icon ghost small" data-vod-set title="Where it comes from" aria-label="Where the verse for today comes from">⋯</button></div>`;
+  if (vod.finished)
+    return `<div class="card vod vod-done" style="padding:24px">${head}
+      <div class="vod-done-title">You've finished ${esc(vod.name)}</div>
+      <p class="muted" style="margin:6px 0 16px">Every verse, one day at a time. What would you like next?</p>
+      <div class="vod-acts"><button class="btn primary" data-vod-again>Start ${esc(vod.name)} again</button><button class="btn" data-vod-set>Choose another</button>${
+        vod.source === "chosen" ? `<button class="btn ghost" data-vod-reading>Follow what I'm reading</button>` : ""
+      }</div></div>`;
+  return `<div class="card vod" style="padding:24px">${head}
+      <a class="quote vod-text" href="#/read/${vod.book}/${vod.chapter}?v=${vod.verse}">${vod.text
+        .split("\n")
+        .map((l) => bible.verseHTML(l.replace(/^\t/, "")))
+        .join("<br>")}</a>
+      <div class="vod-foot"><a class="small" style="font-weight:600" href="#/read/${vod.book}/${vod.chapter}?v=${vod.verse}">${esc(bible.formatRef(vod.book, vod.chapter, vod.verse))}</a>
+        <span class="muted small">${daily.sourceLine(vod)}</span><span class="spacer"></span>
+        <button class="btn ghost small" data-vod-another>Another</button></div></div>`;
+}
+
+function wireVod(main) {
+  const box = main.querySelector("#vod");
+  if (!box) return;
+  const redraw = async (opts) => {
+    box.innerHTML = vodHTML(await daily.today(opts));
+    wireVod(main);
+  };
+  box.querySelectorAll("[data-vod-set]").forEach((b) => (b.onclick = () => daily.choose(() => redraw())));
+  box.querySelector("[data-vod-another]")?.addEventListener("click", () => redraw({ another: true }));
+  box.querySelector("[data-vod-again]")?.addEventListener("click", async () => {
+    const c = daily.settings();
+    const sc = (await daily.today()).scope;
+    daily.restart(sc?.book || c.book, sc?.chapter || 0);
+    redraw();
+  });
+  box.querySelector("[data-vod-reading]")?.addEventListener("click", () => {
+    store.pref("daily", { ...daily.settings(), mode: "reading" });
+    daily.forgetToday();
+    redraw();
+  });
 }
 
 export async function renderHome(main) {
@@ -45,7 +60,7 @@ export async function renderHome(main) {
   const nextCh = lastCh ? bible.nextChapter(lastCh.book, lastCh.chapter) : { book: "GEN", chapter: 1 };
   const lastV = act.lastRead(["verse"]);
   const nextV = lastV ? await bible.stepVerse(lastV.book, lastV.chapter, lastV.verse_start, 1) : null;
-  const vod = await verseOfDay();
+  const vod = await daily.today();
 
   const today = store.localDate();
   const ws = store.weekStart(today);
@@ -81,14 +96,7 @@ export async function renderHome(main) {
       <h1 style="margin-top:4px">${greeting()}</h1>
     </div>
 
-    <a class="card" href="#/read/${vod.book}/${vod.chapter}?v=${vod.verse}" style="padding:24px">
-      <div class="eyebrow">Verse for today</div>
-      <div class="quote" style="font-size:20px;line-height:1.6;margin-top:10px">${vod.text
-        .split("\n")
-        .map((l) => bible.verseHTML(l.replace(/^\t/, "")))
-        .join("<br>")}</div>
-      <div class="muted small" style="margin-top:10px;font-weight:600">${esc(bible.formatRef(vod.book, vod.chapter, vod.verse))}</div>
-    </a>
+    <div id="vod">${vodHTML(vod)}</div>
 
     <section class="section" style="margin-top:22px">
       <div class="section-head"><h2>How are you feeling?</h2><a href="#/topics" class="small" style="font-weight:600">All topics →</a></div>
@@ -144,4 +152,5 @@ export async function renderHome(main) {
           </section>`
         : ""
     }`;
+  wireVod(main);
 }
