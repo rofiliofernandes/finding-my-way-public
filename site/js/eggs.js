@@ -303,7 +303,8 @@ function foundCard(t) {
   const el = document.createElement("div");
   el.className = "egg-found";
   el.innerHTML = `<div class="egg-found-icon">✦</div>
-    <div class="egg-found-text"><b>Hidden treasure found</b><span>${esc(t.title)} · ${foundCount()} of ${TREASURES.length}</span></div>
+    <div class="egg-found-text"><b>Hidden treasure found</b><span>${esc(t.title)} · ${foundCount()} of ${TREASURES.length}</span>
+      <a class="egg-found-link" href="#/settings?treasure=${encodeURIComponent(t.id)}" data-see>See in Treasures →</a></div>
     <button class="btn small" data-share>${icon("share")} Share</button>
     <button class="btn icon ghost" data-x aria-label="Close">${icon("close")}</button>`;
   document.body.appendChild(el);
@@ -313,6 +314,10 @@ function foundCard(t) {
   };
   el.querySelector("[data-x]").onclick = close;
   el.querySelector("[data-share]").onclick = () => share(t.id);
+  el.querySelector("[data-see]").addEventListener("click", () => {
+    close();
+    document.querySelectorAll(".egg-layer").forEach((x) => x.remove()); // don't carry the scene onto the Treasures page
+  });
   setTimeout(close, 9000);
 }
 

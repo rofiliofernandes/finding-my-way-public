@@ -130,6 +130,11 @@
 .egg-found-text { flex: 1; min-width: 0; }
 .egg-found-text b { display: block; font-size: 14px; }
 .egg-found-text span { display: block; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.egg-found-link { display: inline-block; margin-top: 2px; font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; }
+.egg-found-link:hover { text-decoration: underline; }
+/* the treasure you came to see, inside its open door */
+.door__item.flash { animation: item-flash 1.6s ease-out .3s 2; border-radius: 10px; }
+@keyframes item-flash { 0%, 100% { background: transparent; } 40% { background: color-mix(in srgb, var(--accent) 22%, transparent); } }
 
 /* You page: treasures */
 .treasure-head { display: flex; align-items: center; gap: 12px; }

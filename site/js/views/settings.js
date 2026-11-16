@@ -315,6 +315,18 @@ export function renderSettings(main) {
     drawMotion();
     $("[data-daily]", main).onclick = () => daily.choose(() => ($("#dailyDesc", main).textContent = daily.describe()));
     wireTreasures(main);
+    // arriving from "See in Treasures": open that treasure's door and bring it into view
+    const want = new URLSearchParams((location.hash.split("?")[1] || "")).get("treasure");
+    if (want) {
+      const item = main.querySelector(`[data-share="${CSS.escape(want)}"]`);
+      const door = item?.closest(".door");
+      if (door) {
+        if (!door.classList.contains("open")) door.querySelector(".door__pane").click();
+        item.classList.add("flash");
+        setTimeout(() => door.scrollIntoView({ block: "center", behavior: "smooth" }), 60);
+      }
+      history.replaceState(history.state, "", "#/settings");
+    }
     const latin = $("[data-latin]", main);
     if (latin)
       latin.onclick = () => {
