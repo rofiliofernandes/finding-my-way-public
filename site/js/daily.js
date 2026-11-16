@@ -10,11 +10,40 @@ import * as bible from "./bible.js";
 import * as act from "./activity.js";
 import * as store from "./store.js";
 import { esc, openModal, toast } from "./ui.js";
+import * as synced from "./synced.js";
 
 const DEFAULT = { mode: "reading", book: "MRK", chapter: 0, order: "order" };
-export const settings = () => ({ ...DEFAULT, ...(store.pref("daily") || {}) });
-const state = () => store.meta("dailyState") || { day: null, pick: null, seen: {}, pos: {} };
-const saveState = (s) => store.meta("dailyState", s);
+// The choice and the "already shown" record both sync across devices (see synced.js).
+export const settings = () => ({ ...DEFAULT, ...(store.pref("daily") || {}), ...(synced.get("daily") || {}) });
+export const setSettings = (v) => synced.set("daily", v);
+
+const EMPTY = { day: null, pick: null, t: 0, seen: {}, pos: {}, round: {} };
+// Merge this device's record with the synced one. For each book: only the newest "round" counts
+// (Start again begins a new round); within it, verses seen on either device count as seen and the
+// furthest position wins. The most recent pick wins, so all devices show the same verse today.
+function merge(a, b) {
+  a = { ...EMPTY, ...(a || {}) };
+  b = { ...EMPTY, ...(b || {}) };
+  const out = (a.t || 0) >= (b.t || 0) ? { ...a } : { ...b };
+  out.seen = {};
+  out.pos = {};
+  out.round = {};
+  const keys = new Set([...Object.keys(a.seen), ...Object.keys(b.seen), ...Object.keys(a.pos), ...Object.keys(b.pos), ...Object.keys(a.round), ...Object.keys(b.round)]);
+  for (const k of keys) {
+    const ra = a.round[k] || 0, rb = b.round[k] || 0, r = Math.max(ra, rb);
+    const from = [ra === r ? a : null, rb === r ? b : null].filter(Boolean);
+    out.round[k] = r;
+    out.seen[k] = [...new Set(from.flatMap((x) => x.seen[k] || []))];
+    out.pos[k] = Math.max(0, ...from.map((x) => x.pos[k] || 0));
+  }
+  return out;
+}
+const state = () => merge(store.meta("dailyState"), synced.get("dailyState"));
+const saveState = (s) => {
+  s.t = Date.now();
+  store.meta("dailyState", s);
+  synced.set("dailyState", s);
+};
 
 /* ---------- which verses make sense on their own ---------- */
 
@@ -151,8 +180,9 @@ async function anywhere(bump = 0) {
 export function restart(book, chapter) {
   const s = state();
   const key = scopeKey(book, chapter);
-  delete s.seen[key];
-  delete s.pos[key];
+  s.round[key] = (s.round[key] || 0) + 1;
+  s.seen[key] = [];
+  s.pos[key] = 0;
   s.day = null;
   saveState(s);
 }
@@ -221,7 +251,7 @@ export function choose(onDone) {
       dlg.querySelector("[data-cancel]").onclick = close;
       dlg.querySelector("[data-ok]").onclick = () => {
         const mode = dlg.querySelector('input[name="dm"]:checked').value;
-        store.pref("daily", { mode, book: bookSel.value, chapter: +chSel.value, order });
+        setSettings({ mode, book: bookSel.value, chapter: +chSel.value, order });
         forgetToday();
         close();
         toast(mode === "book" ? `Verse for today: ${scopeName(bookSel.value, +chSel.value)}` : "Saved");

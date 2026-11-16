@@ -1,6 +1,7 @@
 // Hidden treasures ("For the kingdom of heaven is like treasure hidden in a field", Matthew 13:44).
 // Small, reverent surprises found by reading, tapping, praying at certain hours, and keeping a rhythm.
 // Found treasures are stored as notes of kind "treasure", so they sync like everything else.
+import * as motion from "./motion.js";
 import * as store from "./store.js";
 import * as act from "./activity.js";
 import * as bible from "./bible.js";
@@ -479,6 +480,7 @@ export function init() {
   let last = 0;
   let jolts = 0;
   window.addEventListener("devicemotion", (e) => {
+    if (!motion.enabled()) return;
     const a = e.accelerationIncludingGravity || e.acceleration;
     if (!a) return;
     const mag = Math.sqrt((a.x || 0) ** 2 + (a.y || 0) ** 2 + (a.z || 0) ** 2);

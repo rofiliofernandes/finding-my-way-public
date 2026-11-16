@@ -4,6 +4,7 @@ import * as store from "../store.js";
 import { esc, icon } from "../ui.js";
 import { TOPICS } from "../topics.js";
 import * as daily from "../daily.js";
+import * as goals from "../goals.js";
 
 function greeting() {
   const h = new Date().getHours();
@@ -48,7 +49,7 @@ function wireVod(main) {
     redraw();
   });
   box.querySelector("[data-vod-reading]")?.addEventListener("click", () => {
-    store.pref("daily", { ...daily.settings(), mode: "reading" });
+    daily.setSettings({ ...daily.settings(), mode: "reading" });
     daily.forgetToday();
     redraw();
   });
@@ -130,6 +131,8 @@ export async function renderHome(main) {
       </a>
     </div>
 
+    ${goals.cardHTML()}
+
     <section class="section card">
       <div class="section-head"><h2>This week</h2><a href="#/history" class="small" style="font-weight:600">Weekly review →</a></div>
       <div class="week-strip">${days.join("")}</div>
@@ -153,4 +156,5 @@ export async function renderHome(main) {
         : ""
     }`;
   wireVod(main);
+  goals.wire(main, () => renderHome(main));
 }

@@ -166,7 +166,12 @@
   transform-origin: 0 50%; transform-style: preserve-3d; transition: transform .25s ease-out, box-shadow .2s;
 }
 @media (hover: hover) { .door:not(.open) .door__pane:hover { transform: rotateY(-14deg); box-shadow: 0 12px 30px rgba(0, 0, 0, .2); } }
-.door.open .door__pane { transform: rotateY(-97deg); pointer-events: none; transition: transform .3s ease-in; }
+.door.open .door__pane { transform: rotateY(-97deg); transition: transform .3s ease-in; cursor: pointer; }
+/* the swung-open edge is plain colour, not the label seen backwards */
+.door__pane > * { transition: opacity .15s .1s; }
+.door.open .door__pane > * { opacity: 0; transition-delay: 0s; }
+.door__inside { cursor: pointer; }
+.door__inside button, .door__inside a { cursor: pointer; }
 .door__emblem { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, .18); box-shadow: inset 0 0 12px rgba(0, 0, 0, .15); }
 .door__emblem svg { width: 30px; height: 30px; fill: none; stroke: #fff; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .door__label { font: italic 600 16px/1.2 var(--serif); text-align: center; text-shadow: 0 1px 2px rgba(0, 0, 0, .25); }
@@ -188,6 +193,8 @@
 .door__item .hint { margin-top: 6px; font: italic 400 13.5px/1.4 var(--serif); background: var(--accent-soft); border-radius: 8px; padding: 5px 8px; text-align: left; }
 .door__item .acts { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; margin-top: 6px; }
 .door__item .btn.small { padding: 4px 9px; font-size: 12px; }
-.door__close { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border: 0; background: none; color: var(--muted); cursor: pointer; border-radius: 50%; }
+.door__close { position: absolute; top: 6px; right: 6px; z-index: 2; width: 30px; height: 30px; display: grid; place-items: center; border: 0; cursor: pointer; border-radius: 50%;
+  background: color-mix(in srgb, var(--c2) 18%, transparent); color: var(--ink); }
+.door__close svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
 .door__close:hover { background: var(--accent-soft); }
 @media (prefers-reduced-motion: reduce) { .door__pane, .door.open .door__pane { transition: none; } .door.open .door__bauble { animation: none; } }

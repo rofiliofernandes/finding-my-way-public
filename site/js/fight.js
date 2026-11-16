@@ -7,6 +7,7 @@ import * as store from "./store.js";
 import * as bible from "./bible.js";
 import * as semantic from "./semantic.js";
 import { esc, icon, openModal, toast } from "./ui.js";
+import * as motion from "./motion.js";
 
 /* ---------- the words ---------- */
 
@@ -195,11 +196,12 @@ export function play(mine = [], { feeling = "", onEnd } = {}) {
   const prevOverflow = document.body.style.overflow;
   document.body.style.overflow = "hidden";
 
-  let raf = 0, finished = false;
+  let raf = 0, finished = false, stopDepth = () => {};
   const finish = () => {
     if (finished) return;
     finished = true;
     cancelAnimationFrame(raf);
+    stopDepth();
     removeEventListener("resize", size);
     document.removeEventListener("keydown", onKey);
     root.classList.add("out");
@@ -255,6 +257,8 @@ export function play(mine = [], { feeling = "", onEnd } = {}) {
   }
   size();
   addEventListener("resize", size);
+  // tilt the phone: the light drifts, the doors sway, He stays nearly still (beams follow His heart)
+  stopDepth = motion.depth([[glow, 12], [$(".f-doors"), 9], [fig, -4]]);
 
   const measurer = document.createElement("div");
   measurer.className = "fw truth";

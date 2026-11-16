@@ -9,6 +9,7 @@ import { openNoteEditor } from "./noteEditor.js";
 import { expandButton, wireExpand } from "../expand.js";
 import { aiEnabled, runInto } from "../ai.js";
 import * as fight from "../fight.js";
+import * as stories from "../stories.js";
 import * as eggs from "../eggs.js";
 
 const PAGE = 40;
@@ -125,7 +126,7 @@ export async function renderTopics(main, _params, query) {
     <p class="muted" style="margin:6px 0 0">Describe what you're feeling or looking for, or choose a topic. Then decide where to look.</p>
 
     <div class="card section scopebar">
-      <div class="searchwrap"><input type="search" id="tq" placeholder="e.g. love towards my wife · feeling not good enough" value="${esc(st.q)}" autocomplete="off" enterkeyhint="search"></div>
+      <div class="searchwrap"><input type="search" id="tq" placeholder="e.g. jonah and the whale · feeling not good enough" value="${esc(st.q)}" autocomplete="off" enterkeyhint="search"></div>
       <div class="seg" role="group" aria-label="Search by">
         <button data-mode="meaning" class="${st.mode === "meaning" ? "on" : ""}" title="Finds passages with the same meaning, even with different words">By meaning</button>
         <button data-mode="words" class="${st.mode === "words" ? "on" : ""}" title="Finds verses containing these exact words">Exact words</button>
@@ -316,6 +317,13 @@ export async function renderTopics(main, _params, query) {
     let html = "";
     // ---------- free-text query ----------
     if (st.q) {
+      // a famous story by name (forgiving spelling): one card on top
+      for (const story of stories.match(st.q)) {
+        const r = stories.parseRef(story.ref);
+        const href = `#/read/${r.book}/${r.chapter}${r.verse ? `?v=${r.verse}` : ""}`;
+        const where = bible.formatRef(r.book, r.chapter, r.verse || undefined);
+        html += `<a class="card story-card" href="${href}"><div class="eyebrow">The story</div><b>${esc(story.title)}</b><span class="muted small">${esc(where)}</span><span class="story-go">Read ${icon("right")}</span></a>`;
+      }
       if (st.mode === "meaning") {
         html += await semanticBlock(st.q, `“${esc(st.q)}”`);
       } else {

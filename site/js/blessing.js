@@ -1,5 +1,6 @@
 // "Jesus loves you, my child": a short blessing (about 8 seconds) shown when you press back from a passage
 // after reading for 5 minutes or more in this visit. Once per visit; tap to skip.
+import * as motion from "./motion.js";
 
 const NEEDED_SECONDS = 5 * 60;
 const KEY_TIME = "fmw:readSeconds";
@@ -110,11 +111,19 @@ export function show({ force = false, words: wordList = DEFAULT_WORDS } = {}) {
   let hole = null;
   let done = false;
   let raf = 0;
+  // tilt the phone: clouds drift most, the light a little, the figure a touch the other way
+  const stopDepth = motion.depth([
+    ...clouds.map((c, i) => [c, 10 + i * 4]),
+    [el.querySelector(".light"), 7],
+    [el.querySelector(".gold"), 4],
+    [lift, -5],
+  ]);
 
   const finish = (fade) => {
     if (done) return;
     done = true;
     cancelAnimationFrame(raf);
+    stopDepth();
     if (!fade) return el.remove();
     el.classList.add("out");
     setTimeout(() => el.remove(), 600);

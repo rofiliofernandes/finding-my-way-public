@@ -5,6 +5,7 @@ import * as semantic from "../semantic.js";
 import { AI_ENABLED } from "../config.js";
 import * as blessing from "../blessing.js";
 import * as daily from "../daily.js";
+import * as motion from "../motion.js";
 import * as eggs from "../eggs.js";
 import * as act from "../activity.js";
 import * as bible from "../bible.js";
@@ -156,22 +157,36 @@ function wireTreasures(main) {
     slot.innerHTML = `<div class="hint">${esc(text)}</div>`;
   };
   const byId = (id) => eggs.TREASURES.find((t) => t.id === id);
-  main.querySelectorAll(".door__pane").forEach(
-    (b) =>
-      (b.onclick = () => {
-        const door = b.closest(".door");
-        door.classList.add("open");
-        b.setAttribute("aria-expanded", "true");
-      })
-  );
-  main.querySelectorAll("[data-closedoor]").forEach(
-    (b) =>
-      (b.onclick = () => {
-        const door = b.closest(".door");
-        door.classList.remove("open");
-        door.querySelector(".door__pane").setAttribute("aria-expanded", "false");
-      })
-  );
+  // Only one door open at a time. Close it by: opening another, tapping the door again (its swung-open
+  // edge or any empty part inside), the ✕, Escape, or turning the phone away like closing a door.
+  let stopTurn = () => {};
+  const closeDoor = (door) => {
+    if (!door?.classList.contains("open")) return;
+    door.classList.remove("open");
+    door.querySelector(".door__pane").setAttribute("aria-expanded", "false");
+    stopTurn();
+  };
+  const closeAll = () => main.querySelectorAll(".door.open").forEach(closeDoor);
+  main.querySelectorAll(".door").forEach((door) => {
+    const pane = door.querySelector(".door__pane");
+    pane.onclick = () => {
+      if (door.classList.contains("open")) return closeDoor(door);
+      closeAll();
+      door.classList.add("open");
+      pane.setAttribute("aria-expanded", "true");
+      stopTurn = motion.onTurnAway(() => closeDoor(door));
+    };
+    door.querySelector(".door__inside").addEventListener("click", (e) => {
+      if (!e.target.closest("button, a")) closeDoor(door);
+    });
+    door.querySelector("[data-closedoor]").onclick = () => closeDoor(door);
+  });
+  const onKey = (e) => {
+    if (e.key !== "Escape") return;
+    if (!document.body.contains(main.querySelector("#treasures"))) return document.removeEventListener("keydown", onKey);
+    closeAll();
+  };
+  document.addEventListener("keydown", onKey);
   main.querySelectorAll("[data-hint]").forEach((b) => (b.onclick = () => reveal(b, byId(b.dataset.hint).hint)));
   main.querySelectorAll("[data-show]").forEach((b) => (b.onclick = () => reveal(b, byId(b.dataset.show).how)));
   main.querySelectorAll("[data-share]").forEach((b) => (b.onclick = () => eggs.share(b.dataset.share)));
@@ -194,7 +209,7 @@ export function renderSettings(main) {
     const size = store.pref("fontSize") || 19;
     const counts = {
       log: store.all("reading_log").length,
-      notes: store.all("notes").filter((n) => n.kind !== "treasure").length,
+      notes: store.all("notes").filter((n) => n.kind !== "treasure" && n.kind !== "settings").length,
       marks: store.all("bookmarks").length,
     };
 
@@ -239,6 +254,7 @@ export function renderSettings(main) {
             .join("")}</div></div>
         <div class="setting"><div class="what"><b>Verse for today</b><span class="muted small" id="dailyDesc">${esc(daily.describe())}</span></div>
           <button class="btn" data-daily>Change</button></div>
+        <div class="setting"><div class="what"><b>Motion</b><span class="muted small" id="motionDesc"></span></div><div id="motionCtl"></div></div>
         <div class="setting"><div class="what"><b>Title</b><span class="muted small">${
           store.pref("titleEnglish") ? "Shown in English. Hold-to-translate already used on this device." : "Shown in Latin. Hold the title for 2 seconds to translate it."
         }</span></div>${store.pref("titleEnglish") ? `<button class="btn" data-latin>Show in Latin again</button>` : ""}</div>
@@ -280,6 +296,23 @@ export function renderSettings(main) {
     });
     $("[data-sync]", main)?.addEventListener("click", () => sync.syncNow());
     $("[data-bless]", main).onclick = () => blessing.show({ force: true });
+    const drawMotion = () => {
+      const desc = $("#motionDesc", main), ctl = $("#motionCtl", main);
+      desc.textContent = "Shake your phone for a hidden treasure, and tilt it for gentle depth in the blessing and other scenes.";
+      if (motion.needsPermission() && !motion.allowed()) {
+        ctl.innerHTML = `<button class="btn" data-motion-allow>Allow motion</button>`;
+        $("[data-motion-allow]", main).onclick = async () => {
+          const ok = await motion.requestAccess();
+          toast(ok ? "Motion is on" : "Motion wasn't allowed. You can allow it in Safari's settings.");
+          drawMotion();
+        };
+      } else {
+        const on = motion.enabled();
+        ctl.innerHTML = `<div class="chips"><button class="chip ${on ? "on" : ""}" data-motion="on">On</button><button class="chip ${on ? "" : "on"}" data-motion="off">Off</button></div>`;
+        main.querySelectorAll("[data-motion]").forEach((b) => (b.onclick = () => (motion.setEnabled(b.dataset.motion === "on"), drawMotion())));
+      }
+    };
+    drawMotion();
     $("[data-daily]", main).onclick = () => daily.choose(() => ($("#dailyDesc", main).textContent = daily.describe()));
     wireTreasures(main);
     const latin = $("[data-latin]", main);
