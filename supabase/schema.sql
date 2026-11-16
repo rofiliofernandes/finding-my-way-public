@@ -67,6 +67,9 @@ begin
     execute format('alter table public.%I enable row level security', t);
     execute format('drop policy if exists "own rows" on public.%I', t);
     execute format('create policy "own rows" on public.%I for all to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id)', t);
+    -- Newer Supabase projects don't expose new tables to the app automatically, so grant it here:
+    -- signed-in users only (never anonymous visitors), and the policy above limits them to their own rows.
+    execute format('grant select, insert, update, delete on public.%I to authenticated', t);
   end loop;
 end $$;
 
@@ -80,6 +83,7 @@ create table if not exists public.ai_usage (
 alter table public.ai_usage enable row level security;
 drop policy if exists "own usage" on public.ai_usage;
 create policy "own usage" on public.ai_usage for select to authenticated using (auth.uid() = user_id);
+grant select on public.ai_usage to authenticated;
 
 create or replace function public.ai_use() returns int
 language plpgsql security definer set search_path = public as $$
