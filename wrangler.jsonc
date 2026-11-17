@@ -1,0 +1,12 @@
+{
+  // Cloudflare settings for the site. Build command: (none). Deploy command: npx wrangler deploy
+  "name": "finding-my-way",
+  "compatibility_date": "2026-11-01",
+  "main": "worker/index.js",
+  "assets": {
+    "directory": "./site",
+    "binding": "ASSETS",
+    // only /api/* runs the Worker; every other request is served straight from site/
+    "run_worker_first": ["/api/*"]
+  }
+}

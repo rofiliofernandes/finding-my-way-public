@@ -1,7 +1,7 @@
-// Cloudflare Pages Function: POST /api/ai
+// POST /api/ai, run by worker/index.js on Cloudflare Workers (and usable as a Pages Function too).
 // Explains or reflects on Bible passages with Claude. Your API key stays here on the server.
 //
-// Settings (Cloudflare → your Pages project → Settings → Variables and Secrets):
+// Settings (Cloudflare → Workers & Pages → finding-my-way → Settings → Variables and Secrets):
 //   ANTHROPIC_API_KEY  (secret)  your key from console.anthropic.com
 //   SUPABASE_URL                 same as in site/js/config.js
 //   SUPABASE_ANON_KEY            same as in site/js/config.js

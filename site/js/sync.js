@@ -64,6 +64,17 @@ export async function init() {
     ready = true;
     // Remove ?code=... left over from the Google redirect.
     if (location.search.includes("code=")) history.replaceState(history.state, "", location.pathname + location.hash);
+    // A cancelled or refused sign-in comes back as ?error=...: say so in plain words and tidy the address.
+    const q = new URLSearchParams(location.search);
+    if (q.get("error")) {
+      const why = q.get("error"), desc = (q.get("error_description") || "").toLowerCase();
+      history.replaceState(history.state, "", location.pathname + location.hash);
+      const msg =
+        why === "access_denied" ? "Sign-in was cancelled, or this Google account isn't on the list yet." :
+        desc.includes("expired") ? "That sign-in link has expired. Ask for a new code." :
+        "Sign-in didn't work. Please try again.";
+      import("./ui.js").then((ui) => ui.toast(msg));
+    }
     emit();
     if (session) scheduleSync(50);
   } catch (e) {
