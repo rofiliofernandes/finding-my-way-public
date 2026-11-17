@@ -1,6 +1,7 @@
 import * as bible from "./bible.js";
 import * as store from "./store.js";
 import * as sync from "./sync.js";
+import * as welcome from "./welcome.js";
 import { $, $$ } from "./ui.js";
 import { renderHome } from "./views/home.js";
 import { renderBooks, renderChapter, renderVerse, renderRandom } from "./views/read.js";
@@ -111,7 +112,8 @@ async function start() {
   await bible.loadCanon();
   window.addEventListener("hashchange", route);
   await route();
-  sync.init();
+  // once we know whether someone is signed in: the welcome screen for new visitors
+  sync.init().then(() => welcome.maybeShow());
   if ("serviceWorker" in navigator && location.protocol === "https:") {
     navigator.serviceWorker.register("sw.js").catch(() => {});
   }

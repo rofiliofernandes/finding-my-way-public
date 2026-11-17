@@ -6,6 +6,7 @@ import { AI_ENABLED } from "../config.js";
 import * as blessing from "../blessing.js";
 import * as daily from "../daily.js";
 import * as motion from "../motion.js";
+import * as welcome from "../welcome.js";
 import * as eggs from "../eggs.js";
 import * as act from "../activity.js";
 import * as bible from "../bible.js";
@@ -219,7 +220,7 @@ export function renderSettings(main) {
         To sign in with Google and sync across your devices, add your Supabase URL and anon key to <code>js/config.js</code> — the README explains each step.</div>`;
     } else if (!u) {
       account = `<div class="setting"><div class="what"><b>Sign in to sync</b><span class="muted small">Your history, notes and saved verses will follow you to every device.</span></div>
-        <button class="btn google-btn" data-signin>${GOOGLE} Sign in with Google</button></div>
+        <div class="signin-btns"><button class="btn google-btn" data-signin>${GOOGLE} Sign in with Google</button><button class="btn" data-signin-email>✉ Sign in with email</button></div></div>
         ${st.error ? `<p class="small" style="color:#b2402f">${esc(st.error)}</p>` : ""}`;
     } else {
       const meta = u.user_metadata || {};
@@ -288,6 +289,7 @@ export function renderSettings(main) {
       </section>`;
 
     $("[data-signin]", main)?.addEventListener("click", () => sync.signIn());
+    $("[data-signin-email]", main)?.addEventListener("click", () => welcome.openEmailSignIn());
     $("[data-signout]", main)?.addEventListener("click", async () => {
       if (await confirmBox("Sign out? Your data stays in your account and on this device.", "Sign out")) {
         await sync.signOut();

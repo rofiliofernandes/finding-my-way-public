@@ -1,4 +1,4 @@
-// Google sign-in (Supabase Auth) and background sync of the local store.
+// Sign-in (Google, or email with a link and a 6-digit code, through Supabase Auth) and background sync of the local store.
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
 import * as store from "./store.js";
 
@@ -10,6 +10,8 @@ const COLUMNS = {
 
 let client = null;
 let session = null;
+let ready = false;
+export const isReady = () => ready || !status.configured;
 let syncing = null;
 let timer = null;
 const listeners = new Set();
@@ -59,6 +61,7 @@ export async function init() {
     });
     const { data } = await client.auth.getSession();
     session = data.session;
+    ready = true;
     // Remove ?code=... left over from the Google redirect.
     if (location.search.includes("code=")) history.replaceState(history.state, "", location.pathname + location.hash);
     emit();
@@ -101,6 +104,33 @@ export async function signIn() {
     status.error = error.message;
     emit();
   }
+}
+
+// Email sign-in: Supabase emails a link and a 6-digit code. The link works in the browser that asked for it;
+// the code works anywhere (e.g. asked on the laptop, email opened on the phone).
+export async function sendEmailCode(email) {
+  if (!client) return { error: "Sign-in isn't set up on this site yet." };
+  const redirectTo = location.origin + location.pathname;
+  const { error } = await client.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo, shouldCreateUser: true } });
+  return { error: error ? friendly(error) : null };
+}
+
+export async function verifyEmailCode(email, code) {
+  if (!client) return { error: "Sign-in isn't set up on this site yet." };
+  const { error } = await client.auth.verifyOtp({ email, token: code, type: "email" });
+  return { error: error ? friendly(error) : null };
+}
+
+// Supabase's messages, in plain words
+function friendly(error) {
+  const m = (error.message || String(error)).toLowerCase();
+  if (m.includes("rate limit") || error.status === 429) return "Too many emails for now. Please wait a minute and try again.";
+  if (m.includes("not authorized") || m.includes("not authorised")) return "Email sign-in isn't switched on for this address yet. Use Google for now.";
+  if (m.includes("signups not allowed") || m.includes("signup")) return "New accounts are closed on this site. Ask the owner to let you in.";
+  if (m.includes("invalid") || m.includes("expired")) return "That code didn't work. Check it, or send a new one.";
+  if (m.includes("email") && m.includes("valid")) return "That doesn't look like an email address.";
+  if (m.includes("fetch") || m.includes("network")) return "You seem to be offline. Try again when you're connected.";
+  return error.message || "Something went wrong. Please try again.";
 }
 
 export async function signOut() {

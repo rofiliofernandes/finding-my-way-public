@@ -39,13 +39,23 @@ Problem: the filter only checks a verse is a whole sentence, so story lines like
 
 After 12, a second year in gold: the same journey, richer each time.
 
-## 4. Email sign-in (with findingmyway.live)
-- Verify a sending address (e.g. `send.findingmyway.live`) in Resend, connect Resend to Supabase as the email sender, and add "Sign in with email" next to Google, so people without Gmail can sign in.
+## 4. "Let Him fight for you": less repetitive answers
+- **Split entries automatically:** "exams, financial problems" or "exams and money" becomes separate words, each with its own answer (still up to 5 in total).
+- **3–4 answers for each kind of worry**, each with its own verse, picking one you haven't seen recently. For money, for example:
+  - "I will provide" (Philippians 4:19)
+  - "Your Father knows what you need" (Matthew 6:8)
+  - "Seek first the Kingdom, and all this is added" (Matthew 6:33)
+  - "I will never leave you" (Hebrews 13:5)
+- The "verse to think about" then changes with the answer.
 
 ## 5. Small things
 - **Home-screen icon:** the app only has `icon.svg`. iPhones don't use SVG for home-screen icons (they show a blurry screenshot instead), and some Android phones shrink it into a white circle. Add PNG icons: a 180×180 `apple-touch-icon`, 192 and 512 for the manifest, and a 512 "maskable" one with padding so it fills Android's round or rounded-square shapes.
 - At tablet width the title wraps as "Iter ad Do / minum".
+- After a cancelled or refused Google sign-in the address shows `?error=access_denied…`. Clear it and show a friendly message instead.
 - Optional AI: was written for Cloudflare Pages; the site runs on Workers, so it needs a small change before it can be turned on.
 
-## In progress (setup, not code)
-- Moving findingmyway.live's DNS from GoDaddy to Cloudflare, then connecting it to the site and adding it to Supabase's URL settings.
+## Setup still to do
+- Once everyone has joined: turn off "Allow new users to sign up" in Supabase.
+
+## Done
+- Google sign-in, email sign-in with a 6-digit code (Resend + Supabase), the welcome screen, and findingmyway.live connected to the site.
