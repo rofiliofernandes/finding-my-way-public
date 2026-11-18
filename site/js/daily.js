@@ -45,18 +45,24 @@ const saveState = (s) => {
   synced.set("dailyState", s);
 };
 
-/* ---------- which verses make sense on their own ---------- */
+export { standsAlone } from "./daily-rules.js";
+import { standsAlone, tidyQuotes } from "./daily-rules.js";
+import * as stories from "./stories.js";
 
-const OPENERS = /^(and|now|then|for|but|so|therefore|because|or|nor|that|which|who|whom|whose|when|while|after|as|also|again|thus|yet|moreover|furthermore|likewise|wherefore|until|unless|if|lest|since|than|these|those|this|it|they|he answered|they answered|and he|saying|namely)\b/i;
-export function standsAlone(raw) {
-  const t = bible.plainVerse(raw).replace(/^[^A-Za-z“"‘']+/, "");
-  if (t.length < 28 || t.length > 330) return false;
-  if (OPENERS.test(t.replace(/^[“"‘']/, ""))) return false;
-  if (!/[.!?][”"’')\]]*$/.test(t)) return false; // ends mid-sentence
-  const open = (t.match(/[“]/g) || []).length, close = (t.match(/[”]/g) || []).length;
-  if (open !== close) return false; // a quote that starts or ends elsewhere
-  if (/^\d|^[a-z]/.test(t)) return false;
-  return true;
+// The verses worth showing on their own, chosen ahead of time by meaning and simple rules
+// (tools/build_daily.mjs → data/daily.json): { BOOK: "c:v,c:v,…" }
+let dailyList = null;
+async function goodVerses() {
+  if (dailyList) return dailyList;
+  try {
+    const r = await fetch("data/daily.json");
+    const j = await r.json();
+    dailyList = {};
+    for (const [b, list] of Object.entries(j.books)) dailyList[b] = list.split(",").map((cv) => cv.split(":").map(Number));
+  } catch {
+    dailyList = {}; // offline before it was cached: fall back to the simple test below
+  }
+  return dailyList;
 }
 
 /* ---------- scopes ---------- */
@@ -81,8 +87,12 @@ async function candidates(book, chapter, preferChapters) {
   const chs = chapter ? [data.chapters[chapter - 1]] : data.chapters;
   let all = [];
   for (const ch of chs) for (const v of ch.v) all.push({ c: ch.c, n: v.n, t: v.t });
+  // best: the chosen verses; if a single chapter has too few of them, any verse there that stands alone
+  const chosen = new Set(((await goodVerses())[book] || []).map(([c, v]) => c + ":" + v));
+  const best = all.filter((v) => chosen.has(v.c + ":" + v.n));
   const good = all.filter((v) => standsAlone(v.t));
-  if (good.length >= Math.min(5, all.length)) all = good;
+  if (best.length >= Math.min(4, good.length || 4)) all = best;
+  else if (good.length >= Math.min(5, all.length)) all = good;
   if (preferChapters?.size) {
     const first = all.filter((v) => preferChapters.has(v.c));
     if (first.length) return { list: all, first };
@@ -135,10 +145,16 @@ async function fromScope(s, book, chapter, order, source, another, preferChapter
   const id = (v) => v.c + ":" + v.n;
   let v = null;
   if (order === "order") {
+    // going through a book in order walks through its stories too: each story is shown as one scene
+    const seq = withStories(list, book, chapter);
     const pos = s.pos[key] || 0;
-    if (pos >= list.length) return finished(book, chapter, source);
-    v = list[pos];
+    if (pos >= seq.length) return finished(book, chapter, source);
     s.pos[key] = pos + 1;
+    const item = seq[pos];
+    const progress = { done: pos + 1, total: seq.length };
+    if (item.story) return storyPick(item.story, source, { book, chapter }, progress);
+    v = item;
+    return { book, chapter: v.c, verse: v.n, text: tidyQuotes(v.t), source, scope: { book, chapter }, progress };
   } else {
     let pool = (first || list).filter((x) => !seen.has(id(x)));
     if (!pool.length && first) pool = list.filter((x) => !seen.has(id(x)));
@@ -148,7 +164,31 @@ async function fromScope(s, book, chapter, order, source, another, preferChapter
   seen.add(id(v));
   s.seen[key] = [...seen];
   const done = order === "order" ? s.pos[key] : seen.size;
-  return { book, chapter: v.c, verse: v.n, text: v.t, source, scope: { book, chapter }, progress: { done, total: list.length } };
+  return { book, chapter: v.c, verse: v.n, text: tidyQuotes(v.t), source, scope: { book, chapter }, progress: { done, total: list.length } };
+}
+
+// Verses in order, with each story in the book standing in for the verses it covers
+function withStories(list, book, chapter) {
+  const at = (c, v) => c * 1000 + v;
+  const sts = stories.inBook(book).filter((st) => !chapter || st.start[0] === chapter || st.key[0] === chapter);
+  const out = [];
+  let i = 0;
+  for (const st of sts) {
+    const a = at(...st.start), z = at(...st.end);
+    while (i < list.length && at(list[i].c, list[i].n) < a) out.push(list[i++]);
+    out.push({ story: st, c: st.start[0], n: st.start[1] });
+    while (i < list.length && at(list[i].c, list[i].n) <= z) i++;
+  }
+  while (i < list.length) out.push(list[i++]);
+  return out;
+}
+
+async function storyPick(st, source, scope, progress) {
+  const data = await bible.loadBook(st.book);
+  const kv = data.chapters[st.key[0] - 1]?.v.find((x) => x.n === st.key[1]);
+  const range = `${bible.formatRef(st.book, st.start[0], st.start[1])}–${st.start[0] === st.end[0] ? st.end[1] : st.end.join(":")}`;
+  return { book: st.book, chapter: st.key[0], verse: st.key[1], text: tidyQuotes(kv ? kv.t : ""), source, scope, progress,
+    story: { title: st.title, range, question: st.question, start: st.start } };
 }
 
 function finished(book, chapter, source) {
@@ -158,7 +198,17 @@ function finished(book, chapter, source) {
 // The old way, from the date (same on every device), moved forward to a verse that stands on its own
 async function anywhere(bump = 0) {
   const canon = bible.getCanon();
-  const pool = canon.books.filter((b) => b.t === "NT" || b.g === "Wisdom" || b.id === "ISA");
+  const lists = await goodVerses();
+  // Job and Ecclesiastes often voice views the book argues against, so they're left out of "Anywhere"
+  const pool = canon.books.filter((b) => (b.t === "NT" || b.g === "Wisdom" || b.id === "ISA") && b.id !== "JOB" && b.id !== "ECC");
+  const flat = pool.flatMap((b) => (lists[b.id] || []).map(([c, v]) => [b.id, c, v]));
+  if (flat.length) {
+    const [book, c, n] = flat[(hash("lectio" + store.localDate()) + bump * 7919) % flat.length];
+    const data = await bible.loadBook(book);
+    const v = data.chapters[c - 1].v.find((x) => x.n === n);
+    return { book, chapter: c, verse: n, text: tidyQuotes(v.t), source: "anywhere" };
+  }
+  // no list (offline before it was saved): the old way, the first verse from the date that stands alone
   const total = pool.reduce((a, b) => a + b.total, 0);
   let r = (hash("lectio" + store.localDate()) + bump * 7919) % total;
   for (const b of pool) {
@@ -167,11 +217,11 @@ async function anywhere(bump = 0) {
       continue;
     }
     const data = await bible.loadBook(b.id);
-    const flat = [];
-    for (const ch of data.chapters) for (const v of ch.v) flat.push({ c: ch.c, n: v.n, t: v.t });
-    for (let k = 0; k < flat.length; k++) {
-      const v = flat[(r + k) % flat.length];
-      if (k > 60 || standsAlone(v.t)) return { book: b.id, chapter: v.c, verse: v.n, text: v.t, source: "anywhere" };
+    const all = [];
+    for (const ch of data.chapters) for (const v of ch.v) all.push({ c: ch.c, n: v.n, t: v.t });
+    for (let k = 0; k < all.length; k++) {
+      const v = all[(r + k) % all.length];
+      if (k > 60 || standsAlone(v.t)) return { book: b.id, chapter: v.c, verse: v.n, text: tidyQuotes(v.t), source: "anywhere" };
     }
   }
 }

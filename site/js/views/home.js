@@ -19,10 +19,23 @@ function vodHTML(vod) {
   if (vod.finished)
     return `<div class="card vod vod-done" style="padding:24px">${head}
       <div class="vod-done-title">You've finished ${esc(vod.name)}</div>
-      <p class="muted" style="margin:6px 0 16px">Every verse, one day at a time. What would you like next?</p>
+      <p class="muted" style="margin:6px 0 16px">One verse a day, all the way through. What would you like next?</p>
       <div class="vod-acts"><button class="btn primary" data-vod-again>Start ${esc(vod.name)} again</button><button class="btn" data-vod-set>Choose another</button>${
         vod.source === "chosen" ? `<button class="btn ghost" data-vod-reading>Follow what I'm reading</button>` : ""
       }</div></div>`;
+  if (vod.story) {
+    const st = vod.story;
+    return `<div class="card vod vod-story" style="padding:24px">${head}
+      <div class="vod-story-eyebrow">The story</div>
+      <a class="vod-story-title" href="#/read/${vod.book}/${st.start[0]}?v=${st.start[1]}">${esc(st.title)}</a>
+      <div class="muted small" style="font-weight:600;margin-top:2px">${esc(st.range)}</div>
+      <blockquote class="quote vod-text">${bible.verseHTML(vod.text.replace(/\n\t?/g, " "))}
+        <span class="muted small" style="font-style:normal;font-weight:600"> ${esc(bible.formatRef(vod.book, vod.chapter, vod.verse))}</span></blockquote>
+      <p class="vod-question">${esc(st.question)}</p>
+      <div class="vod-foot"><a class="btn small" href="#/read/${vod.book}/${st.start[0]}?v=${st.start[1]}">${icon("book")} Read the story</a>
+        <span class="muted small">${daily.sourceLine(vod)}</span><span class="spacer"></span>
+        <button class="btn ghost small" data-vod-another>Next</button></div></div>`;
+  }
   return `<div class="card vod" style="padding:24px">${head}
       <a class="quote vod-text" href="#/read/${vod.book}/${vod.chapter}?v=${vod.verse}">${vod.text
         .split("\n")
