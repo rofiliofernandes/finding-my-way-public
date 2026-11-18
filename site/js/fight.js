@@ -30,42 +30,42 @@ const PAIRS = [
 ];
 
 // Answers for your own words. keys: word stems to look for; q: what it means (for matching by meaning);
-// a: the answer that appears in gold; ref: the verse behind it (and the verse to think about).
+// say: 3–4 answers, each [what appears in gold, the verse behind it]. One you haven't seen lately is picked.
 const ANSWERS = [
   { id: "crisis", keys: ["suicid", "kill myself", "end my life", "end it all", "want to die", "self harm", "self-harm", "hurt myself", "cut myself"], q: "I want to die and end my life", a: "your life is precious to me", ref: "PSA 34:18", crisis: true },
-  { id: "exam", keys: ["exam", "test", "study", "studies", "school", "college", "university", "result", "marks", "grade", "interview", "assignment", "homework"], q: "worried about my exams and studies", a: "I will give you wisdom", ref: "JAS 1:5" },
-  { id: "health", keys: ["health", "sick", "ill", "disease", "pain", "hospital", "surgery", "cancer", "doctor", "fever", "injury", "recovery", "heal"], q: "sickness and someone's health", a: "I will heal you", ref: "JER 17:14" },
-  { id: "money", keys: ["money", "debt", "loan", "bill", "rent", "salary", "financ", "poor", "afford", "broke", "emi"], q: "money worries and paying bills", a: "I will provide", ref: "PHP 4:19" },
-  { id: "work", keys: ["job", "work", "boss", "career", "office", "unemploy", "fired", "promotion", "business", "deadline"], q: "trouble with my job and career", a: "I go before you", ref: "DEU 31:8" },
-  { id: "future", keys: ["future", "unknown", "uncertain", "what next", "plan", "visa", "move", "moving"], q: "uncertain about the future", a: "I know the plans I have for you", ref: "JER 29:11" },
-  { id: "decide", keys: ["decision", "decide", "confus", "direction", "choice", "which way", "don't know what"], q: "confused and can't decide which way to go", a: "I will guide you", ref: "PRO 3:5-6" },
-  { id: "family", keys: ["family", "parent", "dad", "father", "mom", "mum", "mother", "brother", "sister", "son", "daughter", "kids", "child", "home"], q: "trouble in my family at home", a: "I hold your family", ref: "PSA 127:1" },
-  { id: "heart", keys: ["breakup", "break up", "heartbreak", "divorce", "marriage", "wife", "husband", "girlfriend", "boyfriend", "relationship", "ex"], q: "heartbreak in my relationship", a: "I heal the brokenhearted", ref: "PSA 147:3" },
-  { id: "grief", keys: ["grief", "griev", "died", "death", "dead", "funeral", "passed away", "miss", "loss"], q: "grieving someone who died", a: "I am the resurrection", ref: "JHN 11:25" },
-  { id: "sin", keys: ["sin", "addict", "temptation", "tempt", "porn", "lust", "habit", "relapse", "drink", "smok", "gambl"], q: "struggling with sin and temptation", a: "I will make a way out", ref: "1CO 10:13" },
-  { id: "anger", keys: ["anger", "angry", "rage", "hate", "furious", "temper", "bitter"], q: "full of anger and bitterness", a: "let my peace rule your heart", ref: "COL 3:15" },
-  { id: "envy", keys: ["jealous", "envy", "compar"], q: "jealous and comparing myself to others", a: "I made you wonderfully", ref: "PSA 139:14" },
-  { id: "doubt", keys: ["doubt", "unbelief", "faith", "is god real", "can't pray", "cant pray"], q: "doubting God and struggling to believe", a: "believe, I am here", ref: "JHN 20:27" },
-  { id: "failure", keys: ["fail", "mistake", "messed", "mess up", "regret", "screwed"], q: "I failed and made a mistake", a: "my mercies are new", ref: "LAM 3:22-23" },
-  { id: "sleep", keys: ["sleep", "insomnia", "awake", "night", "nightmare"], q: "I can't sleep at night", a: "I give you sleep", ref: "PSA 4:8" },
-  { id: "enemy", keys: ["enemy", "enemies", "bully", "bullied", "people", "judg", "critic", "gossip", "mock", "they"], q: "people are against me and judging me", a: "I am for you", ref: "ROM 8:31" },
-  { id: "wait", keys: ["wait", "waiting", "delay", "patien", "slow", "stuck"], q: "waiting so long, feeling stuck", a: "wait on me, I will renew you", ref: "ISA 40:31" },
-  { id: "lonely", keys: ["alone", "lonely", "loneliness", "isolat", "no friends", "nobody"], q: "lonely with nobody to talk to", a: "I am with you always", ref: "MAT 28:20" },
-  { id: "shame", keys: ["shame", "ashamed", "embarrass", "ugly", "dirty"], q: "ashamed of myself", a: "you are mine", ref: "ISA 43:1" },
-  { id: "sad", keys: ["sad", "depress", "empty", "numb", "cry", "crying", "down", "low", "hurt"], q: "sad, depressed and empty inside", a: "I am close to you", ref: "PSA 34:18" },
-  { id: "stress", keys: ["stress", "pressure", "overwhelm", "burden", "busy", "too much", "heavy"], q: "overwhelmed and under pressure", a: "come to me, I will give you rest", ref: "MAT 11:28" },
-  { id: "anxiety", keys: ["anxi", "worr", "panic", "nervous", "overthink"], q: "anxious and worried", a: "cast it on me", ref: "1PE 5:7" },
-  { id: "fear", keys: ["fear", "afraid", "scared", "terrified", "fright"], q: "afraid and scared", a: "do not fear, I am with you", ref: "ISA 41:10" },
-  { id: "guilt", keys: ["guilt", "guilty", "sorry", "condemn"], q: "guilty about what I did", a: "no condemnation", ref: "ROM 8:1" },
-  { id: "weak", keys: ["weak", "tired", "exhaust", "burnout", "burnt out", "drained", "weary"], q: "weak and exhausted", a: "my strength in your weakness", ref: "2CO 12:9" },
-  { id: "betray", keys: ["betray", "cheat", "lied", "abandon", "left me", "trust"], q: "betrayed and abandoned by someone", a: "I will never leave you", ref: "HEB 13:5" },
-  { id: "forgive", keys: ["forgive", "grudge", "unforgiv"], q: "I can't forgive someone", a: "forgive, as I forgave you", ref: "COL 3:13" },
-  { id: "worth", keys: ["worthless", "useless", "not enough", "not good enough", "nobody", "loser", "stupid", "unloved", "unwanted", "rejected"], q: "I feel worthless and not good enough", a: "I love you, always", ref: "JER 31:3" },
-  { id: "hope", keys: ["hopeless", "despair", "give up", "giving up", "pointless", "no point"], q: "hopeless, I want to give up", a: "I am your hope", ref: "ROM 15:13" },
-  { id: "danger", keys: ["danger", "safe", "war", "travel", "accident", "storm", "attack"], q: "in danger, worried about safety", a: "I am your refuge", ref: "PSA 46:1" },
-  { id: "battle", keys: ["fight", "battle", "court", "case", "conflict", "lawsuit", "dispute"], q: "a fight or battle I am facing", a: "the battle is mine", ref: "2CH 20:15" },
+  { id: "exam", keys: ["exam", "test", "study", "studies", "school", "college", "university", "result", "marks", "grade", "interview", "assignment", "homework"], q: "worried about my exams and studies", say: [["I will give you wisdom", "JAS 1:5"], ["I will instruct you and teach you", "PSA 32:8"], ["you can do all things through me", "PHP 4:13"], ["don't be anxious, bring it to me", "PHP 4:6"]] },
+  { id: "health", keys: ["health", "sick", "ill", "disease", "pain", "hospital", "surgery", "cancer", "doctor", "fever", "injury", "recovery", "heal"], q: "sickness and someone's health", say: [["I will heal you", "JER 17:14"], ["I am the Lord who heals you", "EXO 15:26"], ["by my wounds you are healed", "1PE 2:24"], ["I sustain you on your sickbed", "PSA 41:3"]] },
+  { id: "money", keys: ["money", "debt", "loan", "bill", "rent", "salary", "financ", "poor", "afford", "broke", "emi"], q: "money worries and paying bills", say: [["I will provide", "PHP 4:19"], ["your Father knows what you need", "MAT 6:8"], ["seek first the Kingdom, and all this is added", "MAT 6:33"], ["I will never leave you", "HEB 13:5"]] },
+  { id: "work", keys: ["job", "work", "boss", "career", "office", "unemploy", "fired", "promotion", "business", "deadline"], q: "trouble with my job and career", say: [["I go before you", "DEU 31:8"], ["work as if for me", "COL 3:23"], ["commit your work to me", "PRO 16:3"], ["I will establish the work of your hands", "PSA 90:17"]] },
+  { id: "future", keys: ["future", "unknown", "uncertain", "what next", "plan", "visa", "move", "moving"], q: "uncertain about the future", say: [["I know the plans I have for you", "JER 29:11"], ["don't worry about tomorrow", "MAT 6:34"], ["I am doing a new thing", "ISA 43:19"]] },
+  { id: "decide", keys: ["decision", "decide", "confus", "direction", "choice", "which way", "don't know what"], q: "confused and can't decide which way to go", say: [["I will guide you", "PRO 3:5-6"], ["I will show you the way to go", "PSA 32:8"], ["ask, and I give wisdom", "JAS 1:5"], ["this is the way, walk in it", "ISA 30:21"]] },
+  { id: "family", keys: ["family", "parent", "dad", "father", "mom", "mum", "mother", "brother", "sister", "son", "daughter", "kids", "child", "home"], q: "trouble in my family at home", say: [["I hold your family", "PSA 127:1"], ["you and your household will be saved", "ACT 16:31"], ["love one another as I loved you", "JHN 13:34"]] },
+  { id: "heart", keys: ["breakup", "break up", "heartbreak", "divorce", "marriage", "wife", "husband", "girlfriend", "boyfriend", "relationship", "ex"], q: "heartbreak in my relationship", say: [["I heal the brokenhearted", "PSA 147:3"], ["I am close to the brokenhearted", "PSA 34:18"], ["love is patient, love is kind", "1CO 13:4"], ["I will never leave you", "HEB 13:5"]] },
+  { id: "grief", keys: ["grief", "griev", "died", "death", "dead", "funeral", "passed away", "miss", "loss"], q: "grieving someone who died", say: [["I am the resurrection", "JHN 11:25"], ["blessed are those who mourn", "MAT 5:4"], ["I will wipe away every tear", "REV 21:4"], ["I wept too", "JHN 11:35"]] },
+  { id: "sin", keys: ["sin", "addict", "temptation", "tempt", "porn", "lust", "habit", "relapse", "drink", "smok", "gambl"], q: "struggling with sin and temptation", say: [["I will make a way out", "1CO 10:13"], ["I forgive and cleanse you", "1JN 1:9"], ["my grace is enough", "2CO 12:9"], ["walk by my Spirit", "GAL 5:16"]] },
+  { id: "anger", keys: ["anger", "angry", "rage", "hate", "furious", "temper", "bitter"], q: "full of anger and bitterness", say: [["let my peace rule your heart", "COL 3:15"], ["be slow to anger", "JAS 1:19"], ["a gentle answer turns away wrath", "PRO 15:1"], ["don't let the sun go down on your anger", "EPH 4:26"]] },
+  { id: "envy", keys: ["jealous", "envy", "compar"], q: "jealous and comparing myself to others", say: [["I made you wonderfully", "PSA 139:14"], ["be content, I am with you", "HEB 13:5"], ["you are my workmanship", "EPH 2:10"]] },
+  { id: "doubt", keys: ["doubt", "unbelief", "faith", "is god real", "can't pray", "cant pray"], q: "doubting God and struggling to believe", say: [["believe, I am here", "JHN 20:27"], ["I help your unbelief", "MRK 9:24"], ["faith like a mustard seed is enough", "MAT 17:20"], ["blessed are those who believe without seeing", "JHN 20:29"]] },
+  { id: "failure", keys: ["fail", "mistake", "messed", "mess up", "regret", "screwed"], q: "I failed and made a mistake", say: [["my mercies are new", "LAM 3:22-23"], ["I make all things new", "REV 21:5"], ["I work all things for good", "ROM 8:28"], ["though you stumble, I hold you up", "PSA 37:24"]] },
+  { id: "sleep", keys: ["sleep", "insomnia", "awake", "night", "nightmare"], q: "I can't sleep at night", say: [["I give you sleep", "PSA 4:8"], ["I give my beloved sleep", "PSA 127:2"], ["I never slumber nor sleep", "PSA 121:4"]] },
+  { id: "enemy", keys: ["enemy", "enemies", "bully", "bullied", "people", "judg", "critic", "gossip", "mock", "they"], q: "people are against me and judging me", say: [["I am for you", "ROM 8:31"], ["I will fight for you", "EXO 14:14"], ["love them, pray for them", "MAT 5:44"], ["no weapon formed against you will prosper", "ISA 54:17"]] },
+  { id: "wait", keys: ["wait", "waiting", "delay", "patien", "slow", "stuck"], q: "waiting so long, feeling stuck", say: [["wait on me, I will renew you", "ISA 40:31"], ["be still, and wait", "PSA 37:7"], ["I make everything beautiful in its time", "ECC 3:11"], ["it will surely come, it won't delay", "HAB 2:3"]] },
+  { id: "lonely", keys: ["alone", "lonely", "loneliness", "isolat", "no friends", "nobody"], q: "lonely with nobody to talk to", say: [["I am with you always", "MAT 28:20"], ["I will never leave you", "HEB 13:5"], ["I set the lonely in families", "PSA 68:6"], ["I call you friend", "JHN 15:15"]] },
+  { id: "shame", keys: ["shame", "ashamed", "embarrass", "ugly", "dirty"], q: "ashamed of myself", say: [["you are mine", "ISA 43:1"], ["look to me, and your face will shine", "PSA 34:5"], ["I removed your sins far away", "PSA 103:12"], ["you are a new creation", "2CO 5:17"]] },
+  { id: "sad", keys: ["sad", "depress", "empty", "numb", "cry", "crying", "down", "low", "hurt"], q: "sad, depressed and empty inside", say: [["I am close to you", "PSA 34:18"], ["joy comes in the morning", "PSA 30:5"], ["I turn your mourning into dancing", "PSA 30:11"], ["I will comfort you", "ISA 66:13"]] },
+  { id: "stress", keys: ["stress", "pressure", "overwhelm", "burden", "busy", "too much", "heavy"], q: "overwhelmed and under pressure", say: [["come to me, I will give you rest", "MAT 11:28"], ["my yoke is easy", "MAT 11:30"], ["cast your burden on me", "PSA 55:22"], ["be still, and know that I am God", "PSA 46:10"]] },
+  { id: "anxiety", keys: ["anxi", "worr", "panic", "nervous", "overthink"], q: "anxious and worried", say: [["cast it on me", "1PE 5:7"], ["my peace I give you", "JHN 14:27"], ["don't be anxious, pray", "PHP 4:6"], ["my peace will guard your heart", "PHP 4:7"]] },
+  { id: "fear", keys: ["fear", "afraid", "scared", "terrified", "fright"], q: "afraid and scared", say: [["do not fear, I am with you", "ISA 41:10"], ["I give you power, love and self-control", "2TI 1:7"], ["perfect love casts out fear", "1JN 4:18"], ["I am your light; whom shall you fear?", "PSA 27:1"]] },
+  { id: "guilt", keys: ["guilt", "guilty", "sorry", "condemn"], q: "guilty about what I did", say: [["no condemnation", "ROM 8:1"], ["I forgive and cleanse you", "1JN 1:9"], ["your sins, white as snow", "ISA 1:18"], ["I remember your sins no more", "HEB 8:12"]] },
+  { id: "weak", keys: ["weak", "tired", "exhaust", "burnout", "burnt out", "drained", "weary"], q: "weak and exhausted", say: [["my strength in your weakness", "2CO 12:9"], ["I give strength to the weary", "ISA 40:29"], ["you can do all things through me", "PHP 4:13"], ["I am your strength and shield", "PSA 28:7"]] },
+  { id: "betray", keys: ["betray", "cheat", "lied", "abandon", "left me", "trust"], q: "betrayed and abandoned by someone", say: [["I will never leave you", "HEB 13:5"], ["though others leave you, I take you in", "PSA 27:10"], ["I heal the brokenhearted", "PSA 147:3"]] },
+  { id: "forgive", keys: ["forgive", "grudge", "unforgiv"], q: "I can't forgive someone", say: [["forgive, as I forgave you", "COL 3:13"], ["forgive, and you will be forgiven", "MAT 6:14"], ["forgive seventy times seven", "MAT 18:22"], ["love keeps no record of wrongs", "1CO 13:5"]] },
+  { id: "worth", keys: ["worthless", "useless", "not enough", "not good enough", "nobody", "loser", "stupid", "unloved", "unwanted", "rejected"], q: "I feel worthless and not good enough", say: [["I love you, always", "JER 31:3"], ["you are my child", "1JN 3:1"], ["I made you wonderfully", "PSA 139:14"], ["I chose you", "JHN 15:16"]] },
+  { id: "hope", keys: ["hopeless", "despair", "give up", "giving up", "pointless", "no point"], q: "hopeless, I want to give up", say: [["I am your hope", "ROM 15:13"], ["I give you a future and a hope", "JER 29:11"], ["hope does not disappoint", "ROM 5:5"], ["I make all things new", "REV 21:5"]] },
+  { id: "danger", keys: ["danger", "safe", "war", "travel", "accident", "storm", "attack"], q: "in danger, worried about safety", say: [["I am your refuge", "PSA 46:1"], ["I command my angels to guard you", "PSA 91:11"], ["I keep you from all harm", "PSA 121:7"], ["through the waters, I am with you", "ISA 43:2"]] },
+  { id: "battle", keys: ["fight", "battle", "court", "case", "conflict", "lawsuit", "dispute"], q: "a fight or battle I am facing", say: [["the battle is mine", "2CH 20:15"], ["I will fight for you", "EXO 14:14"], ["if I am for you, who can be against you?", "ROM 8:31"]] },
 ];
-const FALLBACK = { id: "with", a: "I am with you in this", ref: "ISA 43:2" };
+const FALLBACK = { id: "with", say: [["I am with you in this", "ISA 43:2"], ["I will never leave you", "HEB 13:5"], ["I am with you always", "MAT 28:20"], ["cast it on me", "1PE 5:7"]] };
 
 // Topics that count as "heavy" get the button, and the word the sheet starts with.
 export const HEAVY = { anger: "anger", fear: "fear", anxiety: "anxiety", grief: "grief", loneliness: "loneliness", guilt: "guilt", jealousy: "jealousy", temptation: "temptation", doubt: "doubt", weariness: "tired" };
@@ -108,8 +108,19 @@ async function byMeaning(word) {
 }
 
 export async function answerFor(word) {
-  return byKeywords(word) || (await byMeaning(word).catch(() => null)) || FALLBACK;
+  const e = byKeywords(word) || (await byMeaning(word).catch(() => null)) || FALLBACK;
+  if (!e.say) return e; // the crisis answer is always the same
+  // take the next answer for this kind of worry, so the same word doesn't always get the same answer
+  const seen = store.meta("fightSeen") || {};
+  const i = ((seen[e.id] ?? Math.floor(Math.random() * e.say.length)) + 1) % e.say.length;
+  seen[e.id] = i;
+  store.meta("fightSeen", seen);
+  const [a, ref] = e.say[i];
+  return { ...e, a, ref };
 }
+// "exams, money and dad's health" → three worries
+export const splitWords = (text) =>
+  text.split(/\s*(?:,|;|\/|&|\+|\band\b|\bor\b)\s*/i).map((w) => w.trim().replace(/\s+/g, " ")).filter(Boolean);
 
 /* ---------- the sheet ---------- */
 
@@ -137,8 +148,8 @@ export function open({ feeling = "", onEnd } = {}) {
         input.placeholder = words.length >= MAX_WORDS ? "That's enough for now" : "e.g. my exam, money, dad's health";
       };
       const add = () => {
-        const v = input.value.trim().replace(/\s+/g, " ");
-        if (v && words.length < MAX_WORDS && !words.some((w) => w.toLowerCase() === v.toLowerCase())) words.push(v);
+        for (const v of splitWords(input.value))
+          if (words.length < MAX_WORDS && !words.some((w) => w.toLowerCase() === v.toLowerCase())) words.push(v);
         input.value = "";
         draw();
       };
@@ -532,7 +543,7 @@ function pickVerse(mine, feeling) {
   if (c) return c.ref;
   if (mine.length) return mine[mine.length - 1].ref;
   const e = feeling && byKeywords(feeling);
-  return e ? e.ref : "ISA 41:10";
+  return e ? (e.say ? e.say[0][1] : e.ref) : "ISA 41:10";
 }
 
 async function endCard(mine, feeling, onEnd) {
