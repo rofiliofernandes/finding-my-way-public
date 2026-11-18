@@ -11,9 +11,11 @@ A personal Bible website: the **World English Bible, Catholic Edition** (all 73 
 - **Welcome and sign-in:** a new visitor chooses Continue with Google, Continue with email (Supabase emails a link and a 6-digit code; the code works on any device), or Continue without an account (everything stays on that device). Email needs custom SMTP in Supabase (e.g. Resend with your own domain) and the email templates to include `{{ .Token }}`.
 - **Story search:** type a famous story's name in Topics search, even misspelled ("wale story", "red see", "goliat"), and a card for it appears on top. About 90 stories in `site/js/stories.js`.
 - **Your goals:** three rings on Today: chapters today, days this week, and your journey (whole Bible, a Testament, the Gospels or the Psalms). Tap Change to set them.
-- **Verse for today:** from what you're reading, a book you choose (in order or surprise), or anywhere. Goals, this choice and the verses already shown sync across devices in one notes row of kind `settings`.
+- **Verse for today:** from what you're reading, a book you choose (in order or surprise), or anywhere. Verses are picked from a list chosen ahead of time by meaning (promises, prayers, comfort, wisdom, words of Jesus), so lines like "Legion" or "what fell among the thorns" don't come up on their own. In order mode, a story shows as a scene: its title, key verse and one question to think about. To rebuild the list: `node tools/build_daily.mjs` (usage at the top of the file). Goals, this choice and the verses already shown sync across devices in one notes row of kind `settings`.
 - **Motion:** shake for a treasure; tilt for gentle depth in the blessing and the fight scene. iPhones need You → Settings → Motion → Allow motion.
 - **"Let Him fight for you":** in Topics, a heavy feeling (Fear, Worry, Grief, Loneliness, Guilt, Tiredness and others) shows this button. A short sheet asks what's weighing on you (up to 5 words or phrases, kept on the device). Then double doors open, Jesus stands in the light, and each dark word is met by a beam from His heart, breaks into dust, and re-forms as its answer (fear → peace, "my exam" → "I will give you wisdom"). Your words come last. Afterwards you get a verse to think about and can **Save as a prayer**; saved prayers appear in the Journal and in the weekly review under **Given to Him**, which asks "How did it go?". Answers come from a hand-written list matched by keywords, and by meaning when meaning search is downloaded. Words about ending one's life get a gentle answer and a helpline (Tele-MANAS 14416, India). Prayers sync as notes of kind `prayer` with details stored as JSON in `body`, so no database change is needed.
+- **Weekly badges:** reach your weekly goal and a medallion named for that week of the Church year ("33rd Week in Ordinary Time", "2nd Week of Advent") drops in, coloured for the season. It plays once, the moment it's earned, and syncs so other devices don't repeat it.
+- **Monthly scenes and the Tree of Life:** read every day of a month (3 grace days allowed) for a new scene: a seed, the mustard tree, the vine, the lamp, living water, a city on a hill, rest, eagles' wings, the harvest, the gates, the race, and the Tree of Life. Missing a month never resets anything. A second year plays in gold. **You → Your journey** shows this year's badges and your tree, and replays any scene.
 - **Hidden treasures:** 46 small surprises. Some are hidden in verses (tap them), some in gestures, some come with Church seasons and hours, and some are milestones. Each one can be shared as an image card. The **You** page shows how many each chapter holds, and hints unlock once you've finished reading that chapter.
 - **The blessing:** after 5+ minutes of reading, pressing back from a passage shows a short animation ending with "Jesus loves you, my child."
 - **Optional AI:** "Explain", "Help me reflect", and "Ask about these passages" buttons, using your own Claude API key. It's off until you turn it on (see below).
@@ -24,10 +26,12 @@ A personal Bible website: the **World English Bible, Catholic Edition** (all 73 
 
 ```
 finding-my-way/
-├── site/                 ← this folder is the website; deploy it to Cloudflare Pages
+├── site/                 ← this folder is the website (static files)
 │   ├── index.html, css/, js/, data/ (Bible text as JSON), vendor/ (supabase-js)
 │   └── js/config.js      ← put your Supabase URL + key here
-├── functions/api/ai.js   ← optional: the small server function for AI explanations
+├── worker/index.js       ← Cloudflare Worker: serves site/, and /api/ai for the optional AI
+├── wrangler.jsonc        ← Worker settings
+├── functions/api/ai.js   ← the AI code the Worker calls
 ├── supabase/schema.sql   ← run once in Supabase to create the tables
 └── tools/                ← scripts that generated site/data (only needed to rebuild)
 ```
@@ -76,23 +80,17 @@ export const SUPABASE_ANON_KEY = "eyJhbGciOi...";   // or sb_publishable_...
 
 The anon (publishable) key is meant to be public, so it's fine to have it in your site. Row Level Security is what protects your data.
 
-## 5. Deploy to Cloudflare Pages
+## 5. Deploy to Cloudflare (Workers)
 
-**Easiest:** Cloudflare dashboard → **Workers & Pages → Create → Pages → Upload assets**, then drag in the `site` folder. There is no build step. (If you later turn on AI, use the wrangler command below instead, because drag-and-drop doesn't include the server function.)
+The site runs as a Cloudflare Worker with static assets (`wrangler.jsonc`). The Worker serves everything in `site/` and only runs code for `/api/*`.
 
-**Through GitHub (redeploys automatically on every push):** push this folder to a GitHub repository (private is fine), then in Cloudflare go to **Workers & Pages → Create → Pages → Connect to Git** and pick the repository. Use these build settings:
-- Framework preset: **None**
+**Through GitHub (redeploys on every push):** Cloudflare → **Workers & Pages → Create → Import a repository**, pick the repository, and use:
 - Build command: *(leave empty)*
-- Build output directory: **`site`**
+- Deploy command: **`npx wrangler deploy`**
 
-The `functions` folder at the top level is picked up automatically, which is what the optional AI needs.
+**Or from a terminal:** `npx wrangler deploy`
 
-**Or from a terminal:**
-```bash
-npx wrangler pages deploy site --project-name finding-my-way
-```
-
-Open your `https://<name>.pages.dev` URL, go to **You → Sign in with Google**, and do the same on your phone and other devices.
+Open your `https://<name>.<you>.workers.dev` URL (or your own domain), go to **You → Sign in with Google**, and do the same on your phone and other devices.
 
 **Keep it to just you (recommended):** after you've signed in once, go to Supabase → **Authentication → Sign In / Providers** (or **Auth settings**) and turn off **Allow new users to sign up**. Anyone else who finds the URL can still read the Bible, but they can't create an account on your database.
 
@@ -117,16 +115,13 @@ This adds **Explain**, **Help me reflect**, and **Ask about these passages**. It
 
 1. Get an API key at [console.anthropic.com](https://console.anthropic.com) and add a small amount of credit.
 2. Run the updated `supabase/schema.sql` again in the Supabase SQL Editor. This adds the usage counter, and running it again is safe.
-3. Deploy with **wrangler** from the `finding-my-way` folder, since the dashboard drag-and-drop upload doesn't include the `functions` folder:
-   ```bash
-   npx wrangler pages deploy site --project-name finding-my-way
-   ```
-4. In Cloudflare → your Pages project → **Settings → Variables and Secrets**, add:
+3. The Worker already routes `/api/ai` to this code; nothing else to deploy.
+4. In Cloudflare → your Worker → **Settings → Variables and Secrets**, add:
    - `ANTHROPIC_API_KEY`: your key (type **Secret**)
    - `SUPABASE_URL` and `SUPABASE_ANON_KEY`: the same values as in `config.js`
    - `ALLOWED_EMAILS`: your Google email
    - optional: `ANTHROPIC_MODEL` (default `claude-haiku-5-5`) and `MONTHLY_LIMIT` (default `600`)
-5. Set `AI_ENABLED = true` in `site/js/config.js`, then deploy again.
+5. Set `AI_ENABLED = true` in `site/js/config.js`, then push (or deploy again).
 
 ## How sync works
 

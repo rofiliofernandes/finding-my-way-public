@@ -7,6 +7,7 @@ import * as blessing from "../blessing.js";
 import * as daily from "../daily.js";
 import * as motion from "../motion.js";
 import * as welcome from "../welcome.js";
+import * as milestones from "../milestones.js";
 import * as eggs from "../eggs.js";
 import * as act from "../activity.js";
 import * as bible from "../bible.js";
@@ -243,6 +244,7 @@ export function renderSettings(main) {
         ${account}
       </section>
 
+      ${milestones.journeyHTML()}
       ${treasuresHTML()}
 
       <section class="card section">
@@ -317,6 +319,11 @@ export function renderSettings(main) {
     drawMotion();
     $("[data-daily]", main).onclick = () => daily.choose(() => ($("#dailyDesc", main).textContent = daily.describe()));
     wireTreasures(main);
+    milestones.wireJourney(main);
+    if (new URLSearchParams(location.hash.split("?")[1] || "").get("journey")) {
+      setTimeout(() => main.querySelector("#journey")?.scrollIntoView({ block: "start", behavior: "smooth" }), 60);
+      history.replaceState(history.state, "", "#/settings");
+    }
     // arriving from "See in Treasures": open that treasure's door and bring it into view
     const want = new URLSearchParams((location.hash.split("?")[1] || "")).get("treasure");
     if (want) {
