@@ -501,21 +501,32 @@ export function init() {
   });
 
   // pull down past the top of the Today page
+  // On phones the browser's own pull-to-refresh would reload the page first, so on Today we take over the pull:
+  // the page stretches down a little (with resistance), the treasure appears, and it springs back on release.
   let startY = null;
+  let pulled = 0;
   let wheel = 0;
   let wheelT = 0;
   const onToday = () => (location.hash || "#/").replace(/^#/, "") === "/" || location.hash === "";
-  window.addEventListener("touchstart", (e) => (startY = onToday() && scrollY <= 0 ? e.touches[0].clientY : null), { passive: true });
+  const page = () => document.getElementById("view") || document.body;
+  const stretch = (px, ease) => { const el = page(); el.style.transition = ease ? "transform .35s cubic-bezier(.2,.8,.2,1)" : "none"; el.style.transform = px ? `translateY(${px}px)` : ""; };
+  window.addEventListener("touchstart", (e) => { pulled = 0; startY = onToday() && scrollY <= 0 && e.touches.length === 1 ? e.touches[0].clientY : null; }, { passive: true });
   window.addEventListener(
     "touchmove",
     (e) => {
-      if (startY != null && e.touches[0].clientY - startY > 140) {
-        startY = null;
-        find("seek");
-      }
+      if (startY == null) return;
+      const dy = e.touches[0].clientY - startY;
+      if (dy <= 0 || scrollY > 0) { if (pulled) stretch(0, true); startY = null; pulled = 0; return; }
+      if (e.cancelable) e.preventDefault();             // stops pull-to-refresh
+      const px = Math.min(110, dy * .45);
+      stretch(px, false);
+      if (dy > 140 && pulled < 2) { pulled = 2; find("seek"); } else if (!pulled) pulled = 1;
     },
-    { passive: true }
+    { passive: false }
   );
+  const release = () => { if (startY != null || pulled) stretch(0, true); startY = null; pulled = 0; };
+  window.addEventListener("touchend", release, { passive: true });
+  window.addEventListener("touchcancel", release, { passive: true });
   window.addEventListener(
     "wheel",
     (e) => {

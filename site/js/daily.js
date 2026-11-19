@@ -113,7 +113,7 @@ export async function today({ another = false } = {}) {
   const s = state();
   const day = store.localDate();
   const cfg = settings();
-  const cfgKey = JSON.stringify(cfg);
+  const cfgKey = JSON.stringify(cfg) + "|v2"; // v2: picks from the chosen-verses list (a pick saved by the older version is redone once)
   if (!another && s.day === day && s.cfg === cfgKey && s.pick) return s.pick;
 
   let pick = null;
