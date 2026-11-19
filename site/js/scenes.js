@@ -553,41 +553,103 @@ function month10(t) {
 
 /* ---------- month 11: a runner nears the finish, with a crowd of witnesses ---------- */
 function month11(t) {
-  const sky = ctx.createLinearGradient(0, 0, 0, 380); sky.addColorStop(0, "#f6b27a"); sky.addColorStop(1, "#fbe6c2"); ctx.fillStyle = sky; ctx.fillRect(0, 0, W, 380);
-  glow(195, 330, 180, "255,230,170", .8);
-  const run = win(t, 0, 6.2), fin = eo(win(t, 4.8, 5.6));
-  // the stands, rising away on both sides, and grass beside the track
-  const st = ctx.createLinearGradient(0, 380, 0, H); st.addColorStop(0, "#8a6a70"); st.addColorStop(1, "#4a3a48"); ctx.fillStyle = st; ctx.fillRect(0, 380, W, H - 380);
-  ctx.strokeStyle = "rgba(255,255,255,.08)"; ctx.lineWidth = 1; for (let r = 0; r < 14; r++) { const y = 390 + r * r * 2.2; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
-  ctx.fillStyle = "#6f9a52"; ctx.beginPath(); ctx.moveTo(150, 380); ctx.lineTo(240, 380); ctx.lineTo(390, H); ctx.lineTo(0, H); ctx.fill();
-  // the stands on both sides: the witnesses light up as the runner passes
-  for (const side of [-1, 1]) for (let r = 0; r < 5; r++) for (let i = 0; i < 9; i++) {
-    const z = i / 8, x = 195 + side * (60 + z * 150 + r * 14), y = 360 + z * 330 - r * (16 + z * 8);
-    const lit = win(run * 9 - (8 - i) * .6, 0, 1), s = .6 + z * .9;
-    ctx.fillStyle = lit > 0 ? mix("#6a5a6e", "#ffd47a", lit) : "#6a5a6e";
-    ctx.beginPath(); ctx.arc(x, y - 7 * s, 4.5 * s, 0, 7); ctx.fill(); ctx.fillRect(x - 4 * s, y - 3 * s, 8 * s, 9 * s);
-    if (lit > 0 && (i + r) % 3 === 0) { ctx.strokeStyle = `rgba(255,214,122,${lit})`; ctx.lineWidth = 1.6 * s; ctx.beginPath(); ctx.moveTo(x, y - 2 * s); ctx.lineTo(x + side * -6 * s, y - 14 * s - Math.sin(t * 8 + i) * 3); ctx.stroke(); }
+  // side view: the runner keeps the centre while the stands and track rush past
+  const V = 560, T1 = 5.0, SLOW = 1.0, CAM = .45;         // speed (px/s), finish time, runner and camera slow-downs
+  const ease2 = (s) => { const k = clamp(t - T1, 0, s); return V * Math.min(t, T1) + V * (k - k * k / (2 * s)); };
+  const run = ease2(SLOW), dist = ease2(CAM);              // the runner coasts on past the line; the camera settles sooner
+  const A = t < T1 ? 1 : 1 - clamp(t - T1, 0, SLOW) / SLOW; // stride size: 1 running → 0 standing
+  const up = eo(win(t, T1 + .15, T1 + .9));                 // arms raised in joy
+  const fin = eo(win(t, T1, T1 + .6));
+  const RX0 = 140, RX = RX0 + (run - dist), G = 548;                                  // runner x, ground line
+  // sky, and the light ahead where the race ends
+  const sky = ctx.createLinearGradient(0, 0, 0, 300); sky.addColorStop(0, "#f2a46e"); sky.addColorStop(1, "#fde7c0"); ctx.fillStyle = sky; ctx.fillRect(0, 0, W, 300);
+  glow(390, 250, 260, "255,236,180", .9);
+  // the stands: rows of witnesses, nearer rows lower and faster
+  ctx.fillStyle = "#7b5c66"; ctx.fillRect(0, 230, W, 230);
+  for (let r = 4; r >= 0; r--) {
+    const y = 448 - r * 44, sc = 1 - r * .1, sp = .45 - r * .05, gap = 19 * sc;
+    ctx.fillStyle = mix("#8f6f78", "#6a4d58", r / 4); ctx.fillRect(0, y - 4, W, 48);
+    ctx.fillStyle = "rgba(255,255,255,.12)"; ctx.fillRect(0, y + 2, W, 2);
+    const off = dist * sp, i0 = Math.floor((off - 20) / gap), i1 = Math.ceil((off + W + 20) / gap);
+    for (let i = i0; i <= i1; i++) {
+      const x = i * gap - off + (r % 2) * gap / 2, rr = rng(i * 7 + r * 131)(); if (rr < .12) continue;
+      const lit = clamp((RX0 + 40 - x) / 120) * clamp(t / .4);  // lights up once the runner has passed
+      const by = y - 2 - Math.abs(Math.sin(t * 7 + i)) * 3 * lit, hs = 5.2 * sc;
+      ctx.fillStyle = mix(mix("#5a4250", "#4a3644", rr), "#ffcf73", lit * .85);
+      ctx.beginPath(); ctx.arc(x, by - 16 * sc, hs, 0, 7); ctx.fill(); roundRect(x - 6 * sc, by - 10 * sc, 12 * sc, 14 * sc, 4 * sc); ctx.fill();
+      if (lit > .3 && rr > .35) { ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 2.4 * sc; ctx.lineCap = "round"; const w = Math.sin(t * 9 + i * 1.7) * 3;
+        ctx.beginPath(); ctx.moveTo(x - 5 * sc, by - 8 * sc); ctx.lineTo(x - 9 * sc + w, by - 24 * sc); ctx.moveTo(x + 5 * sc, by - 8 * sc); ctx.lineTo(x + 9 * sc + w, by - 24 * sc); ctx.stroke(); }
+    }
   }
-  // the track, rushing toward us
-  ctx.fillStyle = "#c46a4a"; ctx.beginPath(); ctx.moveTo(170, 380); ctx.lineTo(220, 380); ctx.lineTo(330, H); ctx.lineTo(60, H); ctx.fill();
-  ctx.strokeStyle = "rgba(255,255,255,.8)"; ctx.lineWidth = 2; for (const k of [-1, 1]) { ctx.beginPath(); ctx.moveTo(195 + k * 25, 380); ctx.lineTo(195 + k * 135, H); ctx.stroke(); }
-  for (let i = 0; i < 8; i++) { const k = ((i / 8 + t * .5) % 1), y = 380 + k * k * (H - 380); ctx.strokeStyle = `rgba(255,255,255,${.5 * k})`; ctx.beginPath(); ctx.moveTo(195 - 2 - k * 6, y); ctx.lineTo(195 + 2 + k * 6, y); ctx.stroke(); }
-  // the finish ribbon comes near and breaks
-  const rz = eo(win(t, 3.8, 5.0)), ry = lerp(400, 520, rz), rw = lerp(60, 300, rz);
-  if (fin < 1) { ctx.strokeStyle = "#fff"; ctx.lineWidth = 3 + rz * 3; ctx.beginPath(); ctx.moveTo(195 - rw / 2, ry); ctx.lineTo(195 + rw / 2, ry); ctx.stroke(); }
-  else for (const k of [-1, 1]) { const a = win(t, 5.6, 6.6); ctx.strokeStyle = "#fff"; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(195 + k * 150, ry); ctx.quadraticCurveTo(195 + k * 80, ry + 30 * a, 195 + k * (10 + 50 * a), ry + 70 * a); ctx.stroke(); }
-  // the runner (from behind), arms and legs swinging
-  const cyc = t * 9, rx = 195, base = 600 - rz * 30;
-  ctx.save(); ctx.translate(rx, base); ctx.strokeStyle = "#2d2633"; ctx.lineCap = "round";
-  ctx.lineWidth = 9; for (const k of [0, Math.PI]) { const a = Math.sin(cyc + k); ctx.beginPath(); ctx.moveTo(0, -40); ctx.lineTo(a * 14, -12); ctx.lineTo(a * 8 + (a > 0 ? 6 : -2), 18); ctx.stroke(); }
-  ctx.lineWidth = 7; for (const k of [0, Math.PI]) { const a = Math.sin(cyc + k + Math.PI); ctx.beginPath(); ctx.moveTo(0, -80); ctx.lineTo(a * 18 + (k ? -12 : 12), -60); ctx.lineTo(a * 22 + (k ? -14 : 14), -42); ctx.stroke(); }
-  ctx.fillStyle = "#2d2633"; ctx.beginPath(); ctx.ellipse(0, -62, 15, 26, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.arc(0, -100, 11, 0, 7); ctx.fill();
-  ctx.restore();
+  // the wall in front of the stands
+  ctx.fillStyle = "#4c3a46"; ctx.fillRect(0, 460, W, 22);
+  // the track, with lanes and marks streaming past
+  const tr = ctx.createLinearGradient(0, 482, 0, H); tr.addColorStop(0, "#b85f44"); tr.addColorStop(1, "#d97a55"); ctx.fillStyle = tr; ctx.fillRect(0, 482, W, H - 482);
+  ctx.fillStyle = "rgba(255,255,255,.75)"; for (const [y, h] of [[500, 2], [528, 2.5], [576, 3], [650, 3.5], [744, 4]]) ctx.fillRect(0, y, W, h);
+  for (const [y, k] of [[514, .75], [560, 1], [612, 1.25], [696, 1.6]]) { const g = 120 * k, o = (dist * k) % g;
+    ctx.fillStyle = "rgba(255,255,255,.22)"; for (let x = -o; x < W; x += g) ctx.fillRect(x, y, 26 * k, 2 * k); }
+  // speed streaks while running
+  if (A > .2) { ctx.strokeStyle = `rgba(255,240,215,${.25 * A})`; ctx.lineWidth = 1.5; const rs = rng(5);
+    for (let i = 0; i < 9; i++) { const y = 300 + rs() * 260, L2 = 40 + rs() * 50, x = W - ((dist * (1.4 + rs()) + rs() * 900) % (W + 200)); ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + L2, y); ctx.stroke(); } }
+  // the finish: two posts and a ribbon, coming toward the runner
+  const fx = RX0 + 22 + (V * T1 - dist);                     // reaches the runner's chest at T1
+  const near = [fx + 26, 600], far = [fx - 22, 500], hN = 118, hF = 96;
+  const post = (p, h) => { ctx.fillStyle = "#f6efe2"; ctx.fillRect(p[0] - 3, p[1] - h, 6, h); ctx.fillStyle = "#ffcf6a"; ctx.beginPath(); ctx.arc(p[0], p[1] - h, 5, 0, 7); ctx.fill(); };
+  const ribbon = () => {
+    ctx.strokeStyle = "#fff"; ctx.lineWidth = 3.5; ctx.lineCap = "round";
+    const N = [near[0], near[1] - hN + 14], F = [far[0], far[1] - hF + 12];
+    if (t < T1) { ctx.beginPath(); ctx.moveTo(N[0], N[1]); ctx.lineTo(F[0], F[1]); ctx.stroke(); return; }
+    const a = eo(win(t, T1, T1 + 1.2)), sw = Math.sin(t * 6) * 6 * (1 - a * .5);
+    for (const [P, k] of [[N, -1], [F, 1]]) { ctx.beginPath(); ctx.moveTo(P[0], P[1]);
+      ctx.quadraticCurveTo(P[0] + k * -10, P[1] + 20 * a, P[0] + k * (-4 - 10 * a) + sw, P[1] + 30 + 40 * a); ctx.stroke(); }
+  };
+  if (fx > -60 && fx < W + 60) post(far, hF);
+  if (fin > 0) { ctx.save(); ctx.globalCompositeOperation = "lighter"; glow(fx, 430, 230, "255,226,160", .45 * fin); ctx.restore(); }
+  // the runner
+  runner(t, run, A, up, RX, G);
+  if (fx > -60 && fx < W + 60) { post(near, hN); ribbon(); }
   // light and confetti at the finish
-  if (fin > 0) { ctx.save(); ctx.globalCompositeOperation = "lighter"; glow(195, 500, 240, "255,226,160", .5 * fin); ctx.restore();
-    const rc = rng(19); for (let i = 0; i < 40; i++) { const k = win(t, 5.4 + rc() * .3, 6.8 + rc() * .5); if (k <= 0 || k >= 1) continue; ctx.fillStyle = ["#ffd36a", "#ffffff", "#f6a37a"][i % 3]; const a = rc() * 7, d = 40 + rc() * 160; ctx.fillRect(195 + Math.cos(a) * d * eo(k), 480 + Math.sin(a) * d * eo(k) + 80 * k * k, 4, 4); } }
+  if (fin > 0) { const rc = rng(19); for (let i = 0; i < 46; i++) { const k = win(t, T1 + .1 + rc() * .3, T1 + 1.6 + rc() * .6); if (k <= 0 || k >= 1) continue;
+      ctx.fillStyle = ["#ffd36a", "#ffffff", "#f6a37a"][i % 3]; const an = -Math.PI * (.1 + rc() * .8), d = 60 + rc() * 170;
+      ctx.fillRect(fx + Math.cos(an) * d * eo(k), 420 + Math.sin(an) * d * eo(k) + 150 * k * k, 4, 4); } }
   topLabel(t, L.big, L.small, "120,60,20", "70,40,20");
-  caption(t, 6.4, "…seeing we are surrounded by so great a cloud of witnesses… let's run with perseverance the race that is set before us.", "Hebrews 12:1", { y: 620, ink: "58,30,18", sub: "140,70,30", panel: "rgba(255,248,236,.86)" });
+  caption(t, 6.4, "…seeing we are surrounded by so great a cloud of witnesses… let's run with perseverance the race that is set before us.", "Hebrews 12:1", { y: 612, ink: "58,30,18", sub: "140,70,30", panel: "rgba(255,248,236,.88)" });
+}
+// a runner seen from the side, facing right. A = stride (1 running, 0 standing), up = arms raised
+function runner(t, dist, A, up, x, G) {
+  const p = dist / 86;                                       // one stride cycle per ~540px of track
+  const L1 = 50, L2 = 48, LT = 64;                           // thigh, shin, torso
+  const at = (o, an, len) => [o[0] + Math.sin(an) * len, o[1] + Math.cos(an) * len]; // angle from straight down, + = forward
+  const legs = [0, Math.PI].map((ph) => { const q = p + ph, c = Math.cos(q + .35);
+    const th = A * (.08 + .66 * Math.sin(q)), kn = .1 + A * (1.55 * Math.pow(Math.max(0, c), 1.2) + .28 * Math.max(0, -c));
+    return { th, sh: th - kn }; });
+  // keep the lowest foot on the ground; a little lift between steps
+  const drop = Math.max(...legs.map((l) => Math.cos(l.th) * L1 + Math.cos(l.sh) * L2));
+  const lift = A * 7 * Math.pow(Math.max(0, Math.sin(2 * p + .9)), 2);
+  const hip = [x, G - drop - 6 - lift];
+  const lean = A * .2 - up * .06;
+  const sho = [hip[0] + Math.sin(lean) * LT, hip[1] - Math.cos(lean) * LT];
+  const head = [sho[0] + Math.sin(lean) * 19, sho[1] - Math.cos(lean) * 19];
+  const arms = [0, Math.PI].map((ph, i) => { const q = p + ph;
+    const ua = lerp(-.8 * A * Math.sin(q) - .1, Math.PI - .5 + i * .85, up), fa = lerp(ua + 1.6 * Math.max(A, .3), ua - .15, up);
+    return { ua, fa }; });
+  const leg = (l, col) => { const k = at(hip, l.th, L1), an = at(k, l.sh, L2), f = at(an, l.sh + 1.45, 17);
+    ctx.strokeStyle = col; ctx.lineWidth = 13; ctx.beginPath(); ctx.moveTo(hip[0], hip[1]); ctx.lineTo(k[0], k[1]); ctx.stroke();
+    ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(k[0], k[1]); ctx.lineTo(an[0], an[1]); ctx.stroke();
+    ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(an[0], an[1]); ctx.lineTo(f[0], f[1]); ctx.stroke(); };
+  const arm = (a, col) => { const s0 = [sho[0], sho[1] + 6], e = at(s0, a.ua, 34), h = at(e, a.fa, 31);
+    ctx.strokeStyle = col; ctx.lineWidth = 9; ctx.beginPath(); ctx.moveTo(s0[0], s0[1]); ctx.lineTo(e[0], e[1]); ctx.stroke();
+    ctx.lineWidth = 7.5; ctx.beginPath(); ctx.moveTo(e[0], e[1]); ctx.lineTo(h[0], h[1]); ctx.stroke(); };
+  ctx.save(); ctx.lineCap = "round"; ctx.lineJoin = "round";
+  // shadow on the track
+  ctx.fillStyle = "rgba(60,20,10,.25)"; ctx.beginPath(); ctx.ellipse(x + 6, G + 2, 46 - lift * 2, 6, 0, 0, 7); ctx.fill();
+  // warm rim light from the finish ahead
+  ctx.save(); ctx.globalCompositeOperation = "lighter"; glow(x + 30, hip[1] - 40, 120, "255,210,150", .18); ctx.restore();
+  arm(arms[1], "#241d2b"); leg(legs[1], "#241d2b");
+  ctx.strokeStyle = "#3a2f44"; ctx.lineWidth = 24; ctx.beginPath(); ctx.moveTo(hip[0], hip[1]); ctx.lineTo(sho[0], sho[1]); ctx.stroke();
+  ctx.fillStyle = "#3a2f44"; ctx.beginPath(); ctx.arc(head[0], head[1], 13, 0, 7); ctx.fill();
+  leg(legs[0], "#40354b"); arm(arms[0], "#40354b");
+  ctx.restore();
 }
 
 /* ---------- the twelve, in order ---------- */
@@ -602,7 +664,7 @@ export const MONTHS = [
   { name: "Wings like eagles", draw: month8, dur: 8.6, edge: ["#2f7fd0", "#bfe2fa"] },
   { name: "Fields white for harvest", draw: month9, dur: 8.6, edge: ["#c9a070", "#c99a3e"] },
   { name: "The gates open", draw: month10, dur: 8.0, edge: ["#2a2230", "#3e3442"] },
-  { name: "The race", draw: month11, dur: 9.0, edge: ["#f6b27a", "#c46a4a"] },
+  { name: "The race", draw: month11, dur: 9.0, edge: ["#f2a46e", "#d97a55"] },
   { name: "The Tree of Life", draw: month12, dur: 11.4, edge: ["#fff6e2", "#8fb36f"] },
 ];
 
