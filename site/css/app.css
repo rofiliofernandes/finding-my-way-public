@@ -554,3 +554,11 @@ body.welcome-open { overflow: hidden; }
 .install-steps li { margin: 6px 0; }
 .install-steps .inl { display: inline-block; width: 18px; height: 18px; vertical-align: -4px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .install-steps .inl circle { fill: currentColor; stroke: none; }
+
+/* Your name (You page) */
+.name-in { width: 180px; max-width: 45vw; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font: inherit; }
+.name-in:focus { outline: 2px solid color-mix(in srgb, var(--accent) 50%, transparent); outline-offset: 1px; }
+
+/* the name question on the welcome screen */
+.welcome-name { display: grid; gap: 6px; margin: 4px 0 18px; text-align: left; font-weight: 600; font-size: 14px; }
+.welcome-name input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font: inherit; font-weight: 400; font-size: 16px; }

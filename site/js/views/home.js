@@ -5,6 +5,7 @@ import { esc, icon } from "../ui.js";
 import { TOPICS } from "../topics.js";
 import * as daily from "../daily.js";
 import * as goals from "../goals.js";
+import * as synced from "../synced.js";
 
 function greeting() {
   const h = new Date().getHours();
@@ -13,6 +14,8 @@ function greeting() {
   if (h < 17) return "Good afternoon";
   return "Good evening";
 }
+const named = (g) => { const n = String(synced.get("name") || "").trim(); return n ? `${g}, ${esc(n)}` : g; };
+
 
 function vodHTML(vod) {
   const head = `<div class="vod-head"><div class="eyebrow">Verse for today</div><button class="btn icon ghost small" data-vod-set title="Where it comes from" aria-label="Where the verse for today comes from">⋯</button></div>`;
@@ -107,7 +110,7 @@ export async function renderHome(main) {
   main.innerHTML = `
     <div class="hello">
       <div class="eyebrow">${new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</div>
-      <h1 style="margin-top:4px">${greeting()}</h1>
+      <h1 style="margin-top:4px">${named(greeting())}</h1>
     </div>
 
     <div id="vod">${vodHTML(vod)}</div>

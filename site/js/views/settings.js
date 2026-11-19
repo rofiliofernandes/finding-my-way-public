@@ -9,6 +9,7 @@ import * as motion from "../motion.js";
 import * as welcome from "../welcome.js";
 import * as milestones from "../milestones.js";
 import * as install from "../install.js";
+import * as synced from "../synced.js";
 import * as eggs from "../eggs.js";
 import * as act from "../activity.js";
 import * as bible from "../bible.js";
@@ -242,6 +243,8 @@ export function renderSettings(main) {
 
       <section class="card section">
         <div class="section-head"><h2>Account</h2></div>
+        <div class="setting"><div class="what"><b>Your name</b><span class="muted small">Used in the greeting on Today.</span></div>
+          <input class="name-in" id="yourName" maxlength="30" autocomplete="given-name" placeholder="Your name" value="${esc(synced.get("name") || "")}"></div>
         ${account}
         ${install.settingHTML()}
       </section>
@@ -323,6 +326,10 @@ export function renderSettings(main) {
     wireTreasures(main);
     milestones.wireJourney(main);
     install.wire(main);
+    const nameIn = $("#yourName", main);
+    const saveName = () => { const v = nameIn.value.trim().slice(0, 30); if (v === (synced.get("name") || "")) return; synced.set("name", v); toast(v ? "Saved" : "Name removed"); };
+    nameIn?.addEventListener("change", saveName);
+    nameIn?.addEventListener("keydown", (e) => { if (e.key === "Enter") nameIn.blur(); });
     if (new URLSearchParams(location.hash.split("?")[1] || "").get("journey")) {
       setTimeout(() => main.querySelector("#journey")?.scrollIntoView({ block: "start", behavior: "smooth" }), 60);
       history.replaceState(history.state, "", "#/settings");

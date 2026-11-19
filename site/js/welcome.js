@@ -3,6 +3,7 @@
 // reminder a week later for people who chose no account.
 import * as store from "./store.js";
 import * as sync from "./sync.js";
+import * as synced from "./synced.js";
 import { openModal, toast } from "./ui.js";
 
 export const GOOGLE = `<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.5l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.6 5.4 2.6 13.2l7.8 6.1C12.3 13.5 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.5 5.8c4.4-4 6.8-10 6.8-17.2z"/><path fill="#FBBC05" d="M10.4 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.8-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.3 0-11.7-4-13.6-9.6l-7.8 6.1C6.6 42.6 14.6 48 24 48z"/></svg>`;
@@ -115,12 +116,22 @@ function hasHistory() {
 export function maybeShow() {
   if (!sync.status.configured) return;
   if (!store.meta("firstOpen")) store.meta("firstOpen", Date.now());
-  if (sync.user()) return store.meta("welcomed") || store.meta("welcomed", "account");
+  if (sync.user()) { nameFromAccount(); return store.meta("welcomed") || store.meta("welcomed", "account"); }
   if (!store.meta("welcomed")) {
     if (hasHistory()) return store.meta("welcomed", "existing"); // already using the app on this device
     return show();
   }
   if (store.meta("welcomed") === "skip" && !store.meta("remindedSignIn") && Date.now() - store.meta("firstOpen") > WEEK) remind();
+}
+
+// Signed in but no name saved yet: use the first name from the account (Google gives one)
+export function nameFromAccount() {
+  if (String(synced.get("name") || "").trim()) return false;
+  const m = sync.user()?.user_metadata || {};
+  const first = String(m.given_name || m.full_name || m.name || "").trim().split(/\s+/)[0];
+  if (!first || first.length > 30 || first.includes("@")) return false;
+  synced.set("name", first);
+  return true;
 }
 
 export function show() {
@@ -135,6 +146,8 @@ export function show() {
       <div class="welcome-latin">Iter ad Dominum</div>
       <h1>Finding my way to Jesus Christ</h1>
       <p class="welcome-lede">Read the Bible, keep a journal, and let it follow you to every device.</p>
+      <label class="welcome-name"><span>What should we call you?</span>
+        <input id="wName" maxlength="30" autocomplete="given-name" placeholder="Your first name" value="${String(synced.get("name") || "").replace(/"/g, "&quot;")}"></label>
       <div class="welcome-choices">
         <button class="btn google-btn welcome-btn" data-w-google>${GOOGLE} Continue with Google</button>
         <button class="btn welcome-btn" data-w-email>${MAIL} Continue with email</button>
@@ -147,11 +160,18 @@ export function show() {
   document.body.appendChild(el);
   document.body.classList.add("welcome-open");
   requestAnimationFrame(() => el.classList.add("in"));
+  const nameIn = el.querySelector("#wName");
+  const saveName = () => { const v = nameIn.value.trim().slice(0, 30); if (v && v !== synced.get("name")) synced.set("name", v); };
+  nameIn.addEventListener("change", saveName);
+  nameIn.addEventListener("keydown", (e) => { if (e.key === "Enter") nameIn.blur(); });
+  el.addEventListener("click", (e) => { if (e.target.closest("button")) saveName(); }, true);
   const close = (how) => {
+    saveName();
     store.meta("welcomed", how);
     el.classList.remove("in");
     document.body.classList.remove("welcome-open");
     setTimeout(() => el.remove(), 350);
+    window.dispatchEvent(new HashChangeEvent("hashchange")); // redraw the page behind, now with the name
   };
   el.querySelector("[data-w-google]").onclick = () => {
     store.meta("welcomed", "google");

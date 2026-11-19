@@ -22,6 +22,7 @@ A personal Bible website: the **World English Bible, Catholic Edition** (all 73 
 - **History:** a day-by-day view of each week (what you read and the notes you wrote), a **weekly reflection**, a 26-week activity map, your streak, and progress through every book.
 - **Journal:** all your notes, weekly reflections and saved verses, with search.
 - **Today:** a verse for the day, "continue where you left off", your week at a glance, and an older note to revisit.
+- **Your name:** asked on the welcome screen (or taken from the Google account's first name), changeable on the You page; Today greets you with it ("Good evening, Anna"). Syncs across devices.
 - **Install:** an Install button in the top bar and on the You page. On Android, Chrome and Edge it opens the browser's install prompt; on iPhone and iPad it shows the two steps (Share → Add to Home Screen). It hides once the app is installed.
 - It works offline once installed (add it to your home screen), saves everything on the device first, and syncs in the background when you're signed in.
 
