@@ -8,6 +8,7 @@ import * as daily from "../daily.js";
 import * as motion from "../motion.js";
 import * as welcome from "../welcome.js";
 import * as milestones from "../milestones.js";
+import * as install from "../install.js";
 import * as eggs from "../eggs.js";
 import * as act from "../activity.js";
 import * as bible from "../bible.js";
@@ -242,6 +243,7 @@ export function renderSettings(main) {
       <section class="card section">
         <div class="section-head"><h2>Account</h2></div>
         ${account}
+        ${install.settingHTML()}
       </section>
 
       ${milestones.journeyHTML()}
@@ -320,6 +322,7 @@ export function renderSettings(main) {
     $("[data-daily]", main).onclick = () => daily.choose(() => ($("#dailyDesc", main).textContent = daily.describe()));
     wireTreasures(main);
     milestones.wireJourney(main);
+    install.wire(main);
     if (new URLSearchParams(location.hash.split("?")[1] || "").get("journey")) {
       setTimeout(() => main.querySelector("#journey")?.scrollIntoView({ block: "start", behavior: "smooth" }), 60);
       history.replaceState(history.state, "", "#/settings");

@@ -539,3 +539,18 @@ body.welcome-open { overflow: hidden; }
 .tol-row span { grid-column: 2; font-size: 12.5px; color: var(--muted); }
 .tol-row em { grid-row: 1 / span 2; grid-column: 3; font-style: normal; color: var(--accent); }
 @media (max-width: 520px) { .tol { grid-template-columns: 1fr; } .tol-svg { max-width: 240px; margin: 0 auto; display: block; } }
+
+/* Install button (top bar) and its steps */
+.install-pill { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; padding: 6px 12px 6px 10px; border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--line)); background: var(--accent-soft); color: var(--accent);
+  font: 600 13px var(--sans, Inter, system-ui, sans-serif); cursor: pointer; flex: none; }
+.install-pill[hidden] { display: none; }
+.install-pill svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.install-pill:hover { filter: brightness(1.05); }
+.topbar .install-pill + .sync-dot { margin-left: -6px; }
+@media (min-width: 721px) { .install-pill { margin-left: 12px; order: 3; } .topbar .sync-dot { order: 4; } }
+@media (min-width: 721px) and (max-width: 1000px) { .install-pill span { display: none; } .install-pill { padding: 7px; } }
+.install-steps { margin: 0 0 16px; padding-left: 22px; line-height: 1.6; }
+.install-steps li { margin: 6px 0; }
+.install-steps .inl { display: inline-block; width: 18px; height: 18px; vertical-align: -4px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.install-steps .inl circle { fill: currentColor; stroke: none; }
