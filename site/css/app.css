@@ -565,3 +565,10 @@ body.welcome-open { overflow: hidden; }
 .name-card h1 { margin-bottom: 2px; }
 .name-card input { width: 100%; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font: inherit; font-size: 18px; text-align: center; margin: 6px 0 4px; }
 .name-card input:focus { outline: 2px solid color-mix(in srgb, var(--accent) 50%, transparent); outline-offset: 1px; }
+.hello { position: relative; }
+
+/* Topics: a chosen book, before searching */
+.scope-card { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; padding: 22px 24px; }
+.scope-card h2 { margin: 2px 0 6px; }
+.scope-card p { margin: 0; max-width: 46ch; }
+.scope-actions { display: flex; gap: 10px; flex-wrap: wrap; }

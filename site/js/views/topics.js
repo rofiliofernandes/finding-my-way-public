@@ -11,6 +11,7 @@ import { aiEnabled, runInto } from "../ai.js";
 import * as fight from "../fight.js";
 import * as stories from "../stories.js";
 import * as eggs from "../eggs.js";
+import * as daily from "../daily.js";
 
 const PAGE = 40;
 
@@ -141,6 +142,7 @@ export async function renderTopics(main, _params, query) {
     </div>
 
     <div class="section" id="gridToggle" ${st.q ? "" : "hidden"}><button class="btn ghost small" data-showgrid>Browse topics instead</button></div>
+    <div id="scopeCard"></div>
     <div class="topic-grid section" id="topicGrid" ${st.q ? "hidden" : ""}>
       ${TOPICS.map((t) => `<button class="topic ${st.topic === t.id ? "on" : ""}" data-topic="${t.id}"><b>${esc(t.name)}</b><span>${esc(t.blurb)}</span></button>`).join("")}
     </div>
@@ -148,6 +150,7 @@ export async function renderTopics(main, _params, query) {
     <div id="results" class="section"></div>`;
 
   const results = $("#results", main);
+  const scopeBox = $("#scopeCard", main);
 
   const wireResults = (root) => {
     $$("[data-save]", root).forEach(
@@ -302,7 +305,27 @@ export async function renderTopics(main, _params, query) {
     $("#topicGrid", main).hidden = !!st.q;
     $("#gridToggle", main).hidden = !st.q;
     const t = st.topic ? getTopic(st.topic) : null;
+    scopeBox.innerHTML = "";
     if (!t && !st.q) {
+      // a book chosen but nothing searched yet: show what can be done with it straight away
+      if (st.book) {
+        const name = scopeText(), cfg = daily.settings(), isVod = cfg.mode === "book" && cfg.book === st.book && (cfg.chapter || 0) === (st.chapter || 0);
+        results.innerHTML = "";
+        scopeBox.innerHTML = `<div class="card scope-card section">
+            <div><div class="eyebrow">You chose</div><h2>${esc(name)}</h2>
+              <p class="muted small">Type what's on your heart above, or pick a topic, and it will look only in ${esc(name)}.</p></div>
+            <div class="scope-actions">
+              <a class="btn primary" href="#/read/${st.book}/${st.chapter || 1}">${icon("book")} Read ${esc(name)}</a>
+              <button class="btn" data-scope-vod ${isVod ? "disabled" : ""}>${isVod ? "✓ Your verse for today" : "Use for Verse for today"}</button>
+            </div></div>`;
+        scopeBox.querySelector("[data-scope-vod]")?.addEventListener("click", (e) => {
+          daily.setSettings({ ...cfg, mode: "book", book: st.book, chapter: st.chapter || 0, order: cfg.order || "order" });
+          daily.forgetToday();
+          e.currentTarget.textContent = "✓ Your verse for today"; e.currentTarget.disabled = true;
+          toast(`Verse for today: ${daily.scopeName(st.book, st.chapter || 0)}`);
+        });
+        return;
+      }
       results.innerHTML = `<p class="muted small" style="text-align:center">Type what's on your heart above, or pick a topic.</p>`;
       return;
     }

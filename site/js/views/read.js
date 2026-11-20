@@ -413,7 +413,7 @@ export async function renderVerse(main, [bookId, c, v]) {
   const ref = { book: bookId, chapter, verse };
   act.logRead({ book: bookId, chapter, verse_start: verse, verse_end: verse, mode: "verse" });
   store.pref("lastVerse", ref);
-  setTimeout(() => eggs.onVerse(bookId, chapter, verse), 500);
+  setTimeout(() => { eggs.onVerse(bookId, chapter, verse); }, 500);
   const idx = ch.v.indexOf(item);
   const pct = Math.round(((idx + 1) / ch.v.length) * 100);
 
