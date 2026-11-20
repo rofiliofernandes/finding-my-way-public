@@ -13,12 +13,13 @@ const read = () => {
 };
 
 export function get(key) {
-  return read()[key];
+  return key === "_t" ? undefined : read()[key];
 }
 
 export function set(key, value) {
   const row = store.get("notes", ID);
   const data = read();
   data[key] = value;
+  data._t = { ...(data._t || {}), [key]: store.nowISO() }; // per-setting time, so two devices' settings combine instead of one replacing the other
   store.put("notes", { ...(row || {}), id: ID, kind: "settings", body: JSON.stringify(data), created_at: row?.created_at || store.nowISO(), deleted: false });
 }

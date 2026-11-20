@@ -327,7 +327,7 @@ export function renderSettings(main) {
     milestones.wireJourney(main);
     install.wire(main);
     const nameIn = $("#yourName", main);
-    const saveName = () => { const v = nameIn.value.trim().slice(0, 30); if (v === (synced.get("name") || "")) return; synced.set("name", v); toast(v ? "Saved" : "Name removed"); };
+    const saveName = () => { const v = nameIn.value.trim().slice(0, 30); if (v === (synced.get("name") || "")) return; synced.set("name", v); synced.set("nameAsked", true); toast(v ? "Saved" : "Name removed"); };
     nameIn?.addEventListener("change", saveName);
     nameIn?.addEventListener("keydown", (e) => { if (e.key === "Enter") nameIn.blur(); });
     if (new URLSearchParams(location.hash.split("?")[1] || "").get("journey")) {

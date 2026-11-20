@@ -173,20 +173,6 @@ async function doSync() {
     const uid = session.user.id;
     const lastPull = store.meta("lastPull") || {};
     for (const table of store.TABLES) {
-      // push
-      const dirty = store.dirty(table);
-      for (let i = 0; i < dirty.length; i += 500) {
-        const chunk = dirty.slice(i, i + 500);
-        const rows = chunk.map((r) => {
-          const row = { user_id: uid };
-          for (const c of COLUMNS[table]) row[c] = r[c] === undefined ? null : r[c];
-          row.deleted = !!r.deleted;
-          return row;
-        });
-        const { error } = await client.from(table).upsert(rows, { onConflict: "user_id,id" });
-        if (error) throw error;
-        store.markClean(table, chunk);
-      }
       // pull (synced_at is set by the server, so other devices' clocks don't matter)
       let since = lastPull[table] || "1970-01-01T00:00:00Z";
       for (;;) {
@@ -204,6 +190,20 @@ async function doSync() {
       }
       lastPull[table] = since;
       store.meta("lastPull", lastPull);
+      // then push what's changed here (after the pull, so a new device doesn't overwrite combined settings)
+      const dirty = store.dirty(table);
+      for (let i = 0; i < dirty.length; i += 500) {
+        const chunk = dirty.slice(i, i + 500);
+        const rows = chunk.map((r) => {
+          const row = { user_id: uid };
+          for (const c of COLUMNS[table]) row[c] = r[c] === undefined ? null : r[c];
+          row.deleted = !!r.deleted;
+          return row;
+        });
+        const { error } = await client.from(table).upsert(rows, { onConflict: "user_id,id" });
+        if (error) throw error;
+        store.markClean(table, chunk);
+      }
     }
     status.state = "ok";
     status.lastSync = store.nowISO();

@@ -116,22 +116,65 @@ function hasHistory() {
 export function maybeShow() {
   if (!sync.status.configured) return;
   if (!store.meta("firstOpen")) store.meta("firstOpen", Date.now());
-  if (sync.user()) { nameFromAccount(); return store.meta("welcomed") || store.meta("welcomed", "account"); }
+  if (sync.user()) return store.meta("welcomed") || store.meta("welcomed", "account"); // the name is asked after the first sync (app.js)
   if (!store.meta("welcomed")) {
     if (hasHistory()) return store.meta("welcomed", "existing"); // already using the app on this device
     return show();
   }
-  if (store.meta("welcomed") === "skip" && !store.meta("remindedSignIn") && Date.now() - store.meta("firstOpen") > WEEK) remind();
+  if (store.meta("welcomed") === "skip" && !store.meta("remindedSignIn") && Date.now() - store.meta("firstOpen") > WEEK) return remind();
+  maybeAskName();
 }
 
-// Signed in but no name saved yet: use the first name from the account (Google gives one)
-export function nameFromAccount() {
-  if (String(synced.get("name") || "").trim()) return false;
+/* ---------- "What would you like to be called?" ---------- */
+// Asked once per person, after the account choice (with Google or email: after the first sync, so another device's
+// answer arrives first). With an account, the box starts with the account's first name, but it's still asked.
+export function maybeAskName() {
+  // signed in without leaving the page (some browsers, or a sign-in that finished in the background): the first card is done
+  const first = document.querySelector(".welcome:not(.name-ask)");
+  if (first && sync.user()) { first.remove(); document.body.classList.remove("welcome-open"); if (!store.meta("welcomed")) store.meta("welcomed", "account"); }
+  if (!store.meta("welcomed") || synced.get("nameAsked") || document.querySelector(".welcome, .name-ask")) return;
+  askName();
+}
+function suggestion() {
+  const saved = String(synced.get("name") || "").trim();
+  if (saved) return saved;
   const m = sync.user()?.user_metadata || {};
   const first = String(m.given_name || m.full_name || m.name || "").trim().split(/\s+/)[0];
-  if (!first || first.length > 30 || first.includes("@")) return false;
-  synced.set("name", first);
-  return true;
+  return first && first.length <= 30 && !first.includes("@") ? first : "";
+}
+export function askName() {
+  document.querySelector(".name-ask")?.remove();
+  const el = document.createElement("div");
+  el.className = "welcome name-ask";
+  el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true"); el.setAttribute("aria-label", "Your name");
+  const v = suggestion().replace(/"/g, "&quot;");
+  el.innerHTML = `<form class="welcome-card name-card">
+      <img class="welcome-icon" src="icon.svg" alt="">
+      <h1>What would you like to be called?</h1>
+      <p class="welcome-lede">This is how the app will greet you. You can change it any time under <b>You</b>.</p>
+      <input id="askName" maxlength="30" autocomplete="given-name" placeholder="Your name" value="${v}">
+      <button class="btn primary welcome-btn" type="submit">Continue</button>
+      <button class="btn ghost welcome-btn" type="button" data-n-skip>Skip</button>
+    </form>`;
+  document.body.appendChild(el);
+  document.body.classList.add("welcome-open");
+  requestAnimationFrame(() => el.classList.add("in"));
+  const input = el.querySelector("#askName");
+  setTimeout(() => { input.focus(); input.select(); }, 350);
+  let finished = false;
+  const done = (name) => {
+    if (finished) return; // a double tap closes it once
+    finished = true;
+    if (name !== null) synced.set("name", name);
+    synced.set("nameAsked", true);
+    el.classList.remove("in");
+    document.body.classList.remove("welcome-open");
+    setTimeout(() => el.remove(), 350);
+    window.dispatchEvent(new HashChangeEvent("hashchange")); // redraw the page behind with the name
+    if (name) toast(`Nice to meet you, ${name}`);
+  };
+  el.querySelector("form").onsubmit = (e) => { e.preventDefault(); const n = input.value.trim().slice(0, 30); done(n || null); };
+  el.querySelector("[data-n-skip]").onclick = () => done(null);
 }
 
 export function show() {
@@ -146,8 +189,6 @@ export function show() {
       <div class="welcome-latin">Iter ad Dominum</div>
       <h1>Finding my way to Jesus Christ</h1>
       <p class="welcome-lede">Read the Bible, keep a journal, and let it follow you to every device.</p>
-      <label class="welcome-name"><span>What should we call you?</span>
-        <input id="wName" maxlength="30" autocomplete="given-name" placeholder="Your first name" value="${String(synced.get("name") || "").replace(/"/g, "&quot;")}"></label>
       <div class="welcome-choices">
         <button class="btn google-btn welcome-btn" data-w-google>${GOOGLE} Continue with Google</button>
         <button class="btn welcome-btn" data-w-email>${MAIL} Continue with email</button>
@@ -160,13 +201,7 @@ export function show() {
   document.body.appendChild(el);
   document.body.classList.add("welcome-open");
   requestAnimationFrame(() => el.classList.add("in"));
-  const nameIn = el.querySelector("#wName");
-  const saveName = () => { const v = nameIn.value.trim().slice(0, 30); if (v && v !== synced.get("name")) synced.set("name", v); };
-  nameIn.addEventListener("change", saveName);
-  nameIn.addEventListener("keydown", (e) => { if (e.key === "Enter") nameIn.blur(); });
-  el.addEventListener("click", (e) => { if (e.target.closest("button")) saveName(); }, true);
   const close = (how) => {
-    saveName();
     store.meta("welcomed", how);
     el.classList.remove("in");
     document.body.classList.remove("welcome-open");
@@ -184,7 +219,7 @@ export function show() {
     emailBox.querySelector("#efEmail").focus();
   };
   wireEmailForm(emailBox, () => (close("email"), toast("Welcome! You're signed in.")));
-  el.querySelector("[data-w-skip]").onclick = () => close("skip");
+  el.querySelector("[data-w-skip]").onclick = () => { close("skip"); setTimeout(maybeAskName, 380); };
 }
 
 // One gentle nudge, a week after choosing no account

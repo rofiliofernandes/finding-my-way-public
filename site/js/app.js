@@ -103,8 +103,8 @@ sync.onStatus((st, session) => {
   const dot = $("#syncDot");
   dot.className = "sync-dot " + (session ? st.state : "");
   dot.title = !session ? "" : st.state === "error" ? "Sync failed: " + st.error : st.state === "syncing" ? "Syncing…" : "Synced";
-  // once signed in and synced (so a name from another device arrives first), take the first name from the account if none is saved
-  if (session && st.state === "ok" && welcome.nameFromAccount() && (location.hash || "#/") === "#/") route();
+  // once signed in and synced (so an answer from another device arrives first), ask what to call them
+  if (session && st.state === "ok") welcome.maybeAskName();
 });
 
 async function start() {

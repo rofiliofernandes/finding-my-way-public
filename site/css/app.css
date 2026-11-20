@@ -559,6 +559,9 @@ body.welcome-open { overflow: hidden; }
 .name-in { width: 180px; max-width: 45vw; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font: inherit; }
 .name-in:focus { outline: 2px solid color-mix(in srgb, var(--accent) 50%, transparent); outline-offset: 1px; }
 
-/* the name question on the welcome screen */
-.welcome-name { display: grid; gap: 6px; margin: 4px 0 18px; text-align: left; font-weight: 600; font-size: 14px; }
-.welcome-name input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font: inherit; font-weight: 400; font-size: 16px; }
+/* "What would you like to be called?" */
+.name-card { display: grid; gap: 10px; }
+.name-card .welcome-icon { justify-self: center; }
+.name-card h1 { margin-bottom: 2px; }
+.name-card input { width: 100%; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font: inherit; font-size: 18px; text-align: center; margin: 6px 0 4px; }
+.name-card input:focus { outline: 2px solid color-mix(in srgb, var(--accent) 50%, transparent); outline-offset: 1px; }
