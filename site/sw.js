@@ -1,6 +1,6 @@
 // Offline support: app files are fetched fresh when online (falling back to cache),
 // Bible text is cached on first read and served from cache afterwards.
-const VERSION = "fmw-v30";
+const VERSION = "fmw-v31";
 // Big, rarely-changing files (Bible text, search model) live in their own cache so app
 // updates don't re-download them. Bump DATA when those files change.
 const DATA = "fmw-data-1";

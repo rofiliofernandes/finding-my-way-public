@@ -572,3 +572,19 @@ body.welcome-open { overflow: hidden; }
 .scope-card h2 { margin: 2px 0 6px; }
 .scope-card p { margin: 0; max-width: 46ch; }
 .scope-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* Phones: the title may shrink (and wrap onto two lines on very small screens) so the page never gets wider than the screen */
+@media (max-width: 720px) {
+  .topbar { min-width: 0; }
+  .brand { flex-shrink: 1; min-width: 0; white-space: normal; font-size: clamp(14px, 4.3vw, 18px); line-height: 1.15; }
+  .brand svg { flex: none; width: 24px; height: 24px; }
+  .install-pill { padding: 6px 10px 6px 8px; }
+}
+@media (max-width: 400px) { .install-pill span { display: none; } .install-pill { padding: 7px; } }
+/* Topics: on phones the chosen-book card is centred, with big, full-width buttons */
+@media (max-width: 720px) {
+  .scope-card { flex-direction: column; align-items: stretch; text-align: center; padding: 24px 20px; }
+  .scope-card p { margin: 0 auto; }
+  .scope-actions { flex-direction: column; gap: 12px; }
+  .scope-actions .btn { width: 100%; justify-content: center; min-height: 52px; font-size: 16px; }
+}
