@@ -1,11 +1,11 @@
 // Offline support: app files are fetched fresh when online (falling back to cache),
 // Bible text is cached on first read and served from cache afterwards.
-const VERSION = "fmw-v32";
+const VERSION = "fmw-v34";
 // Big, rarely-changing files (Bible text, search model) live in their own cache so app
 // updates don't re-download them. Bump DATA when those files change.
 const DATA = "fmw-data-1";
 const SHELL = [
-  "./", "index.html", "css/app.css", "css/blessing.css", "css/eggs.css", "js/eggs.js", "css/eggfx.css", "js/eggfx.js", "css/fight.css", "js/fight.js", "js/daily.js", "js/goals.js", "js/synced.js", "js/stories.js", "js/welcome.js", "js/milestones.js", "js/install.js", "js/scenes.js", "js/liturgy.js", "js/motion.js", "js/blessing.js", "js/title.js", "js/app.js", "js/bible.js", "js/store.js", "js/sync.js", "js/ui.js",
+  "./", "index.html", "css/app.css", "css/blessing.css", "css/eggs.css", "js/eggs.js", "css/eggfx.css", "js/eggfx.js", "css/fight.css", "js/fight.js", "js/daily.js", "js/goals.js", "js/synced.js", "js/stories.js", "js/welcome.js", "js/milestones.js", "js/install.js", "js/context.js", "js/scenes.js", "js/liturgy.js", "js/motion.js", "js/blessing.js", "js/title.js", "js/app.js", "js/bible.js", "js/store.js", "js/sync.js", "js/ui.js",
   "js/activity.js", "js/config.js", "js/views/home.js", "js/views/read.js", "js/views/history.js",
   "js/views/journal.js", "js/views/topics.js", "js/topics.js", "js/search.js", "js/semantic.js", "js/embed.js", "js/expand.js", "js/ai.js", "js/views/settings.js", "js/views/noteEditor.js", "data/canon.json", "data/daily.json", "js/daily-rules.js", "icon.svg", "icons/icon-192.png", "icons/apple-touch-icon.png",
 ];

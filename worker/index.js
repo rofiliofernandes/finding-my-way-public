@@ -10,6 +10,12 @@ export default {
       if (request.method === "POST") return aiPost({ request, env });
       return new Response("Use POST", { status: 405, headers: { allow: "POST" } });
     }
+    // rough location from the connection (Cloudflare already knows it); used to choose Verse for today. Not stored.
+    if (url.pathname === "/api/where") {
+      const cf = request.cf || {};
+      const body = JSON.stringify({ country: cf.country || null, region: cf.region || null, city: cf.city || null, timezone: cf.timezone || null });
+      return new Response(body, { headers: { "content-type": "application/json", "cache-control": "private, no-store" } });
+    }
     if (url.pathname.startsWith("/api/")) return new Response("Not found", { status: 404 });
     return env.ASSETS.fetch(request);
   },

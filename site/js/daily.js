@@ -48,6 +48,7 @@ const saveState = (s) => {
 export { standsAlone } from "./daily-rules.js";
 import { standsAlone, tidyQuotes } from "./daily-rules.js";
 import * as stories from "./stories.js";
+import * as context from "./context.js";
 
 // The verses worth showing on their own, chosen ahead of time by meaning and simple rules
 // (tools/build_daily.mjs → data/daily.json): { BOOK: "c:v,c:v,…" }
@@ -113,7 +114,7 @@ export async function today({ another = false } = {}) {
   const s = state();
   const day = store.localDate();
   const cfg = settings();
-  const cfgKey = JSON.stringify(cfg) + "|v2"; // v2: picks from the chosen-verses list (a pick saved by the older version is redone once)
+  const cfgKey = JSON.stringify(cfg) + "|v3"; // v3: "anywhere" is now your own mix, shaped by your day (a pick saved by an older version is redone once)
   if (!another && s.day === day && s.cfg === cfgKey && s.pick) return s.pick;
 
   let pick = null;
@@ -195,22 +196,40 @@ function finished(book, chapter, source) {
   return { finished: true, source, scope: { book, chapter }, name: scopeName(book, chapter) };
 }
 
-// The old way, from the date (same on every device), moved forward to a verse that stands on its own
+// Your own mix: first what fits your day (context.js), otherwise a chosen verse from your personal seed and the date
 async function anywhere(bump = 0) {
+  const day = store.localDate(), seed = context.personSeed();
+  try {
+    const fit = await context.choose((hash(seed + day + "|" + bump) % 10007) / 10007, bump);
+    if (fit?.ref) {
+      const [book, c, n] = fit.ref;
+      const v = (await bible.loadBook(book)).chapters[c - 1]?.v.find((x) => x.n === n);
+      if (v) return { book, chapter: c, verse: n, text: tidyQuotes(v.t), source: "anywhere", why: fit.why };
+    }
+  } catch {}
+  // the everyday pool: hand-picked verses (Topics and the times of day), so nothing odd turns up
+  const everyday = context.generalPool();
+  if (everyday.length) {
+    for (let k = 0; k < 5; k++) {
+      const [book, c, n] = everyday[(hash(seed + "lectio" + day) + (bump + k) * 7919) % everyday.length];
+      const v = (await bible.loadBook(book)).chapters[c - 1]?.v.find((x) => x.n === n);
+      if (v) return { book, chapter: c, verse: n, text: tidyQuotes(v.t), source: "anywhere" };
+    }
+  }
   const canon = bible.getCanon();
   const lists = await goodVerses();
   // Job and Ecclesiastes often voice views the book argues against, so they're left out of "Anywhere"
   const pool = canon.books.filter((b) => (b.t === "NT" || b.g === "Wisdom" || b.id === "ISA") && b.id !== "JOB" && b.id !== "ECC");
   const flat = pool.flatMap((b) => (lists[b.id] || []).map(([c, v]) => [b.id, c, v]));
   if (flat.length) {
-    const [book, c, n] = flat[(hash("lectio" + store.localDate()) + bump * 7919) % flat.length];
+    const [book, c, n] = flat[(hash(seed + "lectio" + day) + bump * 7919) % flat.length];
     const data = await bible.loadBook(book);
     const v = data.chapters[c - 1].v.find((x) => x.n === n);
     return { book, chapter: c, verse: n, text: tidyQuotes(v.t), source: "anywhere" };
   }
   // no list (offline before it was saved): the old way, the first verse from the date that stands alone
   const total = pool.reduce((a, b) => a + b.total, 0);
-  let r = (hash("lectio" + store.localDate()) + bump * 7919) % total;
+  let r = (hash(seed + "lectio" + day) + bump * 7919) % total;
   for (const b of pool) {
     if (r >= b.total) {
       r -= b.total;
@@ -248,7 +267,7 @@ export function sourceLine(pick) {
     return `From ${esc(scopeName(pick.scope.book, pick.scope.chapter))}${p ? ` · ${p.done} of ${p.total}` : ""}`;
   }
   if (pick.source === "reading") return `From ${esc(scopeName(pick.scope.book))}, what you're reading`;
-  return "From anywhere in the Bible";
+  return pick.why ? esc(pick.why) : "From anywhere in the Bible";
 }
 
 export function describe() {

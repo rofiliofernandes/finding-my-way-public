@@ -12,6 +12,7 @@ import * as fight from "../fight.js";
 import * as stories from "../stories.js";
 import * as eggs from "../eggs.js";
 import * as daily from "../daily.js";
+import * as context from "../context.js";
 
 const PAGE = 40;
 
@@ -493,6 +494,7 @@ export async function renderTopics(main, _params, query) {
     (b) =>
       (b.onclick = () => {
         st.topic = st.topic === b.dataset.topic ? "" : b.dataset.topic;
+        context.noteTopic(st.topic); // Verse for today leans towards it for a couple of days
         st.sub = "";
         st.q = "";
         $("#tq", main).value = "";
