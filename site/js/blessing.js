@@ -1,29 +1,33 @@
 // "Jesus loves you, my child": a short blessing (about 8 seconds) shown when you press back from a passage
-// after reading for 5 minutes or more in this visit. Once per visit; tap to skip.
+// after reading for 5 minutes or more in one sitting. Once per sitting; tap to skip.
+// A sitting ends when the app has been away (closed, in the background, phone locked) for 30 minutes or more,
+// so an app pinned to the home screen, which is rarely really closed, still gets it each time you sit down to read.
 import * as motion from "./motion.js";
 
 const NEEDED_SECONDS = 5 * 60;
-const KEY_TIME = "fmw:readSeconds";
-const KEY_SHOWN = "fmw:blessed";
+const GAP_MS = 30 * 60 * 1000;
+const KEY = "fmw:sitting"; // { secs, shown, last }
 
-function ss(key, value) {
-  try {
-    if (value === undefined) return sessionStorage.getItem(key);
-    sessionStorage.setItem(key, value);
-  } catch {
-    return null;
-  }
+function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } }
+function save(v) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} }
+// a fresh sitting if we've been away long enough
+function current() {
+  const v = load(), now = Date.now();
+  return !v.last || now - v.last > GAP_MS ? { secs: 0, shown: false, last: now } : v;
 }
 
 // count time while the app is actually on screen
 export function startTimer() {
   setInterval(() => {
-    if (document.visibilityState === "visible") ss(KEY_TIME, String((+ss(KEY_TIME) || 0) + 1));
+    if (document.visibilityState !== "visible") return;
+    const v = current();
+    save({ ...v, secs: (v.secs || 0) + 1, last: Date.now() });
   }, 1000);
 }
 
 export function eligible() {
-  return (+ss(KEY_TIME) || 0) >= NEEDED_SECONDS && !ss(KEY_SHOWN);
+  const v = current();
+  return (v.secs || 0) >= NEEDED_SECONDS && !v.shown;
 }
 
 const FIGURE = `
@@ -64,7 +68,7 @@ export function show({ force = false, words: wordList = DEFAULT_WORDS } = {}) {
   const Z0 = W0 + (WORDS.length - 1) * WGAP + WDUR + HOLD; // the dive into the first "o" begins
   if (!force && !eligible()) return false;
   if (document.querySelector(".blessing")) return false;
-  if (!force) ss(KEY_SHOWN, "1");
+  if (!force) save({ ...current(), shown: true });
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const el = document.createElement("div");
   el.className = "blessing";

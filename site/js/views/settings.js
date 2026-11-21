@@ -266,7 +266,7 @@ export function renderSettings(main) {
         <div class="setting"><div class="what"><b>Title</b><span class="muted small">${
           store.pref("titleEnglish") ? "Shown in English. Hold-to-translate already used on this device." : "Shown in Latin. Hold the title for 2 seconds to translate it."
         }</span></div>${store.pref("titleEnglish") ? `<button class="btn" data-latin>Show in Latin again</button>` : ""}</div>
-        <div class="setting"><div class="what"><b>The blessing</b><span class="muted small">After 5+ minutes of reading, pressing back from a passage shows a short blessing (about 8 seconds), once per visit. Tap to skip.</span></div>
+        <div class="setting"><div class="what"><b>The blessing</b><span class="muted small">After 5+ minutes of reading, pressing back from a passage shows a short blessing (about 8 seconds), once each time you sit down to read (a new sitting starts after 30 minutes away). Tap to skip.</span></div>
           <button class="btn" data-bless>Preview</button></div>
         <p class="scripture" style="margin:10px 0 0;font-size:var(--read-size)">The <span class="sc">Lord</span> is my shepherd; I shall lack nothing.</p>
       </section>
