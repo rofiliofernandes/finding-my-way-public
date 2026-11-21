@@ -33,6 +33,14 @@ export function user() {
   return session?.user || null;
 }
 
+// Call one of the server functions in supabase/social.sql (Journey with). Throws a plain Error on failure.
+export async function rpc(fn, args = {}) {
+  if (!client || !session) throw new Error("Sign in to journey with others.");
+  const { data, error } = await client.rpc(fn, args);
+  if (error) throw Object.assign(new Error(error.message || "Something went wrong"), { code: error.code });
+  return data;
+}
+
 function loadScript(src) {
   return new Promise((resolve, reject) => {
     const s = document.createElement("script");
