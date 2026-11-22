@@ -12,6 +12,7 @@ import * as store from "./store.js";
 import * as act from "./activity.js";
 import * as synced from "./synced.js";
 import * as goals from "./goals.js";
+import * as social from "./social.js";
 import * as lit from "./liturgy.js";
 import * as scenes from "./scenes.js";
 import { esc, toast } from "./ui.js";
@@ -78,6 +79,7 @@ function earnWeek(ws, days, goal) {
   const b = badges();
   b[ws] = { mark: lit.badgeMark(w), name: w.name, season: w.season, days, goal, at: store.nowISO() };
   synced.set("badges", b);
+  social.moment("week", ws, w.name); // Along the way, for companions
   queue.push(() => playWeek(ws, true));
 }
 
@@ -86,6 +88,7 @@ function earnMonth(key) {
   const n = Object.keys(m).length + 1;
   m[key] = { n, at: store.nowISO() };
   synced.set("months", m);
+  social.moment("month", key, social.monthTitle(n));
   queue.unshift(() => playMonth(key, true)); // a month goes before a week if both arrive together
 }
 

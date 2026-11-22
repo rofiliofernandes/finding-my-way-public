@@ -4,6 +4,8 @@ import * as sync from "./sync.js";
 import * as welcome from "./welcome.js";
 import * as milestones from "./milestones.js";
 import * as install from "./install.js";
+import * as social from "./social.js";
+import { renderCompanions, renderJourney } from "./views/companions.js";
 import { $, $$ } from "./ui.js";
 import { renderHome } from "./views/home.js";
 import { renderBooks, renderChapter, renderVerse, renderRandom } from "./views/read.js";
@@ -25,6 +27,8 @@ const routes = [
   [/^\/history$/, renderHistory, "history"],
   [/^\/journal$/, renderJournal, "journal"],
   [/^\/settings$/, renderSettings, "settings"],
+  [/^\/companions$/, renderCompanions, "settings"],
+  [/^\/u\/([a-z0-9_.]{1,20})$/i, renderJourney, "settings"],
 ];
 
 const main = $("#view");
@@ -120,6 +124,8 @@ async function start() {
   sync.init().then(() => welcome.maybeShow());
   milestones.init(); // weekly badges and the monthly Tree of Life
   install.init(); // the Install button (home-screen shortcut)
+  social.init(); // Journey with: companions
+  social.onInvites((n) => { const you = $('.tabs a[data-tab="settings"]'); you?.classList.toggle("has-dot", n > 0); you?.setAttribute("aria-label", n ? `You, ${n} invite${n > 1 ? "s" : ""} waiting` : "You"); });
   if ("serviceWorker" in navigator && location.protocol === "https:") {
     navigator.serviceWorker.register("sw.js").catch(() => {});
   }

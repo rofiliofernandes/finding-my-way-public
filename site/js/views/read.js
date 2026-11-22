@@ -7,6 +7,7 @@ import { expandButton, wireExpand } from "../expand.js";
 import { aiEnabled, runInto } from "../ai.js";
 import { openModal } from "../ui.js";
 import * as eggs from "../eggs.js";
+import { showLights } from "./companions.js";
 
 /* =========================================================
    Book & chapter picker   #/books   #/books/GEN
@@ -191,6 +192,7 @@ export async function renderChapter(main, [bookId, c], query) {
 
   const wire = () => {
     const art = $("#scripture", main);
+    showLights(main, bookId, chapter); // companions' lights on this chapter (Journey with)
     art.addEventListener("click", (e) => {
       const el = e.target.closest(".v");
       if (!el) return;

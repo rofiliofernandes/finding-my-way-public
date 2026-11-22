@@ -9,6 +9,7 @@ import * as motion from "../motion.js";
 import * as welcome from "../welcome.js";
 import * as milestones from "../milestones.js";
 import * as install from "../install.js";
+import * as social from "../social.js";
 import * as synced from "../synced.js";
 import * as eggs from "../eggs.js";
 import * as act from "../activity.js";
@@ -205,6 +206,18 @@ function aiUsageText() {
   return `On. This month on this device: ${u.calls} request${u.calls === 1 ? "" : "s"}, about ${tokens.toLocaleString()} tokens (${u.input.toLocaleString()} in, ${u.output.toLocaleString()} out).`;
 }
 
+// Journey with: your username and companions, at the top of You
+function companionsCard() {
+  if (!social.can() || social.notSetUp()) return "";
+  const me = social.cachedMe(), n = social.invites();
+  if (!me) return `<section class="card section cmp-card"><div class="setting"><div class="what"><b>Journey with others</b>
+      <span class="muted small">Choose a username so your partner, family and friends can find you, and see each other's journey.</span></div>
+      <a class="btn primary" href="#/companions">Choose a username</a></div></section>`;
+  return `<section class="card section cmp-card"><a class="setting" href="#/companions" style="color:inherit">
+      <span class="person-main">${social.avatar(me, 44)}<span><b>${esc(social.who(me))}</b><em>@${esc(me.username)}</em></span></span>
+      <span class="btn ${n ? "primary" : ""}">${n ? `${n} invite${n > 1 ? "s" : ""} waiting` : "Companions"}</span></a></section>`;
+}
+
 export function renderSettings(main) {
   const draw = () => {
     const st = sync.status;
@@ -240,6 +253,7 @@ export function renderSettings(main) {
     main.innerHTML = `
       <div class="eyebrow">Settings</div>
       <h1 style="margin-top:4px">You</h1>
+      ${companionsCard()}
 
       <section class="card section">
         <div class="section-head"><h2>Account</h2></div>
@@ -326,6 +340,7 @@ export function renderSettings(main) {
     wireTreasures(main);
     milestones.wireJourney(main);
     install.wire(main);
+    if (social.can()) social.me().then(() => social.countInvites()).then(() => { const c = $(".cmp-card", main); if (c?.isConnected) c.outerHTML = companionsCard(); }); // fresh from the server
     const nameIn = $("#yourName", main);
     const saveName = () => { const v = nameIn.value.trim().slice(0, 30); if (v === (synced.get("name") || "")) return; synced.set("name", v); synced.set("nameAsked", true); toast(v ? "Saved" : "Name removed"); };
     nameIn?.addEventListener("change", saveName);

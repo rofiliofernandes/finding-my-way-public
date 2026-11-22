@@ -25,6 +25,7 @@ A personal Bible website: the **World English Bible, Catholic Edition** (all 73 
 - **Journal:** all your notes, weekly reflections and saved verses, with search.
 - **Today:** a verse for the day, "continue where you left off", your week at a glance, and an older note to revisit.
 - **Your name:** after choosing an account (or none), the app asks "What would you like to be called?" once per person; with Google the box starts with the account's first name. Changeable on the You page; Today greets you with it ("Good evening, Anna"). Syncs across devices.
+- **Journey with (companions):** choose a username (You → Journey with others), find people by name or @username, and invite them to journey together. Once they accept, you see each other's journey (weekly badges, Tree of Life, streak, what you're reading), the notes you share as **lights** (tick *Share as a light* when writing a note) appear on the verses your companions read, and **Along the way** on Today shows what your companions did lately. Invites show as a dot on You. Block, stop journeying together, and report (reports are only visible in the Supabase dashboard, table `reports`). All privacy rules are enforced in the database (`supabase/social.sql`), not just in the app.
 - **Install:** an Install button in the top bar and on the You page. On Android, Chrome and Edge it opens the browser's install prompt; on iPhone and iPad it shows the two steps (Share → Add to Home Screen). It hides once the app is installed.
 - It works offline once installed (add it to your home screen), saves everything on the device first, and syncs in the background when you're signed in.
 
@@ -37,6 +38,7 @@ finding-my-way/
 ├── wrangler.jsonc        ← Worker settings
 ├── functions/api/ai.js   ← the AI code the Worker calls
 ├── supabase/schema.sql   ← run once in Supabase to create the tables
+├── supabase/social.sql   ← run once after schema.sql: companions (Journey with)
 └── tools/                ← scripts that generated site/data (only needed to rebuild)
 ```
 
@@ -53,7 +55,7 @@ Open http://localhost:8080. Everything works without an account; your data is sa
 ## 2. Create the database (Supabase, about 5 minutes)
 
 1. Go to [supabase.com](https://supabase.com) and create a free project. Pick a region close to you (Mumbai is `ap-south-1`).
-2. Open **SQL Editor → New query**, paste the whole of `supabase/schema.sql`, and click **Run**.
+2. Open **SQL Editor → New query**, paste the whole of `supabase/schema.sql`, and click **Run**. Then do the same with `supabase/social.sql` (companions).
    This creates three tables (`reading_log`, `notes`, `bookmarks`), each locked down so an account can only ever read and write its own rows.
 3. Open **Project Settings → API** (on newer dashboards, **API Keys**) and copy:
    - the **Project URL**, like `https://abcdefgh.supabase.co`

@@ -6,6 +6,7 @@ import { TOPICS } from "../topics.js";
 import * as daily from "../daily.js";
 import * as goals from "../goals.js";
 import * as synced from "../synced.js";
+import { alongHTML } from "./companions.js";
 
 function greeting() {
   const h = new Date().getHours();
@@ -114,6 +115,7 @@ export async function renderHome(main) {
     </div>
 
     <div id="vod">${vodHTML(vod)}</div>
+    <div id="along"></div>
 
     <section class="section" style="margin-top:22px">
       <div class="section-head"><h2>How are you feeling?</h2><a href="#/topics" class="small" style="font-weight:600">All topics →</a></div>
@@ -172,5 +174,6 @@ export async function renderHome(main) {
         : ""
     }`;
   wireVod(main);
+  alongHTML().then((h) => { const a = main.querySelector("#along"); if (h && a?.isConnected) a.innerHTML = h; }); // Journey with
   goals.wire(main, () => renderHome(main));
 }
