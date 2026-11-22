@@ -226,9 +226,18 @@ export function playEffect(t, ctx = {}) {
     case "seek":
       verseLine(t.verse).then((v) => banner(v, t.verse, "top"));
       break;
-    case "amen":
-      layer("egg-amen", '<div class="egg-amen-in">Amen</div>', 2600);
+    case "amen": {
+      // two hands come together in prayer, a soft light, then "Amen"
+      const hand = `<path class="h-fill" d="M100,192 L99,44 C99,24 92,14 83,16 C73,18 69,31 68,47 C66,80 59,110 61,140 C62,164 67,180 69,194 Z"/>
+        <path class="h-line" d="M68,64 C76,66 85,66 93,63 M65,88 C74,91 84,91 94,88 M62,112 C71,115 81,115 92,112"/>
+        <path class="h-thumb" d="M99,118 C89,116 81,123 79,135 C78,146 86,153 99,151"/>
+        <rect class="h-cuff" x="62" y="186" width="40" height="26" rx="6"/>`;
+      const rays = Array.from({ length: 10 }, (_, i) => `<i style="--a:${i * 36}deg"></i>`).join("");
+      layer("egg-amen", `<div class="egg-amen-wrap"><div class="egg-amen-glow"></div><div class="egg-amen-rays">${rays}</div>
+        <svg class="egg-hands" viewBox="40 0 120 220" aria-hidden="true"><g class="hand-l">${hand}</g><g class="hand-r" transform="translate(200,0) scale(-1,1)">${hand}</g></svg>
+        <div class="egg-amen-in">Amen</div></div>`, 3600);
       break;
+    }
     case "snow":
       layer("egg-snow", Array.from({ length: r ? 0 : 46 }, (_, i) => `<i style="left:${(i * 53) % 100}%;animation-delay:${((i * 0.37) % 5).toFixed(2)}s;animation-duration:${(5 + (i % 5)).toFixed(1)}s;transform:scale(${0.5 + (i % 4) * 0.25})"></i>`).join("") + '<div class="egg-star">✦</div>', 11000);
       verseLine(t.verse).then((v) => banner(v, t.verse));

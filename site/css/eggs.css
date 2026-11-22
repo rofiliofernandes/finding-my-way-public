@@ -81,9 +81,26 @@
 .egg-still-in { font: italic 400 clamp(26px, 6vw, 40px)/1.3 var(--serif); color: var(--ink); text-align: center; padding: 0 24px; }
 
 /* Amen */
-.egg-amen { display: flex; align-items: center; justify-content: center; }
-.egg-amen-in { font: italic 600 64px var(--serif); color: var(--gold); text-shadow: 0 0 30px rgba(255, 210, 100, .8); opacity: 0; animation: egg-amen 2.6s ease-out forwards; }
-@keyframes egg-amen { 0% { opacity: 0; transform: scale(.7); } 30% { opacity: 1; transform: scale(1); } 75% { opacity: 1; } 100% { opacity: 0; transform: scale(1.1); } }
+.egg-amen { display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 45%, rgba(28, 18, 10, .72), rgba(14, 9, 5, .9)); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); animation: egg-amen-bg 3.6s ease forwards; }
+@keyframes egg-amen-bg { 0% { opacity: 0; } 10%, 82% { opacity: 1; } 100% { opacity: 0; } }
+.egg-amen-wrap { position: relative; display: grid; justify-items: center; gap: 6px; }
+.egg-hands { width: 150px; height: 275px; overflow: visible; }
+.egg-hands .h-fill { fill: #f3d9a6; stroke: #b98a4a; stroke-width: 2.4; stroke-linejoin: round; }
+.egg-hands .h-line, .egg-hands .h-thumb { fill: none; stroke: #b98a4a; stroke-width: 2.2; stroke-linecap: round; }
+.egg-hands .h-thumb { fill: #f0d29a; }
+.egg-hands .h-cuff { fill: #e6c07a; stroke: #b98a4a; stroke-width: 2.2; }
+.hand-l { animation: egg-hand-l 1.1s cubic-bezier(.3, .7, .2, 1) both; }
+.hand-r { animation: egg-hand-r 1.1s cubic-bezier(.3, .7, .2, 1) both; }
+@keyframes egg-hand-l { from { transform: translate(-46px, 0) translate(100px, 200px) rotate(-24deg) translate(-100px, -200px); opacity: 0; } 30% { opacity: 1; } to { transform: translate(0, 0) translate(100px, 200px) rotate(0deg) translate(-100px, -200px); } }
+@keyframes egg-hand-r { from { transform: translate(246px, 0) scale(-1, 1) translate(100px, 200px) rotate(-24deg) translate(-100px, -200px); opacity: 0; } 30% { opacity: 1; } to { transform: translate(200px, 0) scale(-1, 1) translate(100px, 200px) rotate(0deg) translate(-100px, -200px); } }
+.egg-amen-glow { position: absolute; left: 50%; top: 42%; width: 260px; height: 260px; margin: -130px 0 0 -130px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 226, 150, .85), rgba(255, 210, 120, 0)); opacity: 0; animation: egg-amen-glow 2.6s 1s ease-out forwards; }
+@keyframes egg-amen-glow { 0% { opacity: 0; transform: scale(.4); } 25% { opacity: 1; transform: scale(1.05); } 100% { opacity: .55; transform: scale(1); } }
+.egg-amen-rays { position: absolute; left: 50%; top: 42%; width: 0; height: 0; }
+.egg-amen-rays i { position: absolute; left: -1.5px; bottom: 0; width: 3px; height: 70px; border-radius: 3px; background: linear-gradient(to top, rgba(255, 220, 140, 0), rgba(255, 226, 150, .9)); transform-origin: 50% 100%; transform: rotate(var(--a)) translateY(-95px) scaleY(0); animation: egg-amen-ray 1.6s 1.05s ease-out forwards; }
+@keyframes egg-amen-ray { 0% { transform: rotate(var(--a)) translateY(-80px) scaleY(0); opacity: 0; } 30% { opacity: 1; } 100% { transform: rotate(var(--a)) translateY(-120px) scaleY(1); opacity: 0; } }
+.egg-amen-in { position: relative; font: italic 600 56px var(--serif); color: #ffe3a3; text-shadow: 0 0 26px rgba(255, 210, 100, .85); opacity: 0; animation: egg-amen 2.3s 1.25s ease-out forwards; }
+@keyframes egg-amen { 0% { opacity: 0; transform: translateY(8px) scale(.9); } 30% { opacity: 1; transform: none; } 80% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .hand-l, .hand-r, .egg-amen-rays i { animation: none; } .egg-amen-in, .egg-amen-glow { animation-duration: .01s; animation-delay: 0s; } }
 
 /* Christmas: snow and a star */
 .egg-snow i { position: absolute; top: -12px; width: 8px; height: 8px; border-radius: 50%; background: #fff; box-shadow: 0 0 4px rgba(150, 170, 200, .8); animation: egg-snow linear forwards; }
