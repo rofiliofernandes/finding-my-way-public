@@ -501,4 +501,5 @@ export async function renderRandom(main, _params, query) {
   };
   main.innerHTML = `<div class="spinner"></div>`;
   await draw();
+  return { refresh: () => false }; // a random verse never changes by itself (only "Another verse" or a scope)
 }

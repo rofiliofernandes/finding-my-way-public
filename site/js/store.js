@@ -128,6 +128,8 @@ export function mergeRemote(table, rows) {
     }
     for (const k of Object.keys(r)) if (r[k] === null) delete r[k];
     const cur = data[table].get(r.id);
+    // our own upload coming back (same record, same time): nothing new, so don't redraw anything
+    if (cur && r.updated_at === cur.updated_at && !!r.deleted === !!cur.deleted) { if (cur._dirty) { delete cur._dirty; persist(table); } continue; }
     if (table === "notes" && r.id === SETTINGS_ID && cur && !cur.deleted && !r.deleted) {
       const body = mergeSettings(cur, r);
       if (body !== cur.body || r.updated_at > cur.updated_at) {
