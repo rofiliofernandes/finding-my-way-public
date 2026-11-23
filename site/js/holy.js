@@ -6,7 +6,7 @@
 const W = 390, H = 760;
 let c = null;                       // the 2D context being drawn into
 let VIEW = { x: 0, y: 0, w: W, h: H }; // the whole screen, in stage units (wider or taller than the stage)
-let NAME = "";
+let NAME = "", INTENT = "";
 const full = () => c.fillRect(VIEW.x, VIEW.y, VIEW.w, VIEW.h);
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const win = (t, a, b) => clamp((t - a) / (b - a));
@@ -619,7 +619,10 @@ function candleScene(t) {
   // sparks drifting up from the flame
   if (lit > 0) { const r = rng(14); c.save(); c.globalCompositeOperation = "lighter"; for (let i = 0; i < 12; i++) { const st = 2.6 + r() * 7, k = (t - st) / 2.2; if (k < 0 || k > 1) continue; const x = cx + Math.sin(k * 6 + i) * 14 * k + (r() - .5) * 8, y = top - 70 - k * 230; c.fillStyle = `rgba(255,236,170,${(1 - k) * .9})`; c.beginPath(); c.arc(x, y, 1.6 + r(), 0, 7); c.fill(); } c.restore(); }
   quote(t, 3.4, 0, "“Let my prayer be set before you like incense; the lifting up of my hands like the evening sacrifice.”", "Psalm 141:2", 170, { size: 20 });
-  const tag = eo(win(t, 5, 6)); if (tag > 0) { c.save(); c.globalAlpha = tag * .8; c.fillStyle = "#e9d6bd"; c.textAlign = "center"; c.font = "500 13px Inter, system-ui"; c.fillText("Your candle stays lit beside this prayer today", 195, 712); c.restore(); }
+  const tag = eo(win(t, 5, 6)); if (tag > 0) { c.save(); c.globalAlpha = tag * .85; c.fillStyle = "#e9d6bd"; c.textAlign = "center";
+    if (INTENT) { c.font = `italic 400 17px ${SERIF}`; wrap(`For ${INTENT}`, 320).forEach((l, i) => c.fillText(l, 195, 704 + i * 22)); }
+    else { c.font = "500 13px Inter, system-ui"; c.fillText("Your candle stays lit today", 195, 712); }
+    c.restore(); }
   label(t, "Prayer candle");
 }
 
@@ -632,11 +635,11 @@ const OVER_PAGE = new Set(["ash", "tree", "candle"]);
 export const ids = Object.keys(SCENES);
 let current = null;
 
-export function play(id, { name = "" } = {}) {
+export function play(id, { name = "", intention = "" } = {}) {
   const sc = SCENES[id];
   if (!sc) return Promise.resolve();
   current?.close();
-  NAME = name;
+  NAME = name; INTENT = intention;
   return new Promise((resolve) => {
     const [draw, dur] = sc;
     const ov = document.createElement("div");

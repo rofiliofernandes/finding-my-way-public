@@ -9,6 +9,33 @@ import * as synced from "../synced.js";
 import { alongHTML } from "./companions.js";
 import { seasonToday, playHoly } from "../eggs.js";
 
+// "Take a moment to pray": light a candle (with an optional intention, kept on this device); it stays lit all day
+const PRAY_KEY = "fmw:candle:today";
+function litToday() {
+  try { const v = JSON.parse(localStorage.getItem(PRAY_KEY) || "null"); return v && v.day === store.localDate() ? v : null; } catch { return null; }
+}
+function prayHTML() {
+  const lit = litToday();
+  if (lit) return `<div class="pray-lit"><span class="candle-lit"><span class="cf"></span></span><div><b>Your candle is lit today</b>
+      ${lit.for ? `<div class="muted small">For ${esc(lit.for)}</div>` : `<div class="muted small">“Let my prayer be set before you like incense.” Psalm 141:2</div>`}</div>
+      <span class="spacer"></span><button class="btn ghost small" data-pray-again>Light another</button></div>`;
+  return `<div class="eyebrow">Take a moment to pray</div>
+    <div class="pray-row"><input id="prayFor" maxlength="60" placeholder="Who or what are you praying for? (optional)" autocomplete="off">
+    <button class="btn primary" data-pray>🕯 Light a candle</button></div>`;
+}
+function wirePray(main) {
+  const box = main.querySelector("#prayCard");
+  if (!box) return;
+  const light = () => {
+    const f = box.querySelector("#prayFor")?.value.trim().slice(0, 60) || "";
+    try { localStorage.setItem(PRAY_KEY, JSON.stringify({ day: store.localDate(), for: f })); } catch {}
+    playHoly("candle", { intention: f }).then(() => { if (box.isConnected) { box.innerHTML = prayHTML(); wirePray(main); } });
+  };
+  box.querySelector("[data-pray]")?.addEventListener("click", light);
+  box.querySelector("#prayFor")?.addEventListener("keydown", (e) => e.key === "Enter" && light());
+  box.querySelector("[data-pray-again]")?.addEventListener("click", () => { try { localStorage.removeItem(PRAY_KEY); } catch {} box.innerHTML = prayHTML(); wirePray(main); box.querySelector("#prayFor")?.focus(); });
+}
+
 // Ash Wednesday: a small cross of ash stays beside the greeting all day (tap it to see the ashes again)
 const ASH_MARK = `<button class="ash-mark linkish" data-ash title="Ash Wednesday" aria-label="Ash Wednesday: see the ashes again" style="border:0;background:none;padding:0;cursor:pointer"><svg viewBox="0 0 22 30" aria-hidden="true">
   <filter id="ashy"><feTurbulence type="fractalNoise" baseFrequency="1.3" numOctaves="2" seed="4"/><feColorMatrix values="0 0 0 0 .14  0 0 0 0 .12  0 0 0 0 .1  0 0 0 -1.6 1.25"/><feComposite in2="SourceGraphic" operator="in"/></filter>
@@ -129,6 +156,8 @@ export async function renderHome(main) {
       <div class="feel">${TOPICS.slice(0, 10).map((t) => `<a class="chip" href="#/topics?t=${t.id}">${esc(t.name)}</a>`).join("")}</div>
     </section>
 
+    <section class="section card pray-card" id="prayCard">${prayHTML()}</section>
+
     <div class="grid2 section" style="margin-top:22px">
       ${
         nextCh
@@ -183,5 +212,6 @@ export async function renderHome(main) {
   wireVod(main);
   alongHTML().then((h) => { const a = main.querySelector("#along"); if (h && a?.isConnected) a.innerHTML = h; }); // Journey with
   main.querySelector("[data-ash]")?.addEventListener("click", () => playHoly("ash"));
+  wirePray(main);
   goals.wire(main, () => renderHome(main));
 }

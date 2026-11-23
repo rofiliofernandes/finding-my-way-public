@@ -251,3 +251,10 @@
 /* the Christmas card at the top of You */
 .xmas-card { display: flex; align-items: center; gap: 14px; }
 .xmas-card .xt { width: 34px; height: 40px; flex: none; }
+
+/* Today: take a moment to pray */
+.pray-card { margin-top: 22px; }
+.pray-row { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.pray-row input { flex: 1 1 200px; min-width: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg, #fff); color: inherit; font: inherit; }
+.pray-lit { display: flex; align-items: center; gap: 12px; }
+.pray-lit .candle-lit .cf { transform: scale(1.5); margin: 0 6px; }
