@@ -7,6 +7,13 @@ import * as daily from "../daily.js";
 import * as goals from "../goals.js";
 import * as synced from "../synced.js";
 import { alongHTML } from "./companions.js";
+import { seasonToday, playHoly } from "../eggs.js";
+
+// Ash Wednesday: a small cross of ash stays beside the greeting all day (tap it to see the ashes again)
+const ASH_MARK = `<button class="ash-mark linkish" data-ash title="Ash Wednesday" aria-label="Ash Wednesday: see the ashes again" style="border:0;background:none;padding:0;cursor:pointer"><svg viewBox="0 0 22 30" aria-hidden="true">
+  <filter id="ashy"><feTurbulence type="fractalNoise" baseFrequency="1.3" numOctaves="2" seed="4"/><feColorMatrix values="0 0 0 0 .14  0 0 0 0 .12  0 0 0 0 .1  0 0 0 -1.6 1.25"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+  <path d="M11 2v26M3 10h16" stroke="#2a2522" stroke-width="5.5" stroke-linecap="round" opacity=".55"/>
+  <path d="M11 2v26M3 10h16" stroke="#000" stroke-width="7" stroke-linecap="round" filter="url(#ashy)"/></svg></button>`;
 
 function greeting() {
   const h = new Date().getHours();
@@ -111,7 +118,7 @@ export async function renderHome(main) {
   main.innerHTML = `
     <div class="hello">
       <div class="eyebrow">${new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</div>
-      <h1 style="margin-top:4px">${named(greeting())}</h1>
+      <h1 style="margin-top:4px">${named(greeting())}${seasonToday() === "ashes" ? ASH_MARK : ""}</h1>
     </div>
 
     <div id="vod">${vodHTML(vod)}</div>
@@ -175,5 +182,6 @@ export async function renderHome(main) {
     }`;
   wireVod(main);
   alongHTML().then((h) => { const a = main.querySelector("#along"); if (h && a?.isConnected) a.innerHTML = h; }); // Journey with
+  main.querySelector("[data-ash]")?.addEventListener("click", () => playHoly("ash"));
   goals.wire(main, () => renderHome(main));
 }

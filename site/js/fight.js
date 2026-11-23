@@ -583,10 +583,19 @@ async function endCard(mine, feeling, onEnd) {
   el.querySelector("[data-fdone]").onclick = close;
   el.querySelector("[data-fread]")?.addEventListener("click", close);
   el.querySelector("[data-fsave]")?.addEventListener("click", (e) => {
-    savePrayer(mine, feeling, v);
-    e.target.disabled = true;
-    e.target.textContent = "Saved ✓";
+    const n = savePrayer(mine, feeling, v);
     toast("Saved to your journal. Your weekly review will ask how it went.");
+    // now they can light a candle beside it
+    const b = document.createElement("button");
+    b.className = "btn ghost";
+    b.textContent = "🕯 Light a candle";
+    b.onclick = () => {
+      try { if (n?.id) localStorage.setItem(candleKey(n.id), store.localDate()); } catch {}
+      b.disabled = true;
+      b.textContent = "Candle lit ✓";
+      import("./eggs.js").then((m) => m.playHoly("candle"));
+    };
+    e.target.replaceWith(b);
   });
 }
 
@@ -645,10 +654,24 @@ export function prayerHTML(n, { compact = false } = {}) {
       ${compact ? "" : `<button class="btn icon ghost" data-prayer-del="${n.id}" title="Delete">${icon("trash")}</button>`}</div>
     <div class="prayer-words">${words || esc(d.feeling)}</div>
     <div class="prayer-follow">${follow}</div>
+    ${compact ? "" : `<div class="prayer-candle">${candleLit(n.id) ? `<span class="candle-lit" title="Your candle is lit beside this prayer today"><span class="cf"></span>Candle lit today</span>` : `<button class="btn ghost small" data-candle="${n.id}">🕯 Light a candle</button>`}</div>`}
   </div>`;
 }
 
+// A candle lit beside a prayer stays lit for the rest of that day
+const candleKey = (id) => "fmw:candle:" + id;
+function candleLit(id) {
+  try { return localStorage.getItem(candleKey(id)) === store.localDate(); } catch { return false; }
+}
+
 export function wirePrayers(root, redraw, confirmBox) {
+  root.querySelectorAll("[data-candle]").forEach(
+    (b) =>
+      (b.onclick = () => {
+        try { localStorage.setItem(candleKey(b.dataset.candle), store.localDate()); } catch {}
+        import("./eggs.js").then((m) => m.playHoly("candle")).then(() => redraw());
+      })
+  );
   root.querySelectorAll("[data-follow-save]").forEach(
     (b) =>
       (b.onclick = () => {

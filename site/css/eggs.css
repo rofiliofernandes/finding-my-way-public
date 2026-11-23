@@ -220,3 +220,34 @@
 .door__close svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
 .door__close:hover { background: var(--accent-soft); }
 @media (prefers-reduced-motion: reduce) { .door__pane, .door.open .door__pane { transition: none; } .door.open .door__bauble { animation: none; } }
+
+/* ---------- holy-day scenes (holy.js) ---------- */
+.holy-ov { position: fixed; inset: 0; z-index: 10000; animation: holy-in .5s ease both; overscroll-behavior: contain; touch-action: none; }
+.holy-ov.out { opacity: 0; transition: opacity .6s ease; pointer-events: none; }
+.holy-ov canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.holy-ov .holy-back { display: none; }
+.holy-ov.boxed { background: #000; }
+.holy-ov.boxed .holy-back { display: block; filter: blur(22px) brightness(.7) saturate(1.1); transform: scale(1.15); }
+.holy-x { position: absolute; top: max(12px, env(safe-area-inset-top)); right: 12px; width: 38px; height: 38px; border-radius: 50%; border: 0;
+  background: rgba(20, 14, 10, .45); color: #fff; font: 400 24px/1 system-ui, sans-serif; cursor: pointer; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: .75; }
+.holy-x:hover, .holy-x:focus-visible { opacity: 1; }
+@keyframes holy-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* a little ash cross that stays beside the greeting on Ash Wednesday */
+.ash-mark { display: inline-block; width: 22px; height: 30px; margin-left: 10px; vertical-align: -2px; opacity: .78; }
+.ash-mark svg { width: 100%; height: 100%; display: block; }
+
+/* the prayer candle, lit for today beside a prayer */
+.candle-lit { display: inline-flex; align-items: center; gap: 7px; font: 600 12.5px var(--sans, Inter, system-ui, sans-serif); color: #9a6a3a; }
+.candle-lit .cf { position: relative; width: 10px; height: 20px; }
+.candle-lit .cf::before { content: ""; position: absolute; left: 2px; bottom: 0; width: 6px; height: 10px; border-radius: 1px; background: #efe2c8; box-shadow: inset -1px 0 #d4c09c; }
+.candle-lit .cf::after { content: ""; position: absolute; left: 1px; bottom: 10px; width: 8px; height: 11px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: radial-gradient(circle at 50% 70%, #fff8dc 0 25%, #ffc44d 45%, #ff8a1f 75%, transparent 76%); box-shadow: 0 0 10px 3px rgba(255, 170, 60, .45);
+  transform-origin: 50% 100%; animation: candle-flick 1.6s ease-in-out infinite; }
+@keyframes candle-flick { 0%, 100% { transform: scale(1, 1) rotate(-2deg); } 30% { transform: scale(.92, 1.1) rotate(2deg); } 60% { transform: scale(1.05, .94) rotate(-1deg); } }
+@media (prefers-reduced-motion: reduce) { .candle-lit .cf::after { animation: none; } }
+.prayer-candle { margin-top: 8px; display: flex; justify-content: flex-start; }
+
+/* the Christmas card at the top of You */
+.xmas-card { display: flex; align-items: center; gap: 14px; }
+.xmas-card .xt { width: 34px; height: 40px; flex: none; }

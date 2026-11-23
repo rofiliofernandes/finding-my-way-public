@@ -85,16 +85,22 @@ export function find(id, ctx = {}) {
   if (!t) return;
   const first = !isFound(id);
   if (first) store.put("notes", { id: treasureNoteId(id), kind: "treasure", body: id, deleted: false });
-  // seasonal / hourly ones only announce themselves once per day
+  // holy days play once on the day; hourly ones and milestones once per sitting
   const key = "egg-seen:" + id;
-  if (!first && (t.group === "season" || t.group === "milestone")) {
+  if (!first && HOLY[t.id] && t.group === "season") {
+    if (localStorage.getItem(key) === today()) return;
+  } else if (!first && (t.group === "season" || t.group === "milestone")) {
     if (sessionStorage.getItem(key)) return;
   }
   try {
     sessionStorage.setItem(key, "1");
+    if (HOLY[t.id]) localStorage.setItem(key, today());
   } catch {}
-  playEffect(t, ctx);
-  if (first) setTimeout(() => foundCard(t), t.fx === "bible" ? 9000 : 1400);
+  const played = playEffect(t, ctx);
+  if (first) {
+    if (played && played.then) played.then(() => foundCard(t));
+    else setTimeout(() => foundCard(t), t.fx === "bible" ? 9000 : 1400);
+  }
 }
 
 // For treasures whose scene plays itself (like "fight"): just record it and show the found card.
@@ -154,8 +160,19 @@ const RAINBOW = (() => {
 const FLAME = `<svg viewBox="0 0 24 36"><path d="M12 1c3 7 10 11 10 20a10 10 0 0 1-20 0c0-6 4-8 5-13 2 3 2 6 5 7-1-5-2-9 0-14Z" fill="#f59e0b"/><path d="M12 16c2 3 5 5 5 9a5 5 0 0 1-10 0c0-3 2-4 2-7 1 2 2 3 3 3 0-2-1-3 0-5Z" fill="#fde68a"/></svg>`;
 const DOVE = `<svg viewBox="0 0 120 80"><path d="M8 44c18-2 30 4 40 14 6-14 2-34-12-48 22 6 36 24 38 42 10-10 26-14 42-10-10 6-16 14-18 22-6 18-34 26-60 16C28 74 16 62 8 44Z" fill="#fff" stroke="#c9a227" stroke-width="2"/><circle cx="96" cy="44" r="2.5" fill="#333"/></svg>`;
 
+// the holy days each have their own full-screen scene (holy.js)
+const HOLY = { ashes: "ash", christmas: "christmas", goodfriday: "goodfriday", easter: "easter", pentecost: "pentecost" };
+export function playHoly(scene, opts) {
+  return import("./holy.js").then((m) => m.play(scene, opts));
+}
+
 export function playEffect(t, ctx = {}) {
   const r = reduce();
+  if (HOLY[t.id]) {
+    if (t.id === "ashes") document.documentElement.classList.add("egg-ashwed");
+    if (t.id === "goodfriday") document.documentElement.classList.add("egg-goodfriday");
+    return playHoly(HOLY[t.id]);
+  }
   if (fx.has(t.fx)) return fx.run(t.fx, ctx, { partSea });
   switch (t.fx) {
     case "fight":

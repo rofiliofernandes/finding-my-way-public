@@ -218,6 +218,13 @@ function companionsCard() {
       <span class="btn ${n ? "primary" : ""}">${n ? `${n} invite${n > 1 ? "s" : ""} waiting` : "Companions"}</span></a></section>`;
 }
 
+// Christmas season on the You page: 24 December to 6 January (Epiphany); "eve" = just 24 and 25 December
+function christmasTime(eve = false) {
+  const d = new Date(), m = d.getMonth() + 1, day = d.getDate();
+  if (eve) return m === 12 && (day === 24 || day === 25);
+  return (m === 12 && day >= 24) || (m === 1 && day <= 6);
+}
+
 export function renderSettings(main) {
   const draw = () => {
     const st = sync.status;
@@ -253,6 +260,7 @@ export function renderSettings(main) {
     main.innerHTML = `
       <div class="eyebrow">Settings</div>
       <h1 style="margin-top:4px">You</h1>
+      ${christmasTime() ? `<section class="card section xmas"><div class="setting xmas-card"><svg class="xt" viewBox="0 0 34 40" aria-hidden="true"><path d="M17 4 9 14h5l-8 10h5L4 33h26l-7-9h5l-8-10h5Z" fill="none" stroke="#cb9866" stroke-width="2.2" stroke-linejoin="round"/><path d="M14 33h6v5h-6Z" fill="none" stroke="#cb9866" stroke-width="2"/><path d="m17 0 1.2 2.6 2.8.3-2.1 1.9.6 2.8L17 6.2l-2.5 1.4.6-2.8L13 2.9l2.8-.3Z" fill="#e0a640"/></svg><div class="what"><b>Merry Christmas</b><span class="muted small">“There is born to you today… a Savior.” Luke 2:11</span></div><button class="btn" data-tree>Light the tree</button></div></section>` : ""}
       ${companionsCard()}
 
       <section class="card section">
@@ -341,6 +349,13 @@ export function renderSettings(main) {
     milestones.wireJourney(main);
     install.wire(main);
     if (social.can()) social.me().then(() => social.countInvites()).then(() => { const c = $(".cmp-card", main); if (c?.isConnected) c.outerHTML = companionsCard(); }); // fresh from the server
+    // the Christmas tree: plays by itself the first time You is opened on Christmas Eve and Day, and from the card any time in the season
+    const tree = () => eggs.playHoly("tree", { name: String(synced.get("name") || "").trim() });
+    $("[data-tree]", main)?.addEventListener("click", tree);
+    if (christmasTime(true)) {
+      const k = "holy-tree:" + store.localDate();
+      if (!localStorage.getItem(k)) { try { localStorage.setItem(k, "1"); } catch {} setTimeout(() => { if (main.isConnected && /settings|you/.test(location.hash)) tree(); }, 500); }
+    }
     const nameIn = $("#yourName", main);
     const saveName = () => { const v = nameIn.value.trim().slice(0, 30); if (v === (synced.get("name") || "")) return; synced.set("name", v); synced.set("nameAsked", true); toast(v ? "Saved" : "Name removed"); };
     nameIn?.addEventListener("change", saveName);
