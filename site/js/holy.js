@@ -703,3 +703,66 @@ export function _frame(id, t, canvas) {
   canvas.width = W * 2; canvas.height = H * 2; c = canvas.getContext("2d"); VIEW = { x: 0, y: 0, w: W, h: H };
   c.setTransform(2, 0, 0, 2, 0, 0); SCENES[id][0](t);
 }
+
+/* ================= the prayer space: a cross, and a candle that lights (runs until stopped) ================= */
+let LIT_AT = null;
+function prayScene(t) {
+  const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#140d0a"); g.addColorStop(1, "#070504"); c.fillStyle = g; full();
+  const lit = LIT_AT == null ? 0 : eo(win(t, LIT_AT, LIT_AT + 1.4));
+  const flick = 1 + .05 * Math.sin(t * 7.3) + .03 * Math.sin(t * 13.1);
+  // the cross behind, warmed from below by the candle
+  c.save(); c.globalCompositeOperation = "lighter";
+  glow(195, 300, 340, "255,180,100", (.1 + .28 * lit) * flick); glow(195, 262, 150, "255,214,150", (.04 + .12 * lit) * flick);
+  c.restore();
+  const wood = c.createLinearGradient(0, 140, 0, 560); wood.addColorStop(0, `rgb(${Math.round(52 + 30 * lit)},${Math.round(34 + 18 * lit)},${Math.round(22 + 8 * lit)})`); wood.addColorStop(1, `rgb(${Math.round(70 + 70 * lit)},${Math.round(45 + 40 * lit)},${Math.round(28 + 18 * lit)})`);
+  c.fillStyle = wood; c.beginPath(); c.roundRect(181, 140, 28, 420, 3); c.fill(); c.beginPath(); c.roundRect(112, 250, 166, 26, 3); c.fill();
+  // a thin line of light along the edges facing the flame
+  if (lit > 0) { c.save(); c.globalAlpha = .55 * lit * flick; const e = c.createLinearGradient(0, 560, 0, 180); e.addColorStop(0, "rgba(255,200,130,1)"); e.addColorStop(1, "rgba(255,200,130,0)"); c.fillStyle = e; c.fillRect(181, 276, 2, 284); c.fillRect(207, 276, 2, 284); c.fillRect(112, 274, 69, 2); c.fillRect(209, 274, 69, 2); c.globalAlpha *= .5; c.fillRect(112, 250, 2, 26); c.fillRect(276, 250, 2, 26); c.restore(); }
+  // the candle in front
+  const cx = 195, top = 520;
+  const wax = c.createLinearGradient(cx - 30, 0, cx + 30, 0); wax.addColorStop(0, "#cdb996"); wax.addColorStop(.35, "#f6ecd8"); wax.addColorStop(1, "#bda885"); c.fillStyle = wax;
+  c.beginPath(); c.roundRect(cx - 26, top, 52, 240, [6, 6, 0, 0]); c.fill();
+  c.fillStyle = "#f8f0e0"; c.beginPath(); c.ellipse(cx, top, 26, 6.5, 0, 0, 7); c.fill();
+  for (const [dx, l] of [[-18, 24], [-5, 12], [11, 30], [20, 16]]) { c.beginPath(); c.roundRect(cx + dx - 3, top, 7, l, 3.5); c.fill(); c.beginPath(); c.arc(cx + dx + .5, top + l, 4, 0, 7); c.fill(); }
+  c.fillStyle = "#3a2a20"; c.fillRect(cx - 1.5, top - 15, 3, 15);
+  if (lit > 0) c.save(), c.globalAlpha = 1, (c.globalCompositeOperation = "lighter"), glow(cx, top + 40, 120, "255,170,90", .12 * lit), c.restore();
+  if (LIT_AT != null) { const sp = win(t, LIT_AT - .3, LIT_AT) * (1 - win(t, LIT_AT, LIT_AT + .3)); if (sp > 0) { c.save(); c.globalCompositeOperation = "lighter"; glow(cx, top - 16, 22, "255,230,170", sp); c.restore(); } }
+  if (lit > 0) candleFlame(cx, top - 13, t, lit * .92);
+  // sparks rising, slowly, for as long as the candle burns
+  if (lit > 0) { c.save(); c.globalCompositeOperation = "lighter"; for (let i = 0; i < 9; i++) { const k = (((t - LIT_AT) / 4.2 + i * .618) % 1 + 1) % 1, x = cx + Math.sin(k * 5 + i * 2.3) * (10 + 26 * k) + (i % 3 - 1) * 9 * k, y = top - 80 - k * 240; c.fillStyle = `rgba(255,236,170,${(1 - k) * .75 * lit})`; c.beginPath(); c.arc(x, y, 1.4 + (i % 3) * .5, 0, 7); c.fill(); } c.restore(); }
+}
+
+// Run the prayer space in a canvas until stop() is called; light() lights the candle.
+export function ambient(canvas) {
+  const ctx = canvas.getContext("2d");
+  let raf = 0, t0 = 0, m = [1, 0, 0], view = VIEW, stopped = false;
+  LIT_AT = null;
+  const fit = () => {
+    const vw = canvas.clientWidth || innerWidth, vh = canvas.clientHeight || innerHeight, dpr = Math.min(2, devicePixelRatio || 1);
+    const cover = Math.max(vw / W, vh / H), contain = Math.min(vw / W, vh / H);
+    const k = (W * cover - vw) / (W * cover) <= .2 && (H * cover - vh) / (H * cover) <= .2 ? cover : contain;   // phones: fill; wide screens: fit the height
+    canvas.width = vw * dpr; canvas.height = vh * dpr;
+    const ox = (vw - W * k) / 2, oy = (vh - H * k) / 2;
+    m = [k * dpr, ox * dpr, oy * dpr]; view = { x: -ox / k, y: -oy / k, w: vw / k, h: vh / k };
+  };
+  fit(); addEventListener("resize", fit);
+  const frame = (now) => {
+    if (stopped) return;
+    if (!t0) t0 = now;
+    const t = (now - t0) / 1000;
+    c = ctx; VIEW = view;
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.setTransform(m[0], 0, 0, m[0], m[1], m[2]); ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
+    try { prayScene(t); } catch (e) { console.error(e); return; }
+    raf = requestAnimationFrame(frame);
+  };
+  raf = requestAnimationFrame(frame);
+  return {
+    light() { if (LIT_AT == null) LIT_AT = t0 ? (performance.now() - t0) / 1000 + .3 : .6; },
+    stop() { stopped = true; cancelAnimationFrame(raf); removeEventListener("resize", fit); },
+  };
+}
+export function _prayFrame(t, litAt, canvas) {
+  canvas.width = W * 2; canvas.height = H * 2; c = canvas.getContext("2d"); VIEW = { x: 0, y: 0, w: W, h: H }; LIT_AT = litAt;
+  c.setTransform(2, 0, 0, 2, 0, 0); prayScene(t);
+}
