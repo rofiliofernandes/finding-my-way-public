@@ -270,8 +270,8 @@ html.praying, html.praying body { overflow: hidden; }
 .pray-foot { width: 100%; max-width: 440px; display: flex; justify-content: center; }
 .pray-eyebrow { font: 600 11px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: #d9b88a; }
 .pray-head h2 { font: 400 26px/1.25 var(--serif); margin: 8px 0 18px; color: #fff4e2; }
-.pray-silent { display: flex; flex-direction: column; gap: 4px; padding: 16px 18px; border-radius: 16px; border: 1px solid rgba(255, 210, 150, .35);
-  background: rgba(255, 190, 110, .12); color: inherit; text-align: left; cursor: pointer; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+.pray-silent { display: flex; flex-direction: column; gap: 4px; padding: 18px 18px; border-radius: 16px; border: 1px solid rgba(255, 210, 150, .4);
+  background: rgba(70, 42, 20, .6); color: inherit; text-align: left; cursor: pointer; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
 .pray-silent b { font: 600 17px var(--sans); color: #fff1dc; }
 .pray-silent span { font-size: 13.5px; color: #e2cfb3; }
 .pray-or { margin: 18px 0 10px; font-size: 13px; color: #bfa98b; }
@@ -280,13 +280,16 @@ html.praying, html.praying body { overflow: hidden; }
   background: rgba(20, 13, 10, .55); color: #f3e6d2; font: 500 14px var(--sans); text-align: left; cursor: pointer; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
 .pray-guide:hover, .pray-silent:hover { border-color: rgba(255, 210, 150, .6); }
 .pray-guide .gi { font-size: 17px; }
-.pray-quiet { margin-top: 4vh; transition: opacity 2s ease; }
-.pray-quiet.faded { opacity: .35; }
+.pray-quiet { margin-top: 2vh; transition: opacity 3s ease; }
+.pray-quiet.gone { opacity: 0; }
+.pray-choice { display: flex; flex-direction: column; gap: 12px; }
+.pray-silent.alt { background: rgba(20, 13, 10, .6); border-color: rgba(255, 255, 255, .16); }
+.pray-back { margin: 16px auto 0; background: none; border: 0; color: #d9c2a0; font: 500 14px var(--sans); cursor: pointer; padding: 8px 12px; }
 .pray-q, .pray-verse { font: italic 400 21px/1.5 var(--serif); color: #fff1dc; text-shadow: 0 2px 14px rgba(0, 0, 0, .8); }
 .pray-ref { margin-top: 8px; font: 600 11px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: #d9b88a; }
 .pray-clock { margin-top: 10px; font: 500 13px var(--sans); color: rgba(243, 230, 210, .5); font-variant-numeric: tabular-nums; }
-.pray-step { margin-top: 2vh; padding: 18px 16px; border-radius: 18px; background: rgba(12, 8, 6, .55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
-.pray-step p { font: 400 21px/1.5 var(--serif); color: #fff1dc; margin: 12px 0 14px; }
+.pray-step { margin-top: 0; padding: 12px 14px; border-radius: 18px; background: rgba(12, 8, 6, .55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.pray-step p { font: 400 18px/1.45 var(--serif); color: #fff1dc; margin: 8px 0 10px; }
 .pray-step p.pray-verse { font-style: italic; }
 .pray-dots { display: flex; justify-content: center; gap: 6px; }
 .pray-dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(255, 255, 255, .2); }

@@ -166,21 +166,31 @@ export function open() {
     };
     const begin = () => { if (!started) started = Date.now(); scene ? scene.light() : setTimeout(() => scene?.light(), 400); };
 
-    // 1. how would you like to pray?
-    show(`<div class="pray-head"><div class="pray-eyebrow">Take a moment with God</div><h2>How would you like to pray?</h2></div>
-      <button class="pray-silent" data-silent><b>🕯 Pray in silence</b><span>The candle is lit. Just you and Him, for as long as you like.</span></button>
-      <div class="pray-or">or let a short guide lead you</div>
-      <div class="pray-guides">${GUIDES.map((g) => `<button class="pray-guide" data-guide="${g.id}"><span class="gi" aria-hidden="true">${g.icon}</span>${esc(g.title)}</button>`).join("")}</div>`);
-    stage.querySelector("[data-silent]").onclick = silent;
-    stage.querySelectorAll("[data-guide]").forEach((b) => (b.onclick = () => guided(GUIDES.find((g) => g.id === b.dataset.guide))));
+    // 1. first, do they want help while praying, or to be left in peace?
+    function ask() {
+      show(`<div class="pray-head"><div class="pray-eyebrow">Take a moment with God</div><h2>Would you like some guidance while you pray?</h2></div>
+        <div class="pray-choice">
+          <button class="pray-silent" data-silent><b>🕯 No, just let me pray</b><span>The candle is lit and nothing will interrupt you. Tap Amen when you've finished.</span></button>
+          <button class="pray-silent alt" data-help><b>🙏 Yes, guide me</b><span>Choose what to pray for, and gentle prompts will lead you one step at a time.</span></button>
+        </div>`);
+      stage.querySelector("[data-silent]").onclick = silent;
+      stage.querySelector("[data-help]").onclick = pick;
+    }
+    // 1b. what would you like to pray for?
+    function pick() {
+      show(`<div class="pray-head"><div class="pray-eyebrow">Guide me</div><h2>What would you like to pray for?</h2></div>
+        <div class="pray-guides">${GUIDES.map((g) => `<button class="pray-guide" data-guide="${g.id}"><span class="gi" aria-hidden="true">${g.icon}</span>${esc(g.title)}</button>`).join("")}</div>
+        <button class="pray-back" data-back>← Back</button>`);
+      stage.querySelectorAll("[data-guide]").forEach((b) => (b.onclick = () => guided(GUIDES.find((g) => g.id === b.dataset.guide))));
+      stage.querySelector("[data-back]").onclick = ask;
+    }
+    ask();
 
     // 2a. in silence: the candle lights, the cross behind; a quiet line, a small clock, and Amen
     function silent() {
       begin();
-      show(`<div class="pray-quiet"><div class="pray-q">“Be still, and know that I am God.”</div><div class="pray-ref">Psalm 46:10</div></div><div class="pray-clock" aria-live="off">0:00</div>`, amenBtn);
-      const clock = stage.querySelector(".pray-clock");
-      timer = setInterval(() => { const s = Math.round((Date.now() - started) / 1000); clock.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; }, 1000);
-      setTimeout(() => stage.querySelector(".pray-quiet")?.classList.add("faded"), 9000);
+      show(`<div class="pray-quiet"><div class="pray-q">“Be still, and know that I am God.”</div><div class="pray-ref">Psalm 46:10</div></div>`, amenBtn);
+      setTimeout(() => stage.querySelector(".pray-quiet")?.classList.add("gone"), 6000);   // then nothing on screen but the cross and the candle
       foot.querySelector("[data-amen]").onclick = amen;
     }
 

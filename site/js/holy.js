@@ -705,31 +705,53 @@ export function _frame(id, t, canvas) {
 }
 
 /* ================= the prayer space: a cross, and a candle that lights (runs until stopped) ================= */
-let LIT_AT = null;
+let LIT_AT = null, CRUCIFIX = null;
+function drawnCross(t) {
+  const fade = eo(win(t, .1, 1.6));
+  c.save(); c.globalAlpha = fade;
+  const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#9a9a9a"); g.addColorStop(.35, "#6e6e6e"); g.addColorStop(.7, "#2b2b2b"); g.addColorStop(1, "#0b0b0b"); c.fillStyle = g; full();
+  const r = rng(4); c.save(); c.filter = "blur(30px)"; for (let i = 0; i < 18; i++) { c.fillStyle = `rgba(${r() < .5 ? "230,230,230" : "40,40,40"},${.08 + r() * .14})`; c.beginPath(); c.ellipse(VIEW.x + r() * VIEW.w, r() * H * .7, 80 + r() * 160, 30 + r() * 60, 0, 0, 7); c.fill(); } c.restore();
+  // the cross
+  c.fillStyle = "#151515"; c.fillRect(182, 150, 26, 390); c.fillRect(75, 226, 240, 28);
+  c.fillStyle = "rgba(255,255,255,.08)"; c.fillRect(182, 150, 3, 390); c.fillRect(75, 226, 240, 3);
+  // the hill
+  c.fillStyle = "#0b0b0b"; c.beginPath(); c.moveTo(VIEW.x - 20, H * .86); c.bezierCurveTo(W * .15, H * .8, W * .28, H * .72, W * .4, H * .7); c.lineTo(W * .52, H * .69);
+  c.bezierCurveTo(W * .75, H * .72, W * .88, H * .8, VIEW.x + VIEW.w + 20, H * .84); c.lineTo(VIEW.x + VIEW.w + 20, VIEW.y + VIEW.h); c.lineTo(VIEW.x - 20, VIEW.y + VIEW.h); c.fill();
+  c.restore();
+}
 function prayScene(t) {
-  const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#140d0a"); g.addColorStop(1, "#070504"); c.fillStyle = g; full();
+  c.fillStyle = "#0b0a09"; full();
   const lit = LIT_AT == null ? 0 : eo(win(t, LIT_AT, LIT_AT + 1.4));
   const flick = 1 + .05 * Math.sin(t * 7.3) + .03 * Math.sin(t * 13.1);
-  // the cross behind, warmed from below by the candle
-  c.save(); c.globalCompositeOperation = "lighter";
-  glow(195, 300, 340, "255,180,100", (.1 + .28 * lit) * flick); glow(195, 262, 150, "255,214,150", (.04 + .12 * lit) * flick);
-  c.restore();
-  const wood = c.createLinearGradient(0, 140, 0, 560); wood.addColorStop(0, `rgb(${Math.round(52 + 30 * lit)},${Math.round(34 + 18 * lit)},${Math.round(22 + 8 * lit)})`); wood.addColorStop(1, `rgb(${Math.round(70 + 70 * lit)},${Math.round(45 + 40 * lit)},${Math.round(28 + 18 * lit)})`);
-  c.fillStyle = wood; c.beginPath(); c.roundRect(181, 140, 28, 420, 3); c.fill(); c.beginPath(); c.roundRect(112, 250, 166, 26, 3); c.fill();
-  // a thin line of light along the edges facing the flame
-  if (lit > 0) { c.save(); c.globalAlpha = .55 * lit * flick; const e = c.createLinearGradient(0, 560, 0, 180); e.addColorStop(0, "rgba(255,200,130,1)"); e.addColorStop(1, "rgba(255,200,130,0)"); c.fillStyle = e; c.fillRect(181, 276, 2, 284); c.fillRect(207, 276, 2, 284); c.fillRect(112, 274, 69, 2); c.fillRect(209, 274, 69, 2); c.globalAlpha *= .5; c.fillRect(112, 250, 2, 26); c.fillRect(276, 250, 2, 26); c.restore(); }
-  // the candle in front
-  const cx = 195, top = 520;
-  const wax = c.createLinearGradient(cx - 30, 0, cx + 30, 0); wax.addColorStop(0, "#cdb996"); wax.addColorStop(.35, "#f6ecd8"); wax.addColorStop(1, "#bda885"); c.fillStyle = wax;
-  c.beginPath(); c.roundRect(cx - 26, top, 52, 240, [6, 6, 0, 0]); c.fill();
-  c.fillStyle = "#f8f0e0"; c.beginPath(); c.ellipse(cx, top, 26, 6.5, 0, 0, 7); c.fill();
-  for (const [dx, l] of [[-18, 24], [-5, 12], [11, 30], [20, 16]]) { c.beginPath(); c.roundRect(cx + dx - 3, top, 7, l, 3.5); c.fill(); c.beginPath(); c.arc(cx + dx + .5, top + l, 4, 0, 7); c.fill(); }
-  c.fillStyle = "#3a2a20"; c.fillRect(cx - 1.5, top - 15, 3, 15);
-  if (lit > 0) c.save(), c.globalAlpha = 1, (c.globalCompositeOperation = "lighter"), glow(cx, top + 40, 120, "255,170,90", .12 * lit), c.restore();
+  // Jesus on the cross, filling the screen; it fades in, and is darker while choosing how to pray
+  // a misty sky and a plain cross on a hill (put a picture in CRUCIFIX to use a photo instead)
+  if (!CRUCIFIX) drawnCross(t);
+  const img = CRUCIFIX;
+  if (img && img.complete && img.naturalWidth) {
+    const fade = eo(win(t, .1, 1.6)), s = Math.max(VIEW.w / img.naturalWidth, VIEW.h / img.naturalHeight);
+    const w = img.naturalWidth * s, h = img.naturalHeight * s;
+    c.save(); c.globalAlpha = fade; c.drawImage(img, VIEW.x + (VIEW.w - w) / 2, VIEW.y + (VIEW.h - h) / 2 - VIEW.h * .03, w, h); c.restore();
+  }
+  c.fillStyle = `rgba(0,0,0,${.55 - .3 * lit})`; full();
+  const v = c.createLinearGradient(0, H * .5, 0, H); v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(0,0,0,.8)"); c.fillStyle = v; full();
+  // the candle's warm light on the grey
+  const cx = 195, top = 580;
+  if (lit > 0) { c.save(); c.globalCompositeOperation = "lighter"; glow(cx, top - 50, 300, "255,165,80", .2 * lit * flick); glow(cx, top - 40, 110, "255,210,140", .22 * lit * flick); c.restore(); }
+  // a wide pillar candle in front of the hill
+  const half = 40, wax = c.createLinearGradient(cx - half, 0, cx + half, 0);
+  wax.addColorStop(0, "#c2ad88"); wax.addColorStop(.3, "#f5ead4"); wax.addColorStop(.55, "#efe2c6"); wax.addColorStop(1, "#ad9874"); c.fillStyle = wax;
+  c.beginPath(); c.roundRect(cx - half, top, half * 2, 260, [10, 10, 0, 0]); c.fill();
+  // the soft, melted top: a shallow bowl around the wick, with a few drips over the rim
+  c.fillStyle = "#f7eedc"; c.beginPath(); c.ellipse(cx, top + 1, half, 9, 0, 0, 7); c.fill();
+  c.fillStyle = "rgba(200,170,120,.35)"; c.beginPath(); c.ellipse(cx, top + 2, half - 9, 5, 0, 0, 7); c.fill();
+  c.fillStyle = "#f3e7cf";
+  for (const [dx, l] of [[-33, 22], [-20, 12], [14, 30], [29, 17]]) { c.beginPath(); c.roundRect(cx + dx - 4, top + 2, 8, l, 4); c.fill(); c.beginPath(); c.arc(cx + dx, top + 2 + l, 4.6, 0, 7); c.fill(); }
+  if (lit > 0) { c.save(); c.globalCompositeOperation = "lighter"; glow(cx, top + 10, 46, "255,190,110", .35 * lit * flick); c.restore(); }   // the glow inside the wax
+  c.fillStyle = "#3a2a20"; c.fillRect(cx - 1.8, top - 14, 3.6, 15);
   if (LIT_AT != null) { const sp = win(t, LIT_AT - .3, LIT_AT) * (1 - win(t, LIT_AT, LIT_AT + .3)); if (sp > 0) { c.save(); c.globalCompositeOperation = "lighter"; glow(cx, top - 16, 22, "255,230,170", sp); c.restore(); } }
-  if (lit > 0) candleFlame(cx, top - 13, t, lit * .92);
-  // sparks rising, slowly, for as long as the candle burns
-  if (lit > 0) { c.save(); c.globalCompositeOperation = "lighter"; for (let i = 0; i < 9; i++) { const k = (((t - LIT_AT) / 4.2 + i * .618) % 1 + 1) % 1, x = cx + Math.sin(k * 5 + i * 2.3) * (10 + 26 * k) + (i % 3 - 1) * 9 * k, y = top - 80 - k * 240; c.fillStyle = `rgba(255,236,170,${(1 - k) * .75 * lit})`; c.beginPath(); c.arc(x, y, 1.4 + (i % 3) * .5, 0, 7); c.fill(); } c.restore(); }
+  if (lit > 0) candleFlame(cx, top - 12, t, lit);
+  // sparks rising slowly
+  if (lit > 0) { c.save(); c.globalCompositeOperation = "lighter"; for (let i = 0; i < 9; i++) { const k = (((t - LIT_AT) / 4.2 + i * .618) % 1 + 1) % 1, x = cx + Math.sin(k * 5 + i * 2.3) * (10 + 26 * k) + (i % 3 - 1) * 9 * k, y = top - 90 - k * 240; c.fillStyle = `rgba(255,236,170,${(1 - k) * .75 * lit})`; c.beginPath(); c.arc(x, y, 1.4 + (i % 3) * .5, 0, 7); c.fill(); } c.restore(); }
 }
 
 // Run the prayer space in a canvas until stop() is called; light() lights the candle.
