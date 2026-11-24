@@ -735,29 +735,51 @@ function prayScene(t) {
   c.fillStyle = `rgba(0,0,0,${.55 - .3 * lit})`; full();
   const v = c.createLinearGradient(0, H * .5, 0, H); v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(0,0,0,.8)"); c.fillStyle = v; full();
   // the candle's warm light on the grey
-  const cx = 195, top = 580;
-  if (lit > 0) { c.save(); c.globalCompositeOperation = "lighter"; glow(cx, top - 50, 300, "255,165,80", .2 * lit * flick); glow(cx, top - 40, 110, "255,210,140", .22 * lit * flick); c.restore(); }
+  // the candle burns down over an hour: it gets shorter, a drop of wax runs down every minute, and at the end the flame goes out
+  const burnt = LIT_AT == null ? 0 : Math.max(0, t - LIT_AT);
+  const melt = clamp(burnt / BURN), cx = 195, top = 580 + 70 * melt;
+  const out = LIT_AT == null ? 0 : win(burnt, BURN - 4, BURN);                 // the flame dying in the last seconds
+  const life = lit * (1 - out);
+  if (life > 0) { c.save(); c.globalCompositeOperation = "lighter"; glow(cx, top - 50, 300, "255,165,80", .2 * life * flick); glow(cx, top - 40, 110, "255,210,140", .22 * life * flick); c.restore(); }
   // a wide pillar candle in front of the hill
   const half = 40, wax = c.createLinearGradient(cx - half, 0, cx + half, 0);
   wax.addColorStop(0, "#c2ad88"); wax.addColorStop(.3, "#f5ead4"); wax.addColorStop(.55, "#efe2c6"); wax.addColorStop(1, "#ad9874"); c.fillStyle = wax;
-  c.beginPath(); c.roundRect(cx - half, top, half * 2, 260, [10, 10, 0, 0]); c.fill();
-  // the soft, melted top: a shallow bowl around the wick, with a few drips over the rim
+  c.beginPath(); c.roundRect(cx - half, top, half * 2, 300, [10, 10, 0, 0]); c.fill();
+  // the soft, melted top: a bowl around the wick that deepens as it burns
   c.fillStyle = "#f7eedc"; c.beginPath(); c.ellipse(cx, top + 1, half, 9, 0, 0, 7); c.fill();
-  c.fillStyle = "rgba(200,170,120,.35)"; c.beginPath(); c.ellipse(cx, top + 2, half - 9, 5, 0, 0, 7); c.fill();
+  c.fillStyle = `rgba(200,165,110,${.3 + .25 * melt})`; c.beginPath(); c.ellipse(cx, top + 2, half - 8, 5 + 1.5 * melt, 0, 0, 7); c.fill();
+  // wax drips: a few from the start, then a new one every minute, running down the side and hardening
+  const drip = (dx, len, k) => { const l = len * k; c.beginPath(); c.roundRect(cx + dx - 4, top + 2, 8, l, 4); c.fill(); c.beginPath(); c.arc(cx + dx, top + 2 + l, 4.2 + .8 * k, 0, 7); c.fill(); };
   c.fillStyle = "#f3e7cf";
-  for (const [dx, l] of [[-33, 22], [-20, 12], [14, 30], [29, 17]]) { c.beginPath(); c.roundRect(cx + dx - 4, top + 2, 8, l, 4); c.fill(); c.beginPath(); c.arc(cx + dx, top + 2 + l, 4.6, 0, 7); c.fill(); }
-  if (lit > 0) { c.save(); c.globalCompositeOperation = "lighter"; glow(cx, top + 10, 46, "255,190,110", .35 * lit * flick); c.restore(); }   // the glow inside the wax
-  c.fillStyle = "#3a2a20"; c.fillRect(cx - 1.8, top - 14, 3.6, 15);
+  for (const [dx, l] of [[-33, 22], [-20, 12], [14, 30], [29, 17]]) drip(dx, l, 1);
+  const minutes = Math.floor(burnt / 60);
+  for (let m = Math.max(1, minutes - 9); m <= minutes; m++) {           // the latest ten stay on the candle
+    const r = rng(500 + m), dx = (r() * 2 - 1) * (half - 7), len = 18 + r() * 46;
+    const k = eo(clamp((burnt - m * 60) / 9));                          // each runs down over about nine seconds
+    c.fillStyle = r() < .5 ? "#f6ecd6" : "#efe1c4"; drip(dx, len, k);
+    // the fresh drop glistens while it runs
+    if (k < 1 && life > 0) { c.fillStyle = `rgba(255,250,235,${.8 * (1 - k)})`; c.beginPath(); c.arc(cx + dx - 1.2, top + 2 + len * k - 1, 1.6, 0, 7); c.fill(); }
+  }
+  if (life > 0) { c.save(); c.globalCompositeOperation = "lighter"; glow(cx, top + 10, 46, "255,190,110", .35 * life * flick); c.restore(); }   // the glow inside the wax
+  c.fillStyle = "#3a2a20"; c.fillRect(cx - 1.8, top - 14 + 4 * out, 3.6, 15 - 4 * out);
   if (LIT_AT != null) { const sp = win(t, LIT_AT - .3, LIT_AT) * (1 - win(t, LIT_AT, LIT_AT + .3)); if (sp > 0) { c.save(); c.globalCompositeOperation = "lighter"; glow(cx, top - 16, 22, "255,230,170", sp); c.restore(); } }
-  if (lit > 0) candleFlame(cx, top - 12, t, lit);
+  if (life > 0) candleFlame(cx, top - 12, t, life);
   // sparks rising slowly
-  if (lit > 0) { c.save(); c.globalCompositeOperation = "lighter"; for (let i = 0; i < 9; i++) { const k = (((t - LIT_AT) / 4.2 + i * .618) % 1 + 1) % 1, x = cx + Math.sin(k * 5 + i * 2.3) * (10 + 26 * k) + (i % 3 - 1) * 9 * k, y = top - 90 - k * 240; c.fillStyle = `rgba(255,236,170,${(1 - k) * .75 * lit})`; c.beginPath(); c.arc(x, y, 1.4 + (i % 3) * .5, 0, 7); c.fill(); } c.restore(); }
+  if (life > 0) { c.save(); c.globalCompositeOperation = "lighter"; for (let i = 0; i < 9; i++) { const k = (((t - LIT_AT) / 4.2 + i * .618) % 1 + 1) % 1, x = cx + Math.sin(k * 5 + i * 2.3) * (10 + 26 * k) + (i % 3 - 1) * 9 * k, y = top - 90 - k * 240; c.fillStyle = `rgba(255,236,170,${(1 - k) * .75 * life})`; c.beginPath(); c.arc(x, y, 1.4 + (i % 3) * .5, 0, 7); c.fill(); } c.restore(); }
+  // when it goes out: a thin wisp of smoke, and a last ember on the wick
+  if (out > 0) {
+    const sk = burnt - (BURN - 1.5);
+    if (sk > 0 && sk < 9) { c.save(); c.lineCap = "round"; for (let i = 0; i < 3; i++) { const a = (1 - sk / 9) * (.35 - i * .08); c.strokeStyle = `rgba(200,200,200,${a})`; c.lineWidth = 3 + i * 2; c.beginPath(); c.moveTo(cx, top - 14); for (let y = 0; y < 120 * Math.min(1, sk / 2.5); y += 6) c.lineTo(cx + Math.sin(y / 18 + sk * 1.4 + i) * (4 + y / 10), top - 14 - y); c.stroke(); } c.restore(); }
+    const ember = 1 - win(burnt, BURN, BURN + 5); if (ember > 0) { c.save(); c.globalCompositeOperation = "lighter"; glow(cx, top - 14, 6, "255,120,40", .9 * ember); c.restore(); }
+  }
 }
+const BURN = 3600;   // seconds: the candle lasts one hour
+export const burnSeconds = BURN;
 
 // Run the prayer space in a canvas until stop() is called; light() lights the candle.
-export function ambient(canvas) {
+export function ambient(canvas, { speed = 1, onBurnOut } = {}) {
   const ctx = canvas.getContext("2d");
-  let raf = 0, t0 = 0, m = [1, 0, 0], view = VIEW, stopped = false;
+  let raf = 0, t0 = 0, m = [1, 0, 0], view = VIEW, stopped = false, burned = false;
   LIT_AT = null;
   const fit = () => {
     const vw = canvas.clientWidth || innerWidth, vh = canvas.clientHeight || innerHeight, dpr = Math.min(2, devicePixelRatio || 1);
@@ -771,8 +793,9 @@ export function ambient(canvas) {
   const frame = (now) => {
     if (stopped) return;
     if (!t0) t0 = now;
-    const t = (now - t0) / 1000;
+    const t = ((now - t0) / 1000) * speed;
     c = ctx; VIEW = view;
+    if (LIT_AT != null && !burned && t - LIT_AT >= BURN) { burned = true; onBurnOut?.(); }
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.setTransform(m[0], 0, 0, m[0], m[1], m[2]); ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
     try { prayScene(t); } catch (e) { console.error(e); return; }
@@ -780,7 +803,7 @@ export function ambient(canvas) {
   };
   raf = requestAnimationFrame(frame);
   return {
-    light() { if (LIT_AT == null) LIT_AT = t0 ? (performance.now() - t0) / 1000 + .3 : .6; },
+    light() { if (LIT_AT == null) LIT_AT = t0 ? ((performance.now() - t0) / 1000) * speed + .3 * speed : .6; },
     stop() { stopped = true; cancelAnimationFrame(raf); removeEventListener("resize", fit); },
   };
 }

@@ -5,6 +5,19 @@ import * as store from "./store.js";
 import * as bible from "./bible.js";
 import { esc } from "./ui.js";
 
+// The simple guided prayer: what "Guide me" starts with, no choices needed.
+export const SIMPLE = {
+  id: "simple", title: "A simple prayer",
+  steps: [
+    "Take a slow breath. You are with God now, and He is glad you came.",
+    "Thank Him for one good thing from today, however small.",
+    "Bring to Him the people you love, one by one.",
+    "Think of someone who is struggling, and ask Him to help them.",
+    "Tell Him what is on your heart, and ask Him for what you need.",
+  ],
+  verse: ["PHP", 4, 6],
+};
+
 // Each guide: a few gentle prompts, one at a time, then a verse to rest on.
 export const GUIDES = [
   {
@@ -135,7 +148,8 @@ export function open() {
     document.documentElement.classList.add("praying");
     const stage = ov.querySelector(".pray-stage"), foot = ov.querySelector(".pray-foot");
     let scene = null, started = 0, guide = null, timer = 0, lock = null, closed = false;
-    import("./holy.js").then((m) => { if (!closed) scene = m.ambient(ov.querySelector(".pray-bg")); });
+    const speed = Number(sessionStorage.getItem("fmw:pray-speed")) || 1;   // only for testing the hour-long candle quickly
+    import("./holy.js").then((m) => { if (!closed) scene = m.ambient(ov.querySelector(".pray-bg"), { speed, onBurnOut: burnedOut }); });
     // keep the screen awake while praying
     navigator.wakeLock?.request?.("screen").then((l) => (lock = l)).catch(() => {});
 
@@ -164,6 +178,15 @@ export function open() {
       show(`<div class="pray-done">Amen</div>`);
       setTimeout(() => finish(true), 1700);
     };
+    // after an hour the candle has burned down: a quiet word, and the Amen to close
+    function burnedOut() {
+      if (closed) return;
+      setTimeout(() => {
+        if (closed) return;
+        show(`<div class="pray-quiet"><div class="pray-q">Your candle has burned down.</div><div class="pray-hint" style="margin-top:10px">Thank you for spending this hour with Him.</div></div>`, amenBtn);
+        foot.querySelector("[data-amen]").onclick = amen;
+      }, 3000);
+    }
     const begin = () => { if (!started) started = Date.now(); scene ? scene.light() : setTimeout(() => scene?.light(), 400); };
 
     // 1. first, do they want help while praying, or to be left in peace?
@@ -171,14 +194,16 @@ export function open() {
       show(`<div class="pray-head"><div class="pray-eyebrow">Take a moment with God</div><h2>Would you like some guidance while you pray?</h2></div>
         <div class="pray-choice">
           <button class="pray-silent" data-silent><b>🕯 No, just let me pray</b><span>The candle is lit and nothing will interrupt you. Tap Amen when you've finished.</span></button>
-          <button class="pray-silent alt" data-help><b>🙏 Yes, guide me</b><span>Choose what to pray for, and gentle prompts will lead you one step at a time.</span></button>
-        </div>`);
+          <button class="pray-silent alt" data-help><b>🙏 Yes, guide me</b><span>A few gentle words will lead you through a simple prayer, one step at a time.</span></button>
+        </div>
+        <button class="pray-back" data-pick>or pray for something specific</button>`);
       stage.querySelector("[data-silent]").onclick = silent;
-      stage.querySelector("[data-help]").onclick = pick;
+      stage.querySelector("[data-help]").onclick = () => guided(SIMPLE);
+      stage.querySelector("[data-pick]").onclick = pick;
     }
     // 1b. what would you like to pray for?
     function pick() {
-      show(`<div class="pray-head"><div class="pray-eyebrow">Guide me</div><h2>What would you like to pray for?</h2></div>
+      show(`<div class="pray-head"><div class="pray-eyebrow">Pray for</div><h2>What is on your heart?</h2></div>
         <div class="pray-guides">${GUIDES.map((g) => `<button class="pray-guide" data-guide="${g.id}"><span class="gi" aria-hidden="true">${g.icon}</span>${esc(g.title)}</button>`).join("")}</div>
         <button class="pray-back" data-back>← Back</button>`);
       stage.querySelectorAll("[data-guide]").forEach((b) => (b.onclick = () => guided(GUIDES.find((g) => g.id === b.dataset.guide))));
