@@ -267,6 +267,10 @@ html.praying, html.praying body { overflow: hidden; }
 .pray-ui { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; padding: max(56px, env(safe-area-inset-top)) 20px max(22px, env(safe-area-inset-bottom)); overflow-y: auto; }
 .pray-stage { width: 100%; max-width: 440px; flex: 1; display: flex; flex-direction: column; align-items: stretch; text-align: center; opacity: 0; transform: translateY(8px); transition: opacity .6s ease, transform .6s ease; }
 .pray-stage.in { opacity: 1; transform: none; }
+.pray-stage[data-dir="next"]:not(.in) { transform: translateX(40px); }
+.pray-stage[data-dir="back"]:not(.in) { transform: translateX(-40px); }
+.pray-step.swipe { cursor: pointer; touch-action: pan-y; user-select: none; -webkit-user-select: none; transition: transform .3s ease, opacity .3s ease; }
+.pray-step.swipe:active { background: rgba(20, 13, 10, .65); }
 .pray-foot { width: 100%; max-width: 440px; display: flex; justify-content: center; }
 .pray-eyebrow { font: 600 11px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: #d9b88a; }
 .pray-head h2 { font: 400 26px/1.25 var(--serif); margin: 8px 0 18px; color: #fff4e2; }

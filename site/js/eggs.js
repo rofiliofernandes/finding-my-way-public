@@ -553,17 +553,20 @@ export function init() {
   const release = () => { if (startY != null || pulled) stretch(0, true); startY = null; pulled = 0; };
   window.addEventListener("touchend", release, { passive: true });
   window.addEventListener("touchcancel", release, { passive: true });
+  // with a mouse or trackpad: scrolling up past the top stretches the page down too, then the treasure appears
+  let wheelSpring = 0, wheelFound = false;
   window.addEventListener(
     "wheel",
     (e) => {
-      if (!onToday() || scrollY > 0 || e.deltaY >= 0) return (wheel = 0);
+      if (!onToday() || scrollY > 0 || e.deltaY >= 0) { if (wheel) { wheel = 0; stretch(0, true); } return; }
       const now = Date.now();
-      wheel = now - wheelT < 400 ? wheel - e.deltaY : -e.deltaY;
+      if (now - wheelT > 400) { wheel = 0; wheelFound = false; }
+      wheel -= e.deltaY;
       wheelT = now;
-      if (wheel > 900) {
-        wheel = 0;
-        find("seek");
-      }
+      stretch(Math.min(110, 110 * (1 - Math.exp(-wheel / 500))), false);   // more resistance the further it goes
+      if (wheel > 700 && !wheelFound) { wheelFound = true; find("seek"); }
+      clearTimeout(wheelSpring);
+      wheelSpring = setTimeout(() => { wheel = 0; wheelFound = false; stretch(0, true); }, 220);   // springs back when the scrolling stops
     },
     { passive: true }
   );

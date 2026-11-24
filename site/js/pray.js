@@ -168,7 +168,8 @@ export function open() {
       setTimeout(() => { scene?.stop(); ov.remove(); document.documentElement.classList.remove("praying"); resolve(prayed); }, 700);
       removeEventListener("keydown", onKey);
     };
-    const onKey = (e) => e.key === "Escape" && finish(false);
+    let onArrow = null;
+    const onKey = (e) => { if (e.key === "Escape") finish(false); else onArrow?.(e); };
     addEventListener("keydown", onKey);
     ov.querySelector("[data-x]").onclick = () => finish(!!started);
 
@@ -225,22 +226,48 @@ export function open() {
       begin();
       const vt = verseText(g.verse);
       let i = 0;
-      const step = async () => {
+      // one prompt at a time on a card: tap it, or swipe left, for the next; swipe right to go back
+      const step = async (dir = 1) => {
+        stage.dataset.dir = dir > 0 ? "next" : "back";
         if (i < g.steps.length) {
-          show(`<div class="pray-step"><div class="pray-eyebrow">${esc(g.title)}</div><p>${esc(g.steps[i])}</p>
+          show(`<div class="pray-step swipe" data-card role="button" tabindex="0" aria-label="Next">
+            <div class="pray-eyebrow">${esc(g.title)}</div><p>${esc(g.steps[i])}</p>
             <div class="pray-dots">${g.steps.map((_, j) => `<i class="${j <= i ? "on" : ""}"></i>`).join("")}<i></i></div>
-            <div class="pray-hint">Take your time</div></div>`,
-            `<button class="btn pray-next" data-next>${i < g.steps.length - 1 ? "Next" : "Continue"}</button>`);
-          foot.querySelector("[data-next]").onclick = () => { i++; step(); };
+            <div class="pray-hint">${i === 0 ? "Take your time. Tap or swipe when you're ready" : "Tap or swipe when you're ready"}</div></div>`);
+          wireCard(stage.querySelector("[data-card]"));
         } else {
           const text = await vt;
-          show(`<div class="pray-step"><div class="pray-eyebrow">${esc(g.title)}</div>
+          show(`<div class="pray-step swipe" data-card>
+            <div class="pray-eyebrow">${esc(g.title)}</div>
             ${text ? `<p class="pray-verse">“${esc(text)}”</p><div class="pray-ref">${esc(bible.formatRef(...g.verse))}</div>` : ""}
             <div class="pray-dots">${g.steps.map(() => `<i class="on"></i>`).join("")}<i class="on"></i></div>
             <div class="pray-hint">Stay as long as you like. When you're ready:</div></div>`, amenBtn);
+          wireCard(stage.querySelector("[data-card]"), true);
           foot.querySelector("[data-amen]").onclick = amen;
         }
       };
+      const go = (d) => { const n = i + d; if (n < 0 || n > g.steps.length) return; i = n; step(d); };
+      function wireCard(card, last = false) {
+        let x0 = null, y0 = 0, moved = false;
+        card.addEventListener("pointerdown", (e) => { x0 = e.clientX; y0 = e.clientY; moved = false; card.setPointerCapture?.(e.pointerId); });
+        card.addEventListener("pointermove", (e) => {
+          if (x0 == null) return;
+          const dx = e.clientX - x0;
+          if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(e.clientY - y0)) { moved = true; card.style.transition = "none"; card.style.transform = `translateX(${dx * .6}px) rotate(${dx * .02}deg)`; card.style.opacity = String(1 - Math.min(.5, Math.abs(dx) / 400)); }
+        });
+        const end = (e) => {
+          if (x0 == null) return;
+          const dx = e.clientX - x0; x0 = null;
+          card.style.transition = ""; card.style.transform = ""; card.style.opacity = "";
+          if (moved && dx < -50) { if (!last) go(1); }
+          else if (moved && dx > 50) go(-1);
+          else if (!moved && !last) go(1);                 // a tap
+        };
+        card.addEventListener("pointerup", end);
+        card.addEventListener("pointercancel", () => { x0 = null; card.style.transform = ""; card.style.opacity = ""; });
+        card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (!last) go(1); } });
+      }
+      onArrow = (e) => { if (e.key === "ArrowRight") go(1); if (e.key === "ArrowLeft") go(-1); };
       step();
     }
   });
