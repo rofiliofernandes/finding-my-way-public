@@ -705,7 +705,7 @@ export function _frame(id, t, canvas) {
 }
 
 /* ================= the prayer space: a cross, and a candle that lights (runs until stopped) ================= */
-let LIT_AT = null, CRUCIFIX = null;
+let LIT_AT = null, CRUCIFIX = null, BACKDROP = null;
 function drawnCross(t) {
   const fade = eo(win(t, .1, 1.6));
   c.save(); c.globalAlpha = fade;
@@ -719,6 +719,15 @@ function drawnCross(t) {
   c.bezierCurveTo(W * .75, H * .72, W * .88, H * .8, VIEW.x + VIEW.w + 20, H * .84); c.lineTo(VIEW.x + VIEW.w + 20, VIEW.y + VIEW.h); c.lineTo(VIEW.x - 20, VIEW.y + VIEW.h); c.fill();
   c.restore();
 }
+// a small, blurred, darkened copy of the picture, made once, to fill the sides on wide screens
+function blurredBackdrop(img) {
+  if (BACKDROP) return BACKDROP;
+  const cv = document.createElement("canvas"); cv.width = 160; cv.height = 100;
+  const x = cv.getContext("2d"), s = Math.max(cv.width / img.naturalWidth, cv.height / img.naturalHeight);
+  x.filter = "blur(8px) brightness(.8)";
+  x.drawImage(img, (cv.width - img.naturalWidth * s) / 2, (cv.height - img.naturalHeight * s) / 2, img.naturalWidth * s, img.naturalHeight * s);
+  return (BACKDROP = cv);
+}
 function prayScene(t) {
   c.fillStyle = "#0b0a09"; full();
   const lit = LIT_AT == null ? 0 : eo(win(t, LIT_AT, LIT_AT + 1.4));
@@ -728,9 +737,20 @@ function prayScene(t) {
   if (!CRUCIFIX) drawnCross(t);
   const img = CRUCIFIX;
   if (img && img.complete && img.naturalWidth) {
-    const fade = eo(win(t, .1, 1.6)), s = Math.max(VIEW.w / img.naturalWidth, VIEW.h / img.naturalHeight);
-    const w = img.naturalWidth * s, h = img.naturalHeight * s;
-    c.save(); c.globalAlpha = fade; c.drawImage(img, VIEW.x + (VIEW.w - w) / 2, VIEW.y + (VIEW.h - h) / 2 - VIEW.h * .03, w, h); c.restore();
+    const fade = eo(win(t, .1, 1.6)), iw = img.naturalWidth, ih = img.naturalHeight;
+    const cover = Math.max(VIEW.w / iw, VIEW.h / ih), fitH = VIEW.h / ih;
+    c.save(); c.globalAlpha = fade;
+    if (iw * cover - VIEW.w > VIEW.w * .25 || ih * cover - VIEW.h > VIEW.h * .25) {
+      // a wide screen: the whole picture at full height, with a soft blurred copy of it filling the sides
+      c.drawImage(blurredBackdrop(img), VIEW.x, VIEW.y, VIEW.w, VIEW.h);
+      const w = iw * fitH, x = VIEW.x + (VIEW.w - w) / 2;
+      c.drawImage(img, x, VIEW.y, w, VIEW.h);
+      for (const [x0, dir] of [[x, 1], [x + w, -1]]) { const g2 = c.createLinearGradient(x0, 0, x0 + dir * 60, 0); g2.addColorStop(0, "rgba(60,60,60,.55)"); g2.addColorStop(1, "rgba(60,60,60,0)"); c.fillStyle = g2; c.fillRect(Math.min(x0, x0 + dir * 60), VIEW.y, 60, VIEW.h); }
+    } else {
+      const w = iw * cover, h = ih * cover;
+      c.drawImage(img, VIEW.x + (VIEW.w - w) / 2, VIEW.y + (VIEW.h - h) / 2 - VIEW.h * .03, w, h);
+    }
+    c.restore();
   }
   c.fillStyle = `rgba(0,0,0,${.55 - .3 * lit})`; full();
   const v = c.createLinearGradient(0, H * .5, 0, H); v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(0,0,0,.8)"); c.fillStyle = v; full();

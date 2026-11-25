@@ -233,7 +233,7 @@ export function open() {
           show(`<div class="pray-step swipe" data-card role="button" tabindex="0" aria-label="Next">
             <div class="pray-eyebrow">${esc(g.title)}</div><p>${esc(g.steps[i])}</p>
             <div class="pray-dots">${g.steps.map((_, j) => `<i class="${j <= i ? "on" : ""}"></i>`).join("")}<i></i></div>
-            <div class="pray-hint">${i === 0 ? "Take your time. Tap or swipe when you're ready" : "Tap or swipe when you're ready"}</div></div>`);
+            <div class="pray-hint">${i === 0 ? "Take your time. Tap the right side when you're ready" : "Tap right for the next · left to go back"}</div></div>`);
           wireCard(stage.querySelector("[data-card]"));
         } else {
           const text = await vt;
@@ -247,26 +247,34 @@ export function open() {
         }
       };
       const go = (d) => { const n = i + d; if (n < 0 || n > g.steps.length) return; i = n; step(d); };
+      // the whole screen is the control, like flipping pages: tap the left side to go back, the right side for the next;
+      // or swipe the card left / right
       function wireCard(card, last = false) {
-        let x0 = null, y0 = 0, moved = false;
-        card.addEventListener("pointerdown", (e) => { x0 = e.clientX; y0 = e.clientY; moved = false; card.setPointerCapture?.(e.pointerId); });
-        card.addEventListener("pointermove", (e) => {
-          if (x0 == null) return;
-          const dx = e.clientX - x0;
-          if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(e.clientY - y0)) { moved = true; card.style.transition = "none"; card.style.transform = `translateX(${dx * .6}px) rotate(${dx * .02}deg)`; card.style.opacity = String(1 - Math.min(.5, Math.abs(dx) / 400)); }
-        });
-        const end = (e) => {
-          if (x0 == null) return;
-          const dx = e.clientX - x0; x0 = null;
-          card.style.transition = ""; card.style.transform = ""; card.style.opacity = "";
-          if (moved && dx < -50) { if (!last) go(1); }
-          else if (moved && dx > 50) go(-1);
-          else if (!moved && !last) go(1);                 // a tap
-        };
-        card.addEventListener("pointerup", end);
-        card.addEventListener("pointercancel", () => { x0 = null; card.style.transform = ""; card.style.opacity = ""; });
         card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (!last) go(1); } });
       }
+      const ui = ov.querySelector(".pray-ui");
+      let x0 = null, y0 = 0, moved = false;
+      const cardEl = () => stage.querySelector("[data-card]");
+      const atLast = () => i >= g.steps.length;
+      ui.onpointerdown = (e) => { if (e.target.closest("button")) return; x0 = e.clientX; y0 = e.clientY; moved = false; };
+      ui.onpointermove = (e) => {
+        if (x0 == null) return;
+        const dx = e.clientX - x0, card = cardEl();
+        if (card && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(e.clientY - y0)) { moved = true; card.style.transition = "none"; card.style.transform = `translateX(${dx * .6}px) rotate(${dx * .02}deg)`; card.style.opacity = String(1 - Math.min(.5, Math.abs(dx) / 400)); }
+      };
+      ui.onpointerup = (e) => {
+        if (x0 == null) return;
+        const dx = e.clientX - x0, card = cardEl(); x0 = null;
+        if (card) { card.style.transition = ""; card.style.transform = ""; card.style.opacity = ""; }
+        if (moved && dx < -50) { if (!atLast()) go(1); }
+        else if (moved && dx > 50) go(-1);
+        else if (!moved) {
+          // on the card, its own left side goes back; elsewhere, the left side of the screen
+          const r = card && card.contains(e.target) ? card.getBoundingClientRect() : { left: 0, width: innerWidth };
+          if (e.clientX < r.left + r.width * .4) go(-1); else if (!atLast()) go(1);
+        }
+      };
+      ui.onpointercancel = () => { x0 = null; const card = cardEl(); if (card) { card.style.transform = ""; card.style.opacity = ""; } };
       onArrow = (e) => { if (e.key === "ArrowRight") go(1); if (e.key === "ArrowLeft") go(-1); };
       step();
     }
