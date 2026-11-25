@@ -317,7 +317,7 @@ export function renderSettings(main) {
         “World English Bible” is a trademark of eBible.org.
       </section>`;
 
-    $("[data-signin]", main)?.addEventListener("click", () => sync.signIn());
+    $("[data-signin]", main)?.addEventListener("click", () => (sync.googleWorksHere ? sync.signIn() : welcome.openEmailSignIn({ fromGoogle: true })));
     $("[data-signin-email]", main)?.addEventListener("click", () => welcome.openEmailSignIn());
     $("[data-signout]", main)?.addEventListener("click", async () => {
       if (await confirmBox("Sign out? Your data stays in your account and on this device.", "Sign out")) {

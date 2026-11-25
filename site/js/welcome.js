@@ -93,9 +93,12 @@ export function wireEmailForm(root, onSignedIn) {
 }
 
 // The email form in a sheet, for the You page
-export function openEmailSignIn() {
+// Shown in the iPhone home-screen app when someone taps Google
+const HOME_NOTE = `<p class="small ef-home-note">On the home-screen app, Google sign-in can't come back to the app. Use your Google email here instead: we'll send a 6-digit code, and you'll be signed in to the same account.</p>`;
+
+export function openEmailSignIn({ fromGoogle = false } = {}) {
   openModal(
-    `<div class="eyebrow">Sign in with email</div><h2 style="margin:4px 0 14px">We'll email you a code</h2>${emailFormHTML()}
+    `<div class="eyebrow">Sign in with email</div><h2 style="margin:4px 0 14px">We'll email you a code</h2>${fromGoogle ? HOME_NOTE : ""}${emailFormHTML()}
      <div class="actions"><button class="btn ghost" data-cancel>Cancel</button></div>`,
     (dlg, close) => {
       dlg.querySelector("[data-cancel]").onclick = close;
@@ -209,6 +212,12 @@ export function show() {
     window.dispatchEvent(new HashChangeEvent("hashchange")); // redraw the page behind, now with the name
   };
   el.querySelector("[data-w-google]").onclick = () => {
+    if (!sync.googleWorksHere) {
+      // iPhone home-screen app: Google can't hand the sign-in back here, so use email instead
+      emailBtn.click();
+      if (!emailBox.querySelector(".ef-home-note")) emailBox.insertAdjacentHTML("afterbegin", HOME_NOTE);
+      return;
+    }
     store.meta("welcomed", "google");
     sync.signIn(); // leaves for Google and comes back signed in
   };

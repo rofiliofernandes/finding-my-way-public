@@ -70,6 +70,16 @@ export async function init() {
     const { data } = await client.auth.getSession();
     session = data.session;
     ready = true;
+    // From the home screen on Android, Google sign-in finishes in a browser tab that shares this app's storage.
+    // When they come back to the app, notice the new sign-in and load it.
+    if (homeScreen) {
+      const check = () => {
+        if (document.visibilityState !== "visible" || session) return;
+        try { if (Object.keys(localStorage).some((k) => /^sb-.*-auth-token$/.test(k))) location.reload(); } catch {}
+      };
+      document.addEventListener("visibilitychange", check);
+      addEventListener("focus", check);
+    }
     // Remove ?code=... left over from the Google redirect.
     if (location.search.includes("code=")) history.replaceState(history.state, "", location.pathname + location.hash);
     // A cancelled or refused sign-in comes back as ?error=...: say so in plain words and tidy the address.
@@ -114,6 +124,13 @@ function adoptLocalData(userId) {
   }
   store.meta("owner", userId);
 }
+
+// Opened from the home screen (an installed app) rather than in the browser?
+export const homeScreen = (() => { try { return matchMedia("(display-mode: standalone)").matches || navigator.standalone === true; } catch { return false; } })();
+const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+// On iPhone and iPad, a home-screen app keeps its own storage, separate from Safari, so a Google sign-in
+// (which has to leave the app) can never come back to it. Email with a code works everywhere.
+export const googleWorksHere = !(homeScreen && isIOS);
 
 export async function signIn() {
   if (!client) return;
