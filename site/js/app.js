@@ -39,8 +39,32 @@ let renderId = 0;
 let navIdx = history.state?.idx ?? 0;
 if (history.state?.idx == null) history.replaceState({ ...(history.state || {}), idx: 0 }, "");
 let lastPath = "";
+// Remember how far down each page you were, so a refresh (or going back) returns to the same place
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+const SCROLL_KEY = "fmw:scroll";
+const scrolls = (() => { try { return JSON.parse(sessionStorage.getItem(SCROLL_KEY) || "{}"); } catch { return {}; } })();
+const saveScroll = () => {
+  scrolls[location.hash || "#/"] = Math.round(scrollY);
+  try { sessionStorage.setItem(SCROLL_KEY, JSON.stringify(scrolls)); } catch {}
+};
+let scrollSave = 0;
+addEventListener("scroll", () => { clearTimeout(scrollSave); scrollSave = setTimeout(saveScroll, 150); }, { passive: true });
+addEventListener("pagehide", saveScroll);
+let firstRoute = true, routedHash = "";
+function restoreScroll() {
+  const y = scrolls[location.hash || "#/"];
+  if (!y) return;
+  // the page may still be filling in (a chapter loading): try a few times until it is tall enough
+  let tries = 0;
+  const go = () => {
+    if (document.documentElement.scrollHeight - innerHeight >= y - 4 || tries > 20) return scrollTo(0, y);
+    tries++; setTimeout(go, 100);
+  };
+  requestAnimationFrame(go);
+}
 const READING = /^\/(read|verse|random)\b/;
 
+addEventListener("hashchange", (e) => { clearTimeout(scrollSave); try { const prev = new URL(e.oldURL).hash || "#/"; scrolls[prev] = Math.round(scrollY); sessionStorage.setItem(SCROLL_KEY, JSON.stringify(scrolls)); } catch {} }, true);
 async function route() {
   const raw = location.hash.replace(/^#/, "") || "/";
   const [path, qs] = raw.split("?");
@@ -81,6 +105,15 @@ async function route() {
     }
     current = res || null;
     if (match.tab === "home") eggs.onHome();
+    // a refresh or going back returns to where you were; a new page starts at the top;
+    // a redraw of the same page (new data from another device) leaves the scroll alone
+    const here = location.hash || "#/";
+    if (!query.get("v")) {
+      if (firstRoute || isBack) restoreScroll();
+      else if (here !== routedHash) scrollTo(0, 0);
+    }
+    routedHash = here;
+    firstRoute = false;
   } catch (e) {
     console.error(e);
     main.innerHTML = `<div class="empty-state"><h2>Something went wrong</h2><p>${String(e.message || e)}</p><a href="#/">Go home</a></div>`;
